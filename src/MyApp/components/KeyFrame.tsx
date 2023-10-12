@@ -1,11 +1,11 @@
-interface KeyFrameProps {
+interface KeyframeProps {
   frameWidth: number;
   index: number;
   isSelected: boolean;
   uuid:string;
 }
 
-export default function KeyFrame(props: KeyFrameProps) {
+export default function KeyframeDot(props: KeyframeProps) {
 
   return (
     <div

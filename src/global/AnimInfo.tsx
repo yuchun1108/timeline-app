@@ -1,9 +1,16 @@
 export interface AnimInfo
 {
-    keyFrames: KeyFrameInfo[];
+    channels: Channel[];
 }
 
-export interface KeyFrameInfo{
+export interface Channel
+{
+    name:string;
+    keyframes: Keyframe[];
+    id:string;
+}
+
+export interface Keyframe{
     index:number;
-    uuid:string;
+    id:string;
 }

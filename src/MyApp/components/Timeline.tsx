@@ -6,8 +6,8 @@ import {
   ReactNode,
 } from "react";
 import TimelineBG from "./TimelineBG";
-import KeyFrame from "./KeyFrame";
-import { AnimInfo, KeyFrameInfo } from "../../global/AnimInfo";
+import KeyframeDot from "./KeyFrame";
+import { AnimInfo,Channel, Keyframe } from "../../global/AnimInfo";
 
 interface FrameList {
   frameDatas: FrameData[];
@@ -21,11 +21,11 @@ interface FrameData {
 
 interface TimelineProps {
   width: number;
-  animInfo: AnimInfo;
+  channel: Channel;
   selectedKeys: string[];
   dragIndexOffset: number;
-  onAddKeyFrame: (index: number) => void;
-  onKeyFrameSelect:(index:number)=>void;
+  onAddKeyFrame: (channelId:string, index: number) => void;
+  onKeyFrameSelect:(channelId:string, index:number)=>void;
   onDragIndexMove:(offset:number)=>void;
   onDragIndexEnd:()=>void;
 }
@@ -47,11 +47,11 @@ export default function Timeline(props: TimelineProps) {
     ) {
       const posX = e.target.offsetLeft + e.nativeEvent.offsetX;
       currDragIndex.current = beginDragIndex.current = getFrameIndex(posX);
-      console.log(e,e.target.dataset);
+      // console.log(props.channel.id);
       //props.onKeyFrameClick();
       isDragging.current = true;
 
-      props.onKeyFrameSelect(currDragIndex.current);
+      props.onKeyFrameSelect(props.channel.id, currDragIndex.current);
     }
   }
 
@@ -63,7 +63,6 @@ export default function Timeline(props: TimelineProps) {
       if (index >= 0 && index !== currDragIndex.current) {
         currDragIndex.current = index;
         props.onDragIndexMove(currDragIndex.current - beginDragIndex.current);
-        // console.log("onMouseMove", currDragIndex.current);
       }
     }
   }
@@ -83,24 +82,44 @@ export default function Timeline(props: TimelineProps) {
     if (e.target.nodeName === "CANVAS") {
       const posX = e.nativeEvent.offsetX;
       const index = Math.round((posX - frameWidth * 0.5) / frameWidth);
-      console.log("double click", index);
-      props.onAddKeyFrame(index);
+      props.onAddKeyFrame(props.channel.id, index);
     }
   }
 
-  const keyFrames: ReactElement[] = [];
-  for (let i = 0; i < props.animInfo.keyFrames.length; i++) {
-    const keyFrameInfo = props.animInfo.keyFrames[i];
-    const isSelected = props.selectedKeys.includes(keyFrameInfo.uuid);
-    keyFrames.push(
-      <KeyFrame
+  const keyFrameDots: ReactElement[] = [];
+
+  for (let i = 0; i < props.channel.keyframes.length; i++) {
+    const keyframe = props.channel.keyframes[i];
+    const isSelected = props.selectedKeys.includes(keyframe.id);
+    if(!isSelected)
+    {
+    keyFrameDots.push(
+      <KeyframeDot
         frameWidth={frameWidth}
-        index={isSelected?keyFrameInfo.index + props.dragIndexOffset:keyFrameInfo.index}
+        index={isSelected?keyframe.index + props.dragIndexOffset:keyframe.index}
         isSelected={isSelected}
-        key={keyFrameInfo.uuid}
-        uuid={keyFrameInfo.uuid}
+        key={keyframe.id}
+        uuid={keyframe.id}
       />
     );
+    }
+  }
+
+  for (let i = 0; i < props.channel.keyframes.length; i++) {
+    const keyframe = props.channel.keyframes[i];
+    const isSelected = props.selectedKeys.includes(keyframe.id);
+    if(isSelected)
+    {
+    keyFrameDots.push(
+      <KeyframeDot
+        frameWidth={frameWidth}
+        index={isSelected?keyframe.index + props.dragIndexOffset:keyframe.index}
+        isSelected={isSelected}
+        key={keyframe.id}
+        uuid={keyframe.id}
+      />
+    );
+    }
   }
 
   return (
@@ -118,7 +137,7 @@ export default function Timeline(props: TimelineProps) {
         width={props.width}
         height={height}
       />
-      {keyFrames}
+      {keyFrameDots}
     </div>
   );
 }

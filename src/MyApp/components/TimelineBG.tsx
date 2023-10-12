@@ -38,5 +38,5 @@ export default function TimelineBG(props: TimelineBGProps) {
 
   refresh();
 
-  return <canvas ref={canvasRef}></canvas>;
+  return <canvas className="timeline-bg" ref={canvasRef}></canvas>;
 }

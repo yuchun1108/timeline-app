@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import MyApp from "./MyApp";
-import { AnimInfo, KeyFrameInfo } from "./global/AnimInfo";
+import { AnimInfo, Keyframe } from "./global/AnimInfo";
 import { v4 as uuidv4 } from "uuid";
 
 const root = ReactDOM.createRoot(
@@ -10,28 +10,52 @@ const root = ReactDOM.createRoot(
 );
 
 const animInfo: AnimInfo = {
-  keyFrames: [],
+  channels:
+  [
+    {
+      name:"channel-a",
+      keyframes:[],
+      id:uuidv4()
+    },
+    {
+      name:"channel-b",
+      keyframes:[],
+      id:uuidv4()
+    }
+  ]
 };
 
-function onAddKeyFrame(index: number) {
-  const keyFrame = animInfo.keyFrames.find((k) => k.index === index);
-  if (keyFrame === undefined) {
-    console.log("add key frame", index);
-    const keyFrame: KeyFrameInfo = { index: index, uuid: uuidv4() };
-    animInfo.keyFrames.push(keyFrame);
+function onAddKeyFrame(channelId:string, index: number) {
+  const channel = animInfo.channels.find(c => c.id === channelId);
+  if(channel === undefined)return;
+
+  // console.log(channel.id);
+
+  const keyframe = channel.keyframes.find(k => k.index === index);
+  if (keyframe === undefined) {
+    // console.log("add key frame", index);
+    const _keyframe: Keyframe = { index: index, id: uuidv4() };
+    channel.keyframes.push(_keyframe);
     render();
   }
 }
 
-function onMoveKeyFrameIndex(uuids: string[], offset: number) {
+function onMoveKeyFrameIndex(keyIds: string[], offset: number) {
   if (offset === 0) return;
-  if (uuids.length === 0) return;
+  if (keyIds.length === 0) return;
 
-  animInfo.keyFrames.forEach((keyFrame) => {
-    if (uuids.includes(keyFrame.uuid)) {
-      keyFrame.index += offset;
+  for(let i=0; i<animInfo.channels.length; i++)
+  {
+    const channel = animInfo.channels[i];
+    for(let j=0; j<channel.keyframes.length;j++)
+    {
+      const keyframe = channel.keyframes[j];
+      if(keyIds.includes(keyframe.id))
+      {
+        keyframe.index += offset;
+      }
     }
-  });
+  }
 
   render();
 }
@@ -49,3 +73,7 @@ function render() {
 }
 
 render();
+
+document.addEventListener("mouseleave",(e:any)=>{
+console.log(e);
+});

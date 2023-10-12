@@ -1,6 +1,6 @@
 #my-app {
   position: absolute;
-  top: 0;
+  top: 20px;
   left: 20px;
   right: auto;
   /* margin:auto; */
@@ -10,9 +10,16 @@
 }
 
 .timeline {
-  background-color: gray;
+  position:relative;
+  background-color: yellow;
   border: solid 1px red;
   /* border: 1px 1px 1px 1px; */
+}
+
+.timeline-bg {
+  position: absolute;
+  top:0;
+  left:0;
 }
 
 .keyframe {
