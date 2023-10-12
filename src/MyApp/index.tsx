@@ -1,12 +1,12 @@
 import "./index.css";
-import Timeline from "./components/Timeline";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimInfo, Keyframe } from ".././global/AnimInfo";
+import TimelineGroup from "./components/TimelineGroup";
 
 interface MyAppProps {
   animInfo: AnimInfo;
   onAddKeyFrame: (channelId: string, index: number) => void;
-  onMoveKeyFrameIndex: (uuids: string[], offset: number) => void;
+  onMoveKeyFrame: (uuids: string[], offset: number) => void;
 }
 
 export default function MyApp(props: MyAppProps) {
@@ -21,42 +21,51 @@ export default function MyApp(props: MyAppProps) {
     window.addEventListener("resize", onWindowResize);
   }, []);
 
-  function onKeyFrameSelect(channelId: string, index: number) {
-    const channel = props.animInfo.channels.find((c) => c.id === channelId);
+  function onKeyframeSelect(channelIds:string[],beginIndex:number,endIndex:number) {
 
-    if (channel !== undefined) {
-      channel.keyframes.forEach((keyframe) => {
-        if (keyframe.index === index) {
-          setSelectedKeys([keyframe.id]);
+    const _selectedKeys = [];
+
+    for(let i=0; i<props.animInfo.channels.length; i++)
+    {
+      const channel = props.animInfo.channels[i];
+      if(channelIds.includes(channel.id))
+      {
+        for(let j=0; j<channel.keyframes.length; j++)
+        {
+          const keyframe = channel.keyframes[j];
+          if(keyframe.index >= beginIndex && keyframe.index <= endIndex)
+          {
+            _selectedKeys.push(keyframe.id);
+          }
         }
-      });
+      }
     }
+
+    setSelectedKeys(_selectedKeys);
   }
 
   function onDragIndexMove(offset: number) {
     setDragIndexOffset(offset);
   }
 
-  function onDragIndexEnd() {
-    props.onMoveKeyFrameIndex(selectedKeys, dragIndexOffset);
+  function onDragEnd() {
+    props.onMoveKeyFrame(selectedKeys, dragIndexOffset);
     setDragIndexOffset(0);
   }
 
   return (
-    <div id="my-app" style={{ width: innerWidth }}>
-      {props.animInfo.channels.map((channel) => (
-        <Timeline
-          width={innerWidth}
-          channel={channel}
-          key={channel.id}
-          selectedKeys={selectedKeys}
-          dragIndexOffset={dragIndexOffset}
-          onAddKeyFrame={props.onAddKeyFrame}
-          onKeyFrameSelect={onKeyFrameSelect}
-          onDragIndexMove={onDragIndexMove}
-          onDragIndexEnd={onDragIndexEnd}
-        />
-      ))}
+    <div
+      id="my-app"
+      style={{ width: innerWidth }}
+    >
+      <TimelineGroup 
+        width={innerWidth}
+        selectedKeys={selectedKeys}
+        channels={props.animInfo.channels}
+        onAddKeyFrame={props.onAddKeyFrame}
+        onMoveKeyFrame={props.onMoveKeyFrame}
+        onKeyframeSelect={onKeyframeSelect}
+      />
     </div>
   );
 }

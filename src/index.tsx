@@ -40,7 +40,7 @@ function onAddKeyFrame(channelId:string, index: number) {
   }
 }
 
-function onMoveKeyFrameIndex(keyIds: string[], offset: number) {
+function onMoveKeyFrame(keyIds: string[], offset: number) {
   if (offset === 0) return;
   if (keyIds.length === 0) return;
 
@@ -66,7 +66,7 @@ function render() {
       <MyApp
         animInfo={animInfo}
         onAddKeyFrame={onAddKeyFrame}
-        onMoveKeyFrameIndex={onMoveKeyFrameIndex}
+        onMoveKeyFrame={onMoveKeyFrame}
       />
     </React.StrictMode>
   );
