@@ -7,6 +7,7 @@ import {AnimInfo, KeyFrameInfo} from '.././global/AnimInfo';
 interface MyAppProps {
   animInfo:AnimInfo;
   onAddKeyFrame:(index:number)=>void;
+  onMoveKeyFrameIndex:(uuids:string[], offset:number)=>void;
 }
 
 export default function MyApp(props: MyAppProps) {
@@ -24,21 +25,21 @@ export default function MyApp(props: MyAppProps) {
 
   function onKeyFrameSelect(index:number)
   {
-    // props.animInfo.keyFrames.forEach(keyFrame=>{
-    //   if(keyFrame.index === index)
-    //   {
-    //     setSelectedKeys([keyFrame.uuid]);
-    //   }
-    // });
-  }
-
-  function onKeyFrameClick(uuid:string)
-  {
-    setSelectedKeys([uuid]);
+    props.animInfo.keyFrames.forEach(keyFrame=>{
+      if(keyFrame.index === index)
+      {
+        setSelectedKeys([keyFrame.uuid]);
+      }
+    });
   }
 
   function onDragIndexMove(offset:number){
     setDragIndexOffset(offset);
+  }
+
+  function onDragIndexEnd(){
+    props.onMoveKeyFrameIndex(selectedKeys,dragIndexOffset);
+    setDragIndexOffset(0);
   }
 
   return (
@@ -47,9 +48,9 @@ export default function MyApp(props: MyAppProps) {
       selectedKeys = {selectedKeys}
       dragIndexOffset={dragIndexOffset}
       onAddKeyFrame={props.onAddKeyFrame}
-      onKeyFrameClick={onKeyFrameClick}
       onKeyFrameSelect={onKeyFrameSelect}
       onDragIndexMove = {onDragIndexMove}
+      onDragIndexEnd = {onDragIndexEnd}
       />
     </div>
   );

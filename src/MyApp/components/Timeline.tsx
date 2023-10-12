@@ -25,9 +25,9 @@ interface TimelineProps {
   selectedKeys: string[];
   dragIndexOffset: number;
   onAddKeyFrame: (index: number) => void;
-  onKeyFrameClick: (uuid: string) => void;
   onKeyFrameSelect:(index:number)=>void;
   onDragIndexMove:(offset:number)=>void;
+  onDragIndexEnd:()=>void;
 }
 
 export default function Timeline(props: TimelineProps) {
@@ -42,8 +42,8 @@ export default function Timeline(props: TimelineProps) {
   function onMouseDown(e: any) {
     // console.log(e);
     if (
-      // e.target.nodeName === "CANVAS" ||
-      (e.target.nodeName === "DIV" && e.target.classList.contains("keyframe"))
+      e.target.nodeName === "CANVAS"
+      // || (e.target.nodeName === "DIV" && e.target.classList.contains("keyframe"))
     ) {
       const posX = e.target.offsetLeft + e.nativeEvent.offsetX;
       currDragIndex.current = beginDragIndex.current = getFrameIndex(posX);
@@ -71,7 +71,7 @@ export default function Timeline(props: TimelineProps) {
   function onMouseUp(e: any) {
     if (isDragging.current) {
       isDragging.current = false;
-      props.onDragIndexMove(0);
+      props.onDragIndexEnd();
     }
   }
 
@@ -99,7 +99,6 @@ export default function Timeline(props: TimelineProps) {
         isSelected={isSelected}
         key={keyFrameInfo.uuid}
         uuid={keyFrameInfo.uuid}
-        onClick={props.onKeyFrameClick}
       />
     );
   }
