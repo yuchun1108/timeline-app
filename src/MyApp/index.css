@@ -1,0 +1,55 @@
+#my-app {
+  position: absolute;
+  top: 0;
+  left: 20px;
+  right: auto;
+  /* margin:auto; */
+  width: 400px;
+  height: 800px;
+  background-color: #AFF;
+}
+
+.timeline {
+  background-color: gray;
+  border: solid 1px red;
+  /* border: 1px 1px 1px 1px; */
+}
+
+.timeline-frame {
+  float: left;
+  height: 100%;
+  background-color: yellow;
+  border: solid 1px green;
+}
+
+.timeline-frame-key {
+  width: 100%;
+  height: 100%;
+  background-color: gray;
+}
+
+.timeline-frame-hover {
+  float: left;
+  height: 100%;
+  background-color: yellow;
+  border: solid 1px green;
+}
+
+.timeline-frame-key-hover {
+  float: left;
+  height: 100%;
+  background-color: yellow;
+  border: solid 1px green;
+}
+
+.keyframe {
+  position: absolute;
+  top:4px;
+  width: 10px;
+  height: 12px;
+  background-color: cyan;
+}
+
+.keyframe.selected {
+  background-color: blue;
+}
