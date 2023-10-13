@@ -1,19 +1,39 @@
+body{
+  background-color: black;
+}
+
 #my-app {
   position: absolute;
-  top: 20px;
-  left: 20px;
-  right: auto;
-  /* margin:auto; */
-  width: 400px;
-  height: 800px;
+  bottom:0;
   background-color: #AFF;
+  height:200px;
+  display:grid;
+  grid-template-columns: 200px auto 200px;
+  grid-template-areas: "name-label timeline inspector";
+}
+
+#name-label-group
+{
+  grid-area:"name-label";
+  position:relative;
+  background-color:gray;
+}
+
+#timeline-group
+{
+  grid-area:"timeline";
+  position:relative;
+  background-color: #EEE;
+  overflow: scroll;
+}
+
+#inspector
+{
+  grid-area:"inspector";
 }
 
 .timeline {
   position:relative;
-  /* background-color: yellow; */
-  border: solid 1px red;
-  /* border: 1px 1px 1px 1px; */
 }
 
 .timeline-bg {
@@ -26,6 +46,16 @@
   position: absolute;
   background-color: aquamarine;
   pointer-events: none;
+}
+
+.name-label
+{
+  background-color: yellow;
+}
+
+.name-label.selected
+{
+  background-color: red;
 }
 
 .keyframe {

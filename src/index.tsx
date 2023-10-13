@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import MyApp from "./MyApp";
-import { AnimInfo, Keyframe } from "./global/AnimInfo";
+import { AnimInfo,AnimNode, Keyframe } from "./global/AnimInfo";
 import { v4 as uuidv4 } from "uuid";
 
 const root = ReactDOM.createRoot(
@@ -12,12 +12,18 @@ const root = ReactDOM.createRoot(
 const animInfo: AnimInfo = {
   channels: [
     {
+      discriminator: "channel",
       name: "channel-a",
+      target:"box",
+      attr:"position",
       keyframes: [],
       id: uuidv4(),
     },
     {
+      discriminator: "channel",
       name: "channel-b",
+      target:"box",
+      attr:"position",
       keyframes: [],
       id: uuidv4(),
     },
@@ -33,22 +39,31 @@ function onAddKeyFrame(channelId: string, index: number) {
   const keyframe = channel.keyframes.find((k) => k.index === index);
   if (keyframe === undefined) {
     // console.log("add key frame", index);
-    const _keyframe: Keyframe = { index: index, id: uuidv4() };
+    const _keyframe: Keyframe = { discriminator:"keyframe", index: index, id: uuidv4() ,value:""};
     channel.keyframes.push(_keyframe);
     render();
   }
 }
 
-function onMoveKeyFrame(keyIds: string[], offset: number) {
+function onMoveKeyFrame(nodes:AnimNode[], offset: number) {
   if (offset === 0) return;
-  if (keyIds.length === 0) return;
+  if (nodes.length === 0) return;
+
+  // nodes.forEach(node=>{
+
+  //   if(node.discriminator === "keyframe")
+  //   {
+  //     const keyframe = node as Keyframe;
+  //     keyframe.index += offset;
+  //   }
+  // });
 
   animInfo.channels.forEach((channel) => {
     const oldKeyframes: Keyframe[] = [];
     const newFrameIndices: number[] = [];
 
     channel.keyframes.forEach((keyframe) => {
-      if (keyIds.includes(keyframe.id)) {
+      if (nodes.includes(keyframe)) {
         keyframe.index += offset;
         newFrameIndices.push(keyframe.index);
       } else {

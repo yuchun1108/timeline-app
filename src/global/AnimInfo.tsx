@@ -3,14 +3,24 @@ export interface AnimInfo
     channels: Channel[];
 }
 
-export interface Channel
+export interface AnimNode
 {
-    name:string;
-    keyframes: Keyframe[];
+    discriminator:string;
     id:string;
 }
 
-export interface Keyframe{
+export interface Channel extends AnimNode
+{
+    discriminator:"channel";
+    name:string;
+    target:string;
+    attr:string;
+    keyframes: Keyframe[];
+}
+
+export interface Keyframe extends AnimNode
+{
+    discriminator:"keyframe";
     index:number;
-    id:string;
+    value:any;
 }

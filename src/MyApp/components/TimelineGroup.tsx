@@ -1,14 +1,15 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
-import { AnimInfo, Channel, Keyframe } from "../../global/AnimInfo";
+import { AnimInfo,AnimNode, Channel, Keyframe } from "../../global/AnimInfo";
 import Timeline from "./Timeline";
 import MarqueeRect from "./MarqueeRect";
 
 interface TimelineGroupProps {
   width: number;
-  selectedKeys: string[];
+  timelineHeight:number;
+  selectedNodes:AnimNode[] | null;
   channels: Channel[];
   onAddKeyFrame: (channelId: string, index: number) => void;
-  onMoveKeyFrame: (keyIds: string[], offset: number) => void;
+  onMoveKeyFrame: (selectedNodes:AnimNode[], offset: number) => void;
   onKeyframeSelect: (
     channelIds: string[],
     frameIndexMin: number,
@@ -37,7 +38,6 @@ export default function TimelineGroup(props: TimelineGroupProps) {
     frameIndex: 0,
   });
 
-  const height = 20;
   const frameCount = 20;
   const frameWidth = props.width / frameCount;
 
@@ -103,9 +103,12 @@ export default function TimelineGroup(props: TimelineGroupProps) {
       currDragIndex.current = beginDragIndex.current = frameIndex;
       isDragging.current = true;
 
-      if(!props.selectedKeys.includes(keyframeId))
+      if(props.selectedNodes !== null)
       {
-        props.onKeyframeSelect([channelId], frameIndex, frameIndex);
+        if(props.selectedNodes.find(obj => obj.id === keyframeId) === undefined)
+        {
+          props.onKeyframeSelect([channelId], frameIndex, frameIndex);
+        }
       }
     }
   }
@@ -153,7 +156,10 @@ export default function TimelineGroup(props: TimelineGroupProps) {
   function onMouseUp(e: any) {
     if (isDragging.current) {
       isDragging.current = false;
-      props.onMoveKeyFrame(props.selectedKeys, dragOffset);
+      if(props.selectedNodes !== null)
+      {
+      props.onMoveKeyFrame(props.selectedNodes, dragOffset);
+      }
       setDragOffset(0);
       //   props.onDragIndexEnd();
     } else if (isSelecting) {
@@ -186,20 +192,20 @@ export default function TimelineGroup(props: TimelineGroupProps) {
     timelines.push(
       <Timeline
         width={props.width}
-        height={height}
+        height={props.timelineHeight}
         frameCount={frameCount}
         frameWidth={frameWidth}
         channel={channel}
         index={i}
         key={channel.id}
         dragOffset={dragOffset}
-        selectedKeys={props.selectedKeys}
+        selectedNodes={props.selectedNodes}
       />
     );
   }
 
   return (
-    <div
+    <div id="timeline-group"
       onMouseDown={onMouseDown}
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
@@ -209,7 +215,7 @@ export default function TimelineGroup(props: TimelineGroupProps) {
       {isSelecting ? (
         <MarqueeRect
           frameWidth={frameWidth}
-          timelineHeight={height}
+          timelineHeight={props.timelineHeight}
           channelIndexMin={getMarqueeChannelIndexMin()}
           channelIndexMax={getMarqueeChannelIndexMax()}
           frameIndexMin={getMarqueeFrameIndexMin()}
