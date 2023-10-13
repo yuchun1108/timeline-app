@@ -12,7 +12,6 @@ interface MyAppProps {
 export default function MyApp(props: MyAppProps) {
   const [innerWidth, setInnerWidth] = useState(window.innerWidth);
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
-  const [dragIndexOffset, setDragIndexOffset] = useState(0);
 
   useEffect(() => {
     function onWindowResize() {
@@ -21,7 +20,7 @@ export default function MyApp(props: MyAppProps) {
     window.addEventListener("resize", onWindowResize);
   }, []);
 
-  function onKeyframeSelect(channelIds:string[],beginIndex:number,endIndex:number) {
+  function onKeyframeSelect(channelIds:string[],frameIndexMin:number,frameIndexMax:number) {
 
     const _selectedKeys = [];
 
@@ -33,7 +32,7 @@ export default function MyApp(props: MyAppProps) {
         for(let j=0; j<channel.keyframes.length; j++)
         {
           const keyframe = channel.keyframes[j];
-          if(keyframe.index >= beginIndex && keyframe.index <= endIndex)
+          if(keyframe.index >= frameIndexMin && keyframe.index <= frameIndexMax)
           {
             _selectedKeys.push(keyframe.id);
           }
@@ -42,15 +41,6 @@ export default function MyApp(props: MyAppProps) {
     }
 
     setSelectedKeys(_selectedKeys);
-  }
-
-  function onDragIndexMove(offset: number) {
-    setDragIndexOffset(offset);
-  }
-
-  function onDragEnd() {
-    props.onMoveKeyFrame(selectedKeys, dragIndexOffset);
-    setDragIndexOffset(0);
   }
 
   return (

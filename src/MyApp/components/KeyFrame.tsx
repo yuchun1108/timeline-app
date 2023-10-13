@@ -2,7 +2,7 @@ interface KeyframeProps {
   frameWidth: number;
   index: number;
   isSelected: boolean;
-  uuid:string;
+  keyframeId:string;
 }
 
 export default function KeyframeDot(props: KeyframeProps) {
@@ -18,6 +18,7 @@ export default function KeyframeDot(props: KeyframeProps) {
       style={{
         left: props.frameWidth * (props.index + 0.5) - 5,
       }}
+      data-keyframeid = {props.keyframeId}
       onDragStart = {onDragStart}
     ></div>
   );

@@ -11,7 +11,7 @@
 
 .timeline {
   position:relative;
-  background-color: yellow;
+  /* background-color: yellow; */
   border: solid 1px red;
   /* border: 1px 1px 1px 1px; */
 }
@@ -20,6 +20,12 @@
   position: absolute;
   top:0;
   left:0;
+}
+
+.marquee-rect{
+  position: absolute;
+  background-color: aquamarine;
+  pointer-events: none;
 }
 
 .keyframe {
