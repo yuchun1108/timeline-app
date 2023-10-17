@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import {AnimInfo, AnimNode,Channel, Keyframe,addChannel } from "../global/AnimInfo";
-import TimelineGroup from "./components/TimelineGroup";
+import TimelineGroup from "../TimelineGroup";
 import NameLabelGroup from "./components/NameLabelGroup";
 import Inspector from "../Inspector"
 import Controller from "./components/Controller"

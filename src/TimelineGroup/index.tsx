@@ -1,7 +1,7 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
-import { AnimInfo,AnimNode, Channel, Keyframe } from "../../global/AnimInfo";
-import Timeline from "./Timeline";
-import MarqueeRect from "./MarqueeRect";
+import { AnimInfo,AnimNode, Channel, Keyframe } from "../global/AnimInfo";
+import Timeline from "./components/Timeline";
+import MarqueeRect from "./components/MarqueeRect";
 
 interface TimelineGroupProps {
   width: number;
