@@ -1,13 +1,90 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+body{
+  background-color: black;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+#my-app {
+  position: absolute;
+  bottom:0;
+  background-color: #AFF;
+  height:200px;
+  display:grid;
+  grid-template-columns: 200px auto 200px;
+  grid-template-rows: 30px auto;
+  grid-template-areas: 
+  "controller timebar inspector"
+  "name-label timeline inspector";
+}
+
+#name-label-group
+{
+  grid-area:name-label;
+  position:relative;
+  background-color:gray;
+}
+
+#timebar
+{
+  grid-area:timebar;
+  background-color: green;
+}
+
+#timeline-group
+{
+  grid-area:timeline;
+  position:relative;
+  background-color: #EEE;
+  overflow: scroll;
+}
+
+#controller
+{
+  grid-area:controller;
+}
+
+#inspector
+{
+  grid-area:inspector;
+}
+
+#inspector > .select-type{
+  background-color: yellow;
+}
+
+.timeline {
+  position:relative;
+}
+
+.timeline-bg {
+  position: absolute;
+  top:0;
+  left:0;
+}
+
+.marquee-rect{
+  position: absolute;
+  background-color: aquamarine;
+  pointer-events: none;
+}
+
+.name-label
+{
+  background-color: yellow;
+}
+
+.name-label.selected
+{
+  background-color: red;
+}
+
+.keyframe {
+  position: absolute;
+  top:4px;
+  width: 10px;
+  height: 12px;
+  background-color: cyan;
+  /* pointer-events: none; */
+}
+
+.keyframe.selected {
+  background-color: blue;
 }

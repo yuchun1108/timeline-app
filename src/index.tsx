@@ -2,33 +2,26 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import MyApp from "./MyApp";
-import { AnimInfo,AnimNode, Keyframe } from "./global/AnimInfo";
+import { animInfo ,AnimNode, Keyframe } from "./global/AnimInfo";
 import { v4 as uuidv4 } from "uuid";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 
-const animInfo: AnimInfo = {
-  channels: [
-    {
-      discriminator: "channel",
-      name: "channel-a",
-      target:"box",
-      attr:"position",
-      keyframes: [],
-      id: uuidv4(),
-    },
-    {
-      discriminator: "channel",
-      name: "channel-b",
-      target:"box",
-      attr:"position",
-      keyframes: [],
-      id: uuidv4(),
-    },
-  ],
-};
+
+
+function onAddChannel(){
+  animInfo.channels.push({
+    discriminator: "channel",
+    name: "new channel",
+    target:"box",
+    attr:"position",
+    keyframes: [],
+    id: uuidv4(),
+  });
+  render();
+}
 
 function onAddKeyFrame(channelId: string, index: number) {
   const channel = animInfo.channels.find((c) => c.id === channelId);
@@ -89,6 +82,7 @@ function render() {
     <React.StrictMode>
       <MyApp
         animInfo={animInfo}
+        onAddChannel={onAddChannel}
         onAddKeyFrame={onAddKeyFrame}
         onMoveKeyFrame={onMoveKeyFrame}
       />

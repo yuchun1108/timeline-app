@@ -6,7 +6,7 @@ import MarqueeRect from "./MarqueeRect";
 interface TimelineGroupProps {
   width: number;
   timelineHeight:number;
-  selectedNodes:AnimNode[] | null;
+  selectedNodes:AnimNode[];
   channels: Channel[];
   onAddKeyFrame: (channelId: string, index: number) => void;
   onMoveKeyFrame: (selectedNodes:AnimNode[], offset: number) => void;
@@ -212,7 +212,7 @@ export default function TimelineGroup(props: TimelineGroupProps) {
       onDoubleClick={onDoubleClick}
       onMouseLeave={onMouseLeave}
     >
-      {isSelecting ? (
+      {isSelecting ?? 
         <MarqueeRect
           frameWidth={frameWidth}
           timelineHeight={props.timelineHeight}
@@ -221,7 +221,7 @@ export default function TimelineGroup(props: TimelineGroupProps) {
           frameIndexMin={getMarqueeFrameIndexMin()}
           frameIndexMax={getMarqueeFrameIndexMax()}
         />
-      ) : undefined}
+      }
       {timelines}
     </div>
   );

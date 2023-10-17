@@ -1,19 +1,21 @@
-import "./index.css";
 import { useEffect, useRef, useState } from "react";
-import { AnimInfo, AnimNode,Channel, Keyframe } from ".././global/AnimInfo";
+import {AnimInfo, AnimNode,Channel, Keyframe,addChannel } from "../global/AnimInfo";
 import TimelineGroup from "./components/TimelineGroup";
 import NameLabelGroup from "./components/NameLabelGroup";
-import Inspector from "./components/Inspector";
+import Inspector from "../Inspector"
+import Controller from "./components/Controller"
 
 interface MyAppProps {
   animInfo: AnimInfo;
+  onAddChannel:()=>void;
   onAddKeyFrame: (channelId: string, index: number) => void;
   onMoveKeyFrame: (nodes: AnimNode[], offset: number) => void;
 }
 
 export default function MyApp(props: MyAppProps) {
+  const [channels, setChannels] = useState<Channel[]>(props.animInfo.channels);
   const [innerWidth, setInnerWidth] = useState(window.innerWidth);
-  const [selectedNodes, setSelectedNodes] = useState<AnimNode[] | null>(null);
+  const [selectedNodes, setSelectedNodes] = useState<AnimNode[]>([]);
   // const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
 
   useEffect(() => {
@@ -58,14 +60,20 @@ export default function MyApp(props: MyAppProps) {
   //   console.log(obj instanceof Channel);
   // }
 
+  function onAddChannel(){
+    addChannel();
+    setChannels(props.animInfo.channels)
+  }
+
   const timelineHeight = 20;
 
   return (
     <div id="my-app" style={{ width: innerWidth }}>
+      <Controller onAddChannel = {onAddChannel} />
       <NameLabelGroup
         height={timelineHeight}
         selectedNodes = {selectedNodes}
-        channels={props.animInfo.channels}
+        channels={channels}
         onChannelSelect={onChannelSelect}
       />
 
@@ -74,13 +82,13 @@ export default function MyApp(props: MyAppProps) {
         timelineHeight={timelineHeight}
         // selectedKeys={selectedKeys}
         selectedNodes = {selectedNodes}
-        channels={props.animInfo.channels}
+        channels={channels}
         onAddKeyFrame={props.onAddKeyFrame}
         onMoveKeyFrame={props.onMoveKeyFrame}
         onKeyframeSelect={onKeyframeSelect}
       />
 
-      <Inspector selectedNodes={selectedNodes}/>
+      <Inspector selectedNodes={selectedNodes} key={selectedNodes.length >0?selectedNodes[0].id:"empty"}/>
     </div>
   );
 }

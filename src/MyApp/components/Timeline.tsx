@@ -1,4 +1,4 @@
-import { useRef, ReactElement } from "react";
+import { useRef, ReactElement, useState } from "react";
 import TimelineBG from "./TimelineBG";
 import KeyframeDot from "./KeyFrame";
 import { AnimInfo,AnimNode, Channel, Keyframe } from "../../global/AnimInfo";
@@ -10,14 +10,17 @@ interface TimelineProps {
   frameWidth: number;
   channel: Channel;
   index: number;
-  selectedNodes: AnimNode[] | null;
+  selectedNodes: AnimNode[];
   dragOffset: number;
 }
 
 export default function Timeline(props: TimelineProps) {
+
+  const [keyframes, setKeyframes] = useState<Keyframe[]>(props.channel.keyframes);
+
   const keyFrameDots: ReactElement[] = [];
 
-  props.channel.keyframes.forEach((keyframe) => {
+  keyframes.forEach((keyframe) => {
     const isSelected = props.selectedNodes !== null ? props.selectedNodes.includes(keyframe) : false;
     if (!isSelected) {
       keyFrameDots.push(
@@ -34,7 +37,7 @@ export default function Timeline(props: TimelineProps) {
     }
   });
 
-  props.channel.keyframes.forEach((keyframe) => {
+  keyframes.forEach((keyframe) => {
     const isSelected = props.selectedNodes !== null ? props.selectedNodes.includes(keyframe) : false;
     if (isSelected) {
       keyFrameDots.push(

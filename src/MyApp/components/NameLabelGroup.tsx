@@ -4,7 +4,7 @@ import NameLabel from "./NameLabel";
 interface NameLabelGroupProps {
   height: number;
   channels: Channel[];
-  selectedNodes: AnimNode[] | null;
+  selectedNodes: AnimNode[];
   onChannelSelect: (channel: Channel) => void;
 }
 
