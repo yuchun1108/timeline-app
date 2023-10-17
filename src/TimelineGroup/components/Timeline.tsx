@@ -8,7 +8,8 @@ interface TimelineProps {
   height: number;
   frameCount: number;
   frameWidth: number;
-  channel: Channel;
+  channelId: string;
+  keyframes:Keyframe[];
   index: number;
   selectedNodes: AnimNode[];
   dragOffset: number;
@@ -16,9 +17,15 @@ interface TimelineProps {
 
 export default function Timeline(props: TimelineProps) {
 
-  const [keyframes, setKeyframes] = useState<Keyframe[]>(props.channel.keyframes);
+  const {keyframes} = props;
+
+  console.log('refresh timeline');
+  // const [keyframes, setKeyframes] = useState<Keyframe[]>(props.channel.keyframes);
 
   const keyFrameDots: ReactElement[] = [];
+
+  if(keyframes)
+  {
 
   keyframes.forEach((keyframe) => {
     const isSelected = props.selectedNodes !== null ? props.selectedNodes.includes(keyframe) : false;
@@ -54,15 +61,17 @@ export default function Timeline(props: TimelineProps) {
     }
   });
 
+}
+
   return (
     <div
       className="timeline"
       style={{ width: props.width, height: props.height }}
-      data-channelid={props.channel.id}
+      data-channelid={props.channelId}
       data-index={props.index}
     >
       <TimelineBG
-        channelId={props.channel.id}
+        channelId={props.channelId}
         frameCount={props.frameCount}
         frameWidth={props.frameWidth}
         width={props.width}

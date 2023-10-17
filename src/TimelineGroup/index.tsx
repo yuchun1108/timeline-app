@@ -1,5 +1,5 @@
-import { ReactNode, useEffect, useRef, useState } from "react";
-import { AnimInfo,AnimNode, Channel, Keyframe } from "../global/AnimInfo";
+import { ReactNode, useContext, useEffect, useReducer, useRef, useState } from "react";
+import { AnimInfo, AnimNode, Channel, Keyframe, addKeyframe, moveKeyFrame } from "../global/AnimInfo";
 import Timeline from "./components/Timeline";
 import MarqueeRect from "./components/MarqueeRect";
 
@@ -8,8 +8,6 @@ interface TimelineGroupProps {
   timelineHeight:number;
   selectedNodes:AnimNode[];
   channels: Channel[];
-  onAddKeyFrame: (channelId: string, index: number) => void;
-  onMoveKeyFrame: (selectedNodes:AnimNode[], offset: number) => void;
   onKeyframeSelect: (
     channelIds: string[],
     frameIndexMin: number,
@@ -23,13 +21,15 @@ interface MarqueePos {
 }
 
 export default function TimelineGroup(props: TimelineGroupProps) {
+  const [, forceUpdate] = useReducer(x => x + 1, 0);
   const [dragOffset, setDragOffset] = useState(0);
   const isDragging = useRef(false);
   const beginDragIndex = useRef(0);
   const currDragIndex = useRef(0);
 
-  const [isSelecting, setIsSelecting] = useState(false);
-  const [beginMarqueePos, setBeginMarqueePos] = useState<MarqueePos>({
+  const isSelecting = useRef(false);
+  const [isMarqueeShow, setMarqueeShow] = useState(false);
+  const beginMarqueePos = useRef({
     channelIndex: 0,
     frameIndex: 0,
   });
@@ -38,30 +38,32 @@ export default function TimelineGroup(props: TimelineGroupProps) {
     frameIndex: 0,
   });
 
+  console.log('refresh timeline group');
+
   const frameCount = 20;
   const frameWidth = props.width / frameCount;
 
   function getMarqueeChannelIndexMin() {
-    return isSelecting
-      ? Math.min(beginMarqueePos.channelIndex, endMarqueePos.channelIndex)
+    return isSelecting.current
+      ? Math.min(beginMarqueePos.current.channelIndex, endMarqueePos.channelIndex)
       : 0;
   }
 
   function getMarqueeChannelIndexMax() {
-    return isSelecting
-      ? Math.max(beginMarqueePos.channelIndex, endMarqueePos.channelIndex)
+    return isSelecting.current
+      ? Math.max(beginMarqueePos.current.channelIndex, endMarqueePos.channelIndex)
       : 0;
   }
 
   function getMarqueeFrameIndexMin() {
-    return isSelecting
-      ? Math.min(beginMarqueePos.frameIndex, endMarqueePos.frameIndex)
+    return isSelecting.current
+      ? Math.min(beginMarqueePos.current.frameIndex, endMarqueePos.frameIndex)
       : 0;
   }
 
   function getMarqueeFrameIndexMax() {
-    return isSelecting
-      ? Math.max(beginMarqueePos.frameIndex, endMarqueePos.frameIndex)
+    return isSelecting.current
+      ? Math.max(beginMarqueePos.current.frameIndex, endMarqueePos.frameIndex)
       : 0;
   }
 
@@ -81,15 +83,15 @@ export default function TimelineGroup(props: TimelineGroupProps) {
         (channel) => channel.id === channelId
       );
       if (channel) {
-        setIsSelecting(true);
-        setBeginMarqueePos({
+        isSelecting.current = true;
+        beginMarqueePos.current = {
           channelIndex: channelIndex,
           frameIndex: frameIndex,
-        });
-        setEndMarqueePos({
-          channelIndex: channelIndex,
-          frameIndex: frameIndex,
-        });
+        };
+        // setEndMarqueePos({
+        //   channelIndex: channelIndex,
+        //   frameIndex: frameIndex,
+        // });
       }
 
     } else if (
@@ -122,19 +124,24 @@ export default function TimelineGroup(props: TimelineGroupProps) {
         currDragIndex.current = frameIndex;
         setDragOffset(currDragIndex.current - beginDragIndex.current);
       }
-    } else if (isSelecting) {
+    } else if (isSelecting.current) {
       if (e.target.nodeName === "CANVAS") {
         const channelIndex = e.target.dataset["index"];
 
-        if (
-          endMarqueePos.channelIndex !== channelIndex ||
-          endMarqueePos.frameIndex !== frameIndex
+        const _isMarqueeShow = channelIndex !== beginMarqueePos.current.channelIndex &&
+        frameIndex !== beginMarqueePos.current.frameIndex;
+
+        if (_isMarqueeShow &&
+          (endMarqueePos.channelIndex !== channelIndex ||
+          endMarqueePos.frameIndex !== frameIndex)
         ) {
           setEndMarqueePos({
             channelIndex: channelIndex,
             frameIndex: frameIndex,
           });
         }
+
+        setMarqueeShow(_isMarqueeShow);
       }
     }
   }
@@ -158,12 +165,14 @@ export default function TimelineGroup(props: TimelineGroupProps) {
       isDragging.current = false;
       if(props.selectedNodes !== null)
       {
-      props.onMoveKeyFrame(props.selectedNodes, dragOffset);
+        moveKeyFrame(props.selectedNodes, dragOffset);
+        forceUpdate();
       }
       setDragOffset(0);
       //   props.onDragIndexEnd();
-    } else if (isSelecting) {
-      setIsSelecting(false);
+    } else if (isSelecting.current) {
+      isSelecting.current = false;
+      setMarqueeShow(false);
     }
   }
 
@@ -172,7 +181,10 @@ export default function TimelineGroup(props: TimelineGroupProps) {
       const channelId = e.target.dataset["channelid"];
       const posX = e.nativeEvent.offsetX;
       const index = getFrameIndex(posX);
-      props.onAddKeyFrame(channelId, index);
+
+      addKeyframe(channelId,index);
+      // props.onAddKeyFrame(channelId, index);
+      forceUpdate();
     }
   }
 
@@ -180,8 +192,9 @@ export default function TimelineGroup(props: TimelineGroupProps) {
     if (isDragging.current) {
       isDragging.current = false;
       setDragOffset(0);
-    } else if (isSelecting) {
-      setIsSelecting(false);
+    } else if (isSelecting.current) {
+      isSelecting.current = false;
+      setMarqueeShow(false);
     }
   }
 
@@ -195,7 +208,8 @@ export default function TimelineGroup(props: TimelineGroupProps) {
         height={props.timelineHeight}
         frameCount={frameCount}
         frameWidth={frameWidth}
-        channel={channel}
+        channelId={channel.id}
+        keyframes={channel.keyframes}
         index={i}
         key={channel.id}
         dragOffset={dragOffset}
@@ -212,7 +226,8 @@ export default function TimelineGroup(props: TimelineGroupProps) {
       onDoubleClick={onDoubleClick}
       onMouseLeave={onMouseLeave}
     >
-      {isSelecting ?? 
+      {
+        isMarqueeShow?
         <MarqueeRect
           frameWidth={frameWidth}
           timelineHeight={props.timelineHeight}
@@ -220,7 +235,7 @@ export default function TimelineGroup(props: TimelineGroupProps) {
           channelIndexMax={getMarqueeChannelIndexMax()}
           frameIndexMin={getMarqueeFrameIndexMin()}
           frameIndexMax={getMarqueeFrameIndexMax()}
-        />
+        />:undefined
       }
       {timelines}
     </div>
