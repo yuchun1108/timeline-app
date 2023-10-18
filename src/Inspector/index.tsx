@@ -1,12 +1,17 @@
-import { ReactNode, useEffect, useRef, useState } from "react";
-import { AnimNode, Channel, Keyframe } from "../global/AnimInfo";
-
+import { ReactNode, useState } from "react";
+import { AnimInfo, AnimNode, Channel, Keyframe } from "../global/AnimInfo";
+import { printToNewTab } from "../global/Common";
 interface InspectorProps {
+  animInfo: AnimInfo;
   selectedNodes: AnimNode[];
 }
 
+function exportAnimInfo(animInfo: AnimInfo) {
+  printToNewTab(animInfo.toJson());
+}
+
 export default function Inspector(props: InspectorProps) {
-  const {selectedNodes} = props;
+  const { selectedNodes } = props;
   // const animNodes = props.selectedNodes;
   let element: ReactNode;
 
@@ -73,5 +78,11 @@ export default function Inspector(props: InspectorProps) {
     }
   }
 
-  return <div id="inspector">{element}</div>;
+  return (
+    <div id="inspector">
+      {element}
+      {/* <a href={exportAnimInfo(props.animInfo)}>AAA</a> */}
+      <button onClick={() => exportAnimInfo(props.animInfo)}>export</button>
+    </div>
+  );
 }

@@ -1,5 +1,3 @@
-import { useEffect, useRef } from "react";
-
 interface MarqueeRectProps {
   frameWidth: number;
   timelineHeight: number;
@@ -11,8 +9,8 @@ interface MarqueeRectProps {
 
 /**
  * 圈選框
- * @param props 
- * @returns 
+ * @param props
+ * @returns
  */
 export default function MarqueeRect(props: MarqueeRectProps) {
   if (

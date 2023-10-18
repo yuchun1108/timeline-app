@@ -12,12 +12,12 @@ export default function NameLabelGroup(props: NameLabelGroupProps) {
   return (
     <div id="name-label-group">
       {props.channels.map((channel) => {
-
-        const isSelected = props.selectedNodes !== null && props.selectedNodes.includes(channel);
+        const isSelected =
+          props.selectedNodes !== null && props.selectedNodes.includes(channel);
 
         return (
           <NameLabel
-          isSelected={isSelected}
+            isSelected={isSelected}
             height={props.height}
             key={channel.id}
             channel={channel}

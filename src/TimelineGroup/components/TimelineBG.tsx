@@ -19,7 +19,6 @@ export default function TimelineBG(props: TimelineBGProps) {
       canvas.height = props.height;
       const context: CanvasRenderingContext2D | null = canvas.getContext("2d");
       if (context) {
-  
         context.beginPath();
         for (let i = 0; i < props.frameCount; i++) {
           const posX = Math.round((i + 0.5) * props.frameWidth);
@@ -28,7 +27,6 @@ export default function TimelineBG(props: TimelineBGProps) {
         }
         context.closePath();
         context.stroke();
-
       }
     }
   }

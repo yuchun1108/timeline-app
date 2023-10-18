@@ -1,16 +1,10 @@
-import { useEffect, useRef, useState } from "react";
-import {
-  AnimInfo,
-  AnimNode,
-  Channel,
-  Keyframe,
-  addChannel,
-  animInfo,
-} from "../global/AnimInfo";
-import TimelineGroup from "../TimelineGroup";
-import NameLabelGroup from "./components/NameLabelGroup";
+import { useState } from "react";
 import Inspector from "../Inspector";
+import TimelineGroup from "../TimelineGroup";
+import { AnimInfo, AnimNode, Channel } from "../global/AnimInfo";
+import { isArrayEqual } from "../global/Common";
 import Controller from "./components/Controller";
+import NameLabelGroup from "./components/NameLabelGroup";
 
 interface MyAppProps {
   animInfo: AnimInfo;
@@ -18,16 +12,8 @@ interface MyAppProps {
 
 export default function MyApp(props: MyAppProps) {
   const [channels, setChannels] = useState<Channel[]>(props.animInfo.channels);
-  const [innerWidth, setInnerWidth] = useState(window.innerWidth);
-  const [selectedNodes, setSelectedNodes] = useState<AnimNode[]>([]);
-  // const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
 
-  useEffect(() => {
-    function onWindowResize() {
-      setInnerWidth(window.innerWidth);
-    }
-    window.addEventListener("resize", onWindowResize);
-  }, []);
+  const [selectedNodes, setSelectedNodes] = useState<AnimNode[]>([]);
 
   function onChannelSelect(channel: Channel) {
     setSelectedNodes([channel]);
@@ -55,7 +41,11 @@ export default function MyApp(props: MyAppProps) {
       }
     }
     setSelectedNodes((prev) => {
-      if (prev.length === 0 && _selectedNodes.length === 0) return prev;
+      if (isArrayEqual(prev, _selectedNodes)) {
+        console.log("is same");
+        return prev;
+      }
+      console.log("is not same");
       return _selectedNodes;
     });
   }
@@ -67,35 +57,37 @@ export default function MyApp(props: MyAppProps) {
   // }
 
   function onAddChannel() {
-    addChannel();
+    props.animInfo.addChannel();
     setChannels(props.animInfo.channels);
   }
 
   const timelineHeight = 20;
 
   return (
-      <div id="my-app" style={{ width: innerWidth }}>
-        <Controller onAddChannel={onAddChannel} />
-        <NameLabelGroup
-          height={timelineHeight}
-          selectedNodes={selectedNodes}
-          channels={channels}
-          onChannelSelect={onChannelSelect}
-        />
+    <div id="my-app">
+      <Controller onAddChannel={onAddChannel} />
+      <NameLabelGroup
+        height={timelineHeight}
+        selectedNodes={selectedNodes}
+        channels={channels}
+        onChannelSelect={onChannelSelect}
+      />
 
-        <TimelineGroup
-          width={innerWidth - 72}
-          timelineHeight={timelineHeight}
-          // selectedKeys={selectedKeys}
-          selectedNodes={selectedNodes}
-          channels={channels}
-          onKeyframeSelect={onKeyframeSelect}
-        />
+      <TimelineGroup
+        // width={innerWidth - 72}
+        timelineHeight={timelineHeight}
+        // selectedKeys={selectedKeys}
+        selectedNodes={selectedNodes}
+        animInfo={props.animInfo}
+        channels={channels}
+        onKeyframeSelect={onKeyframeSelect}
+      />
 
-        <Inspector
-          selectedNodes={selectedNodes}
-          key={selectedNodes.length > 0 ? selectedNodes[0].id : "empty"}
-        />
-      </div>
+      <Inspector
+        animInfo={props.animInfo}
+        selectedNodes={selectedNodes}
+        key={selectedNodes.length > 0 ? selectedNodes[0].id : "empty"}
+      />
+    </div>
   );
 }

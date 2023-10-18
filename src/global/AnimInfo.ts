@@ -1,9 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
 
-export interface AnimInfo {
-  channels: Channel[];
-}
-
 export interface AnimNode {
   discriminator: string;
   id: string;
@@ -22,83 +18,80 @@ export interface Keyframe extends AnimNode {
   index: number;
   value: any;
 }
+export class AnimInfo {
+  public channels: Channel[];
 
-export const animInfo: AnimInfo = {
-  channels: [
-    {
-      discriminator: "channel",
-      name: "channel-a",
-      target: "box",
-      attr: "position",
-      keyframes: [],
-      id: uuidv4(),
-    },
-    {
-      discriminator: "channel",
-      name: "channel-b",
-      target: "box",
-      attr: "position",
-      keyframes: [],
-      id: uuidv4(),
-    },
-  ],
-};
-
-export function addChannel() {
-  animInfo.channels = [
-    ...animInfo.channels,
-    {
-      discriminator: "channel",
-      name: "new channel",
-      target: "box",
-      attr: "position",
-      keyframes: [],
-      id: uuidv4(),
-    },
-  ];
-}
-
-export function addKeyframe(channelId: string, index: number) {
-  const channel = animInfo.channels.find((c) => c.id === channelId);
-  if (!channel) return;
-
-  const keyframe = channel.keyframes.find((k) => k.index === index);
-  if (!keyframe) {
-    const _keyframe: Keyframe = {
-      discriminator: "keyframe",
-      index: index,
-      id: uuidv4(),
-      value: "",
-    };
-    channel.keyframes.push(_keyframe);
+  constructor(channels: Channel[] = []) {
+    this.channels = channels;
   }
-}
 
-export function moveKeyFrame(nodes: AnimNode[], offset: number) {
-  if (offset === 0) return;
-  if (nodes.length === 0) return;
+  addChannel(name: string = "channel"): void {
+    this.channels.push({
+      discriminator: "channel",
+      name,
+      target: "box",
+      attr: "position",
+      keyframes: [],
+      id: uuidv4(),
+    });
+  }
 
-  animInfo.channels.forEach((channel) => {
-    const oldKeyframes: Keyframe[] = [];
-    const newFrameIndices: number[] = [];
+  addKeyframe(channelId: string, index: number): void {
+    const channel = this.channels.find((c) => c.id === channelId);
+    if (!channel) return;
 
-    channel.keyframes.forEach((keyframe) => {
-      if (nodes.includes(keyframe)) {
-        keyframe.index += offset;
-        newFrameIndices.push(keyframe.index);
-      } else {
-        oldKeyframes.push(keyframe);
+    const keyframe = channel.keyframes.find((k) => k.index === index);
+    if (!keyframe) {
+      const _keyframe: Keyframe = {
+        discriminator: "keyframe",
+        index: index,
+        id: uuidv4(),
+        value: "",
+      };
+      channel.keyframes.push(_keyframe);
+    }
+  }
+
+  moveKeyFrame(nodes: AnimNode[], offset: number): boolean {
+    if (offset === 0) return false;
+    if (nodes.length === 0) return false;
+
+    let hasChange = false;
+
+    this.channels.forEach((channel) => {
+      const oldKeyframes: Keyframe[] = [];
+      const newFrameIndices: number[] = [];
+
+      channel.keyframes.forEach((keyframe) => {
+        if (nodes.includes(keyframe)) {
+          keyframe.index += offset;
+          newFrameIndices.push(keyframe.index);
+          hasChange = true;
+        } else {
+          oldKeyframes.push(keyframe);
+        }
+      });
+
+      for (let i = channel.keyframes.length - 1; i >= 0; i--) {
+        const keyframe = channel.keyframes[i];
+        if (
+          oldKeyframes.includes(keyframe) &&
+          newFrameIndices.includes(keyframe.index)
+        ) {
+          channel.keyframes.splice(i, 1);
+        }
       }
     });
 
-    for (let i = channel.keyframes.length - 1; i >= 0; i--) {
-      const keyframe = channel.keyframes[i];
-      if (
-        oldKeyframes.includes(keyframe) &&
-        newFrameIndices.includes(keyframe.index)
-      ) {
-        channel.keyframes.splice(i, 1);
-      }
+    return hasChange;
+  }
+
+  toJson(): string {
+    function replacer(key: string, value: any) {
+      if (key === "id") return undefined;
+      else if (key === "discriminator") return undefined;
+      else return value;
     }
-  });
+    return JSON.stringify(this, replacer, "\t");
+  }
 }

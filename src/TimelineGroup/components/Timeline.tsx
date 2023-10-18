@@ -1,7 +1,7 @@
-import { useRef, ReactElement, useState } from "react";
-import TimelineBG from "./TimelineBG";
+import { ReactElement } from "react";
+import { AnimNode, Keyframe } from "../../global/AnimInfo";
 import KeyframeDot from "./KeyFrame";
-import { AnimInfo,AnimNode, Channel, Keyframe } from "../../global/AnimInfo";
+import TimelineBG from "./TimelineBG";
 
 interface TimelineProps {
   width: number;
@@ -9,59 +9,61 @@ interface TimelineProps {
   frameCount: number;
   frameWidth: number;
   channelId: string;
-  keyframes:Keyframe[];
+  keyframes: Keyframe[];
   index: number;
   selectedNodes: AnimNode[];
-  dragOffset: number;
+  moveOffset: number;
 }
 
 export default function Timeline(props: TimelineProps) {
+  const { keyframes } = props;
 
-  const {keyframes} = props;
-
-  console.log('refresh timeline');
+  console.log("refresh timeline");
   // const [keyframes, setKeyframes] = useState<Keyframe[]>(props.channel.keyframes);
 
   const keyFrameDots: ReactElement[] = [];
 
-  if(keyframes)
-  {
+  if (keyframes) {
+    keyframes.forEach((keyframe) => {
+      const isSelected =
+        props.selectedNodes !== null
+          ? props.selectedNodes.includes(keyframe)
+          : false;
+      if (!isSelected) {
+        keyFrameDots.push(
+          <KeyframeDot
+            frameWidth={props.frameWidth}
+            index={
+              isSelected ? keyframe.index + props.moveOffset : keyframe.index
+            }
+            isSelected={isSelected}
+            key={keyframe.id}
+            keyframeId={keyframe.id}
+          />
+        );
+      }
+    });
 
-  keyframes.forEach((keyframe) => {
-    const isSelected = props.selectedNodes !== null ? props.selectedNodes.includes(keyframe) : false;
-    if (!isSelected) {
-      keyFrameDots.push(
-        <KeyframeDot
-          frameWidth={props.frameWidth}
-          index={
-            isSelected ? keyframe.index + props.dragOffset : keyframe.index
-          }
-          isSelected={isSelected}
-          key={keyframe.id}
-          keyframeId={keyframe.id}
-        />
-      );
-    }
-  });
-
-  keyframes.forEach((keyframe) => {
-    const isSelected = props.selectedNodes !== null ? props.selectedNodes.includes(keyframe) : false;
-    if (isSelected) {
-      keyFrameDots.push(
-        <KeyframeDot
-          frameWidth={props.frameWidth}
-          index={
-            isSelected ? keyframe.index + props.dragOffset : keyframe.index
-          }
-          isSelected={isSelected}
-          key={keyframe.id}
-          keyframeId={keyframe.id}
-        />
-      );
-    }
-  });
-
-}
+    keyframes.forEach((keyframe) => {
+      const isSelected =
+        props.selectedNodes !== null
+          ? props.selectedNodes.includes(keyframe)
+          : false;
+      if (isSelected) {
+        keyFrameDots.push(
+          <KeyframeDot
+            frameWidth={props.frameWidth}
+            index={
+              isSelected ? keyframe.index + props.moveOffset : keyframe.index
+            }
+            isSelected={isSelected}
+            key={keyframe.id}
+            keyframeId={keyframe.id}
+          />
+        );
+      }
+    });
+  }
 
   return (
     <div
