@@ -16,6 +16,10 @@ body {
     "name-label timeline inspector";
 }
 
+#three-container {
+  height: 80%;
+}
+
 #name-label-group {
   grid-area: name-label;
   position: relative;

@@ -3,6 +3,8 @@ import ReactDOM from "react-dom/client";
 import MyApp from "./MyApp";
 import { AnimInfo } from "./global/AnimInfo";
 import "./index.css";
+import Entity from "./three/Entity";
+import World from "./three/World";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -17,3 +19,7 @@ root.render(
     <MyApp animInfo={animInfo} />
   </React.StrictMode>
 );
+
+const world = new World(200);
+const entity = new Entity();
+world.addEntity(entity);
