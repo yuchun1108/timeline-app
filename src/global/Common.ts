@@ -1,3 +1,5 @@
+export const globalVar = {};
+
 export function isArrayEqual(a: any[], b: any): boolean {
   if (a.length !== b.length) return false;
   for (let i = 0; i < a.length; i++) {

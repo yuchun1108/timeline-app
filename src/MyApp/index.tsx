@@ -1,8 +1,10 @@
 import { useState } from "react";
 import Inspector from "../Inspector";
+import Timebar from "../Timebar";
 import TimelineGroup from "../TimelineGroup";
 import { AnimInfo, AnimNode, Channel } from "../global/AnimInfo";
 import { isArrayEqual } from "../global/Common";
+import FrameSize from "../global/FrameSize";
 import Controller from "./components/Controller";
 import NameLabelGroup from "./components/NameLabelGroup";
 
@@ -14,6 +16,15 @@ export default function MyApp(props: MyAppProps) {
   const [channels, setChannels] = useState<Channel[]>(props.animInfo.channels);
 
   const [selectedNodes, setSelectedNodes] = useState<AnimNode[]>([]);
+
+  const timeBarHeight = 30;
+  const [frameSize, setFrameSize] = useState<FrameSize>({
+    width: 20,
+    count: 20,
+    totalWidth: 20 * 20,
+    height: 20,
+    fps: 24,
+  });
 
   function onChannelSelect(channel: Channel) {
     setSelectedNodes([channel]);
@@ -64,7 +75,7 @@ export default function MyApp(props: MyAppProps) {
   const timelineHeight = 20;
 
   return (
-    <div id="my-app">
+    <div id="my-app" style={{ gridTemplateRows: `${timeBarHeight}px auto` }}>
       <Controller onAddChannel={onAddChannel} />
       <NameLabelGroup
         height={timelineHeight}
@@ -73,10 +84,9 @@ export default function MyApp(props: MyAppProps) {
         onChannelSelect={onChannelSelect}
       />
 
+      <Timebar frameSize={frameSize} height={timeBarHeight} />
       <TimelineGroup
-        // width={innerWidth - 72}
-        timelineHeight={timelineHeight}
-        // selectedKeys={selectedKeys}
+        frameSize={frameSize}
         selectedNodes={selectedNodes}
         animInfo={props.animInfo}
         channels={channels}

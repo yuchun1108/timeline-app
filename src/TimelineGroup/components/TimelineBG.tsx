@@ -1,29 +1,37 @@
 import { useEffect, useRef } from "react";
+import FrameSize from "../../global/FrameSize";
 
 interface TimelineBGProps {
   channelId: string;
   index: number;
-  frameCount: number;
-  frameWidth: number;
-  width: number;
-  height: number;
+  frameSize: FrameSize;
 }
 
 export default function TimelineBG(props: TimelineBGProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
+  const frameCount = useRef(0);
+  const frameWidth = useRef(0);
+
   function refresh() {
+    if (
+      frameCount.current === props.frameSize.count &&
+      frameWidth.current === props.frameSize.width
+    )
+      return;
+
     if (canvasRef.current) {
       const canvas = canvasRef.current;
-      canvas.width = props.width;
-      canvas.height = props.height;
+      const width = props.frameSize.totalWidth;
+      canvas.width = width;
+      canvas.height = props.frameSize.height;
       const context: CanvasRenderingContext2D | null = canvas.getContext("2d");
       if (context) {
         context.beginPath();
-        for (let i = 0; i < props.frameCount; i++) {
-          const posX = Math.round((i + 0.5) * props.frameWidth);
+        for (let i = 0; i < props.frameSize.count; i++) {
+          const posX = Math.round((i + 0.5) * props.frameSize.width);
           context.moveTo(posX, 0);
-          context.lineTo(posX, props.height);
+          context.lineTo(posX, props.frameSize.height);
         }
         context.closePath();
         context.stroke();

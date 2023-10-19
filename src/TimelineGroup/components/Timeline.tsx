@@ -1,13 +1,11 @@
 import { ReactElement } from "react";
 import { AnimNode, Keyframe } from "../../global/AnimInfo";
+import FrameSize from "../../global/FrameSize";
 import KeyframeDot from "./KeyFrame";
 import TimelineBG from "./TimelineBG";
 
 interface TimelineProps {
-  width: number;
-  height: number;
-  frameCount: number;
-  frameWidth: number;
+  frameSize: FrameSize;
   channelId: string;
   keyframes: Keyframe[];
   index: number;
@@ -17,9 +15,6 @@ interface TimelineProps {
 
 export default function Timeline(props: TimelineProps) {
   const { keyframes } = props;
-
-  console.log("refresh timeline");
-  // const [keyframes, setKeyframes] = useState<Keyframe[]>(props.channel.keyframes);
 
   const keyFrameDots: ReactElement[] = [];
 
@@ -32,7 +27,7 @@ export default function Timeline(props: TimelineProps) {
       if (!isSelected) {
         keyFrameDots.push(
           <KeyframeDot
-            frameWidth={props.frameWidth}
+            frameWidth={props.frameSize.width}
             index={
               isSelected ? keyframe.index + props.moveOffset : keyframe.index
             }
@@ -52,7 +47,7 @@ export default function Timeline(props: TimelineProps) {
       if (isSelected) {
         keyFrameDots.push(
           <KeyframeDot
-            frameWidth={props.frameWidth}
+            frameWidth={props.frameSize.width}
             index={
               isSelected ? keyframe.index + props.moveOffset : keyframe.index
             }
@@ -68,16 +63,13 @@ export default function Timeline(props: TimelineProps) {
   return (
     <div
       className="timeline"
-      style={{ width: props.width, height: props.height }}
+      style={{ width: "100%", height: props.frameSize.height }}
       data-channelid={props.channelId}
       data-index={props.index}
     >
       <TimelineBG
         channelId={props.channelId}
-        frameCount={props.frameCount}
-        frameWidth={props.frameWidth}
-        width={props.width}
-        height={props.height}
+        frameSize={props.frameSize}
         index={props.index}
       />
       {keyFrameDots}

@@ -1,10 +1,11 @@
 import { ReactNode, useEffect, useReducer, useRef, useState } from "react";
 import { AnimInfo, AnimNode, Channel } from "../global/AnimInfo";
+import FrameSize from "../global/FrameSize";
 import MarqueeRect from "./components/MarqueeRect";
 import Timeline from "./components/Timeline";
 
 interface TimelineGroupProps {
-  timelineHeight: number;
+  frameSize: FrameSize;
   selectedNodes: AnimNode[];
   animInfo: AnimInfo;
   channels: Channel[];
@@ -22,14 +23,6 @@ interface MarqueePos {
 
 export default function TimelineGroup(props: TimelineGroupProps) {
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
-
-  const [innerWidth, setInnerWidth] = useState(window.innerWidth);
-  useEffect(() => {
-    function onWindowResize() {
-      setInnerWidth(window.innerWidth);
-    }
-    window.addEventListener("resize", onWindowResize);
-  }, []);
 
   const [moveOffset, setMoveOffset] = useState(0);
 
@@ -51,9 +44,6 @@ export default function TimelineGroup(props: TimelineGroupProps) {
   });
 
   console.log("refresh timeline group");
-
-  const frameCount = 20;
-  const frameWidth = 20;
 
   function getMarqueeChannelIndexMin() {
     return isMarqueeMaking.current
@@ -86,6 +76,7 @@ export default function TimelineGroup(props: TimelineGroupProps) {
   }
 
   function getFrameIndex(posX: number) {
+    const frameWidth = props.frameSize.width;
     return Math.round((posX - frameWidth * 0.5) / frameWidth);
   }
 
@@ -241,10 +232,7 @@ export default function TimelineGroup(props: TimelineGroupProps) {
     const channel = props.channels[i];
     timelines.push(
       <Timeline
-        width={frameWidth * frameCount}
-        height={props.timelineHeight}
-        frameCount={frameCount}
-        frameWidth={frameWidth}
+        frameSize={props.frameSize}
         channelId={channel.id}
         keyframes={channel.keyframes}
         index={i}
@@ -266,8 +254,7 @@ export default function TimelineGroup(props: TimelineGroupProps) {
     >
       {isMarqueeShow ? (
         <MarqueeRect
-          frameWidth={frameWidth}
-          timelineHeight={props.timelineHeight}
+          frameSize={props.frameSize}
           channelIndexMin={getMarqueeChannelIndexMin()}
           channelIndexMax={getMarqueeChannelIndexMax()}
           frameIndexMin={getMarqueeFrameIndexMin()}

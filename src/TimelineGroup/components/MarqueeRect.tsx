@@ -1,6 +1,7 @@
+import FrameSize from "../../global/FrameSize";
+
 interface MarqueeRectProps {
-  frameWidth: number;
-  timelineHeight: number;
+  frameSize: FrameSize;
   channelIndexMin: number;
   channelIndexMax: number;
   frameIndexMin: number;
@@ -23,13 +24,14 @@ export default function MarqueeRect(props: MarqueeRectProps) {
     <div
       className="marquee-rect"
       style={{
-        top: props.channelIndexMin * props.timelineHeight,
+        top: props.channelIndexMin * props.frameSize.height,
         height:
           (props.channelIndexMax + 1 - props.channelIndexMin) *
-          props.timelineHeight,
-        left: props.frameIndexMin * props.frameWidth,
+          props.frameSize.height,
+        left: props.frameIndexMin * props.frameSize.width,
         width:
-          (props.frameIndexMax + 1 - props.frameIndexMin) * props.frameWidth,
+          (props.frameIndexMax + 1 - props.frameIndexMin) *
+          props.frameSize.width,
       }}
     />
   );

@@ -1,85 +1,79 @@
-body{
+body {
   background-color: black;
 }
 
 #my-app {
   position: absolute;
-  bottom:0;
-  background-color: #AFF;
-  width:100%;
-  height:200px;
-  display:grid;
+  bottom: 0;
+  background-color: #aff;
+  width: 100%;
+  height: 200px;
+  display: grid;
   grid-template-columns: 200px auto 200px;
   grid-template-rows: 30px auto;
-  grid-template-areas: 
-  "controller timebar inspector"
-  "name-label timeline inspector";
+  grid-template-areas:
+    "controller timebar inspector"
+    "name-label timeline inspector";
 }
 
-#name-label-group
-{
-  grid-area:name-label;
-  position:relative;
-  background-color:gray;
+#name-label-group {
+  grid-area: name-label;
+  position: relative;
+  background-color: gray;
 }
 
-#timebar
-{
-  grid-area:timebar;
+#timebar {
+  grid-area: timebar;
   background-color: green;
+  position: relative;
 }
 
-#timeline-group
-{
-  grid-area:timeline;
-  position:relative;
-  background-color: #EEE;
+#timeline-group {
+  grid-area: timeline;
+  position: relative;
+  background-color: #eee;
   overflow: scroll;
 }
 
-#controller
-{
-  grid-area:controller;
+#controller {
+  grid-area: controller;
 }
 
-#inspector
-{
-  grid-area:inspector;
+#inspector {
+  grid-area: inspector;
 }
 
-#inspector > .select-type{
+#inspector > .select-type {
   background-color: yellow;
 }
 
 .timeline {
-  position:relative;
+  position: relative;
 }
 
 .timeline-bg {
   position: absolute;
-  top:0;
-  left:0;
+  top: 0;
+  left: 0;
 }
 
-.marquee-rect{
+.marquee-rect {
   position: absolute;
   background-color: aquamarine;
   pointer-events: none;
 }
 
-.name-label
-{
+.name-label {
   background-color: yellow;
 }
 
-.name-label.selected
-{
+.name-label.selected {
   background-color: red;
 }
 
 .keyframe {
   position: absolute;
-  top:4px;
+  top: 4px;
   width: 10px;
   height: 12px;
   background-color: cyan;
@@ -88,4 +82,14 @@ body{
 
 .keyframe.selected {
   background-color: blue;
+}
+
+.time-pos {
+  position: absolute;
+  top: 0;
+  left: 10px;
+  width: 1px;
+  height: 100%;
+  background-color: red;
+  pointer-events: none;
 }
