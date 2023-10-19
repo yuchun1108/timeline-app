@@ -1,15 +1,15 @@
-import { Channel } from "../../global/AnimInfo";
+import { Track } from "../../global/Anim";
 
 interface NameLabelProps {
   height: number;
-  channel: Channel;
+  track: Track;
   isSelected: boolean;
-  onChannelSelect: (channel: Channel) => void;
+  onTrackSelect: (track: Track) => void;
 }
 
 export default function NameLabel(props: NameLabelProps) {
   function onClick(e: any) {
-    props.onChannelSelect(props.channel);
+    props.onTrackSelect(props.track);
   }
   return (
     <div
@@ -17,7 +17,7 @@ export default function NameLabel(props: NameLabelProps) {
       style={{ height: props.height }}
       onClick={onClick}
     >
-      {props.channel.name}
+      {props.track.name}
     </div>
   );
 }

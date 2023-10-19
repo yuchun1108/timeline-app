@@ -1,23 +1,23 @@
 import { ReactNode, useEffect, useReducer, useRef, useState } from "react";
-import { AnimInfo, AnimNode, Channel } from "../global/AnimInfo";
+import { Anim, AnimInfo, Track } from "../global/Anim";
 import FrameSize from "../global/FrameSize";
 import MarqueeRect from "./components/MarqueeRect";
 import Timeline from "./components/Timeline";
 
 interface TimelineGroupProps {
   frameSize: FrameSize;
-  selectedNodes: AnimNode[];
+  selectedNodes: Anim[];
   animInfo: AnimInfo;
-  channels: Channel[];
+  tracks: Track[];
   onKeyframeSelect: (
-    channelIds: string[],
+    trackUuids: string[],
     frameIndexMin: number,
     frameIndexMax: number
   ) => void;
 }
 
 interface MarqueePos {
-  channelIndex: number;
+  trackIndex: number;
   frameIndex: number;
 }
 
@@ -35,31 +35,25 @@ export default function TimelineGroup(props: TimelineGroupProps) {
   const isMarqueeMaking = useRef(false);
   const [isMarqueeShow, setMarqueeShow] = useState(false);
   const beginMarqueePos = useRef({
-    channelIndex: 0,
+    trackIndex: 0,
     frameIndex: 0,
   });
   const [endMarqueePos, setEndMarqueePos] = useState<MarqueePos>({
-    channelIndex: 0,
+    trackIndex: 0,
     frameIndex: 0,
   });
 
   console.log("refresh timeline group");
 
-  function getMarqueeChannelIndexMin() {
+  function getMarqueeTrackIndexMin() {
     return isMarqueeMaking.current
-      ? Math.min(
-          beginMarqueePos.current.channelIndex,
-          endMarqueePos.channelIndex
-        )
+      ? Math.min(beginMarqueePos.current.trackIndex, endMarqueePos.trackIndex)
       : 0;
   }
 
-  function getMarqueeChannelIndexMax() {
+  function getMarqueeTrackIndexMax() {
     return isMarqueeMaking.current
-      ? Math.max(
-          beginMarqueePos.current.channelIndex,
-          endMarqueePos.channelIndex
-        )
+      ? Math.max(beginMarqueePos.current.trackIndex, endMarqueePos.trackIndex)
       : 0;
   }
 
@@ -82,40 +76,38 @@ export default function TimelineGroup(props: TimelineGroupProps) {
 
   function onMouseDown(e: any) {
     if (e.target.nodeName === "CANVAS") {
-      const channelId = e.target.dataset["channelid"];
-      const channelIndex = e.target.dataset["index"];
+      const trackUuid = e.target.dataset["trackuuid"];
+      const trackIndex = e.target.dataset["index"];
       const posX = e.target.offsetLeft + e.nativeEvent.offsetX;
       const frameIndex = getFrameIndex(posX);
       currMoveIndex.current = beginMoveIndex.current = frameIndex;
 
-      const channel = props.channels.find(
-        (channel) => channel.id === channelId
-      );
-      if (channel) {
+      const track = props.tracks.find((track) => track.uuid === trackUuid);
+      if (track) {
         isMarqueeMaking.current = true;
         beginMarqueePos.current = {
-          channelIndex: channelIndex,
+          trackIndex: trackIndex,
           frameIndex: frameIndex,
         };
-        props.onKeyframeSelect([channelId], frameIndex, frameIndex);
+        props.onKeyframeSelect([trackUuid], frameIndex, frameIndex);
       }
     } else if (
       e.target.nodeName === "DIV" &&
       e.target.classList.contains("keyframe")
     ) {
-      const keyframeId = e.target.dataset["keyframeid"];
-      const channelId = e.target.parentNode.dataset["channelid"];
+      const keyframeUuid = e.target.dataset["keyframeuuid"];
+      const trackUuid = e.target.parentNode.dataset["trackuuid"];
       const posX = e.target.offsetLeft + e.nativeEvent.offsetX;
 
       const frameIndex = getFrameIndex(posX);
       currMoveIndex.current = beginMoveIndex.current = frameIndex;
       isMoving.current = true;
 
-      if (!props.selectedNodes.find((obj) => obj.id === keyframeId)) {
-        props.onKeyframeSelect([channelId], frameIndex, frameIndex);
+      if (!props.selectedNodes.find((obj) => obj.uuid === keyframeUuid)) {
+        props.onKeyframeSelect([trackUuid], frameIndex, frameIndex);
       }
 
-      clickedKeyframeId.current = keyframeId;
+      clickedKeyframeId.current = keyframeUuid;
     }
   }
 
@@ -132,19 +124,19 @@ export default function TimelineGroup(props: TimelineGroupProps) {
       }
     } else if (isMarqueeMaking.current) {
       if (e.target.nodeName === "CANVAS") {
-        const channelIndex = e.target.dataset["index"];
+        const trackIndex = e.target.dataset["index"];
 
         const _isMarqueeShow =
-          channelIndex !== beginMarqueePos.current.channelIndex ||
+          trackIndex !== beginMarqueePos.current.trackIndex ||
           frameIndex !== beginMarqueePos.current.frameIndex;
 
         if (
           _isMarqueeShow &&
-          (endMarqueePos.channelIndex !== channelIndex ||
+          (endMarqueePos.trackIndex !== trackIndex ||
             endMarqueePos.frameIndex !== frameIndex)
         ) {
           setEndMarqueePos({
-            channelIndex: channelIndex,
+            trackIndex: trackIndex,
             frameIndex: frameIndex,
           });
         }
@@ -155,19 +147,16 @@ export default function TimelineGroup(props: TimelineGroupProps) {
   }
 
   useEffect(() => {
-    const _channelIds: string[] = [];
-    for (let i = 0; i < props.channels.length; i++) {
-      if (
-        i >= getMarqueeChannelIndexMin() &&
-        i <= getMarqueeChannelIndexMax()
-      ) {
-        const _channel = props.channels[i];
-        _channelIds.push(_channel.id);
+    const _trackUuids: string[] = [];
+    for (let i = 0; i < props.tracks.length; i++) {
+      if (i >= getMarqueeTrackIndexMin() && i <= getMarqueeTrackIndexMax()) {
+        const _track = props.tracks[i];
+        _trackUuids.push(_track.uuid);
       }
     }
 
     props.onKeyframeSelect(
-      _channelIds,
+      _trackUuids,
       getMarqueeFrameIndexMin(),
       getMarqueeFrameIndexMax()
     );
@@ -179,12 +168,12 @@ export default function TimelineGroup(props: TimelineGroupProps) {
     //   e.target.classList.contains("keyframe") &&
     //   clickedKeyframeId.current !== ""
     // ){
-    const keyframeId = e.target.dataset["keyframeid"];
-    if (keyframeId === clickedKeyframeId.current) {
-      const channelId = e.target.parentNode.dataset["channelid"];
+    const keyframeUuid = e.target.dataset["keyframeuuid"];
+    if (keyframeUuid === clickedKeyframeId.current) {
+      const trackUuid = e.target.parentNode.dataset["trackuuid"];
       const posX = e.target.offsetLeft + e.nativeEvent.offsetX;
       const frameIndex = getFrameIndex(posX);
-      props.onKeyframeSelect([channelId], frameIndex, frameIndex);
+      props.onKeyframeSelect([trackUuid], frameIndex, frameIndex);
     }
 
     if (isMoving.current) {
@@ -205,13 +194,13 @@ export default function TimelineGroup(props: TimelineGroupProps) {
   }
 
   function onDoubleClick(e: any) {
+    console.log(e);
     if (e.target.nodeName === "CANVAS") {
-      const channelId = e.target.dataset["channelid"];
+      const trackUuid = e.target.dataset["trackuuid"];
       const posX = e.nativeEvent.offsetX;
       const index = getFrameIndex(posX);
 
-      props.animInfo.addKeyframe(channelId, index);
-      // props.onAddKeyFrame(channelId, index);
+      props.animInfo.addKeyframe(trackUuid, index);
       forceUpdate();
     }
   }
@@ -228,15 +217,15 @@ export default function TimelineGroup(props: TimelineGroupProps) {
 
   const timelines: ReactNode[] = [];
 
-  for (let i = 0; i < props.channels.length; i++) {
-    const channel = props.channels[i];
+  for (let i = 0; i < props.tracks.length; i++) {
+    const track = props.tracks[i];
     timelines.push(
       <Timeline
         frameSize={props.frameSize}
-        channelId={channel.id}
-        keyframes={channel.keyframes}
+        trackUuid={track.uuid}
+        keyframes={track.keyframes}
         index={i}
-        key={channel.id}
+        key={track.uuid}
         moveOffset={moveOffset}
         selectedNodes={props.selectedNodes}
       />
@@ -255,8 +244,8 @@ export default function TimelineGroup(props: TimelineGroupProps) {
       {isMarqueeShow ? (
         <MarqueeRect
           frameSize={props.frameSize}
-          channelIndexMin={getMarqueeChannelIndexMin()}
-          channelIndexMax={getMarqueeChannelIndexMax()}
+          trackIndexMin={getMarqueeTrackIndexMin()}
+          trackIndexMax={getMarqueeTrackIndexMax()}
           frameIndexMin={getMarqueeFrameIndexMin()}
           frameIndexMax={getMarqueeFrameIndexMax()}
         />

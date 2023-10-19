@@ -1,9 +1,9 @@
 import { ReactNode, useState } from "react";
-import { AnimInfo, AnimNode, Channel, Keyframe } from "../global/AnimInfo";
+import { Anim, AnimInfo, Keyframe, Track } from "../global/Anim";
 import { printToNewTab } from "../global/Common";
 interface InspectorProps {
   animInfo: AnimInfo;
-  selectedNodes: AnimNode[];
+  selectedNodes: Anim[];
 }
 
 function exportAnimInfo(animInfo: AnimInfo) {
@@ -48,11 +48,11 @@ export default function Inspector(props: InspectorProps) {
     element = <></>;
   } else {
     const firstNode = selectedNodes[0];
-    if (firstNode.discriminator === "channel") {
-      const channel = firstNode as Channel;
+    if (firstNode.discriminator === "track") {
+      const track = firstNode as Track;
       element = (
         <>
-          <div className="select-type">Channel</div>
+          <div className="select-type">Track</div>
           <label>Target</label>
           <input type="text"></input>
           <label>Attr</label>

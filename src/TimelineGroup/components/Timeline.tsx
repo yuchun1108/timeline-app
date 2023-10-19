@@ -1,15 +1,15 @@
 import { ReactElement } from "react";
-import { AnimNode, Keyframe } from "../../global/AnimInfo";
+import { Anim, Keyframe } from "../../global/Anim";
 import FrameSize from "../../global/FrameSize";
 import KeyframeDot from "./KeyFrame";
 import TimelineBG from "./TimelineBG";
 
 interface TimelineProps {
   frameSize: FrameSize;
-  channelId: string;
+  trackUuid: string;
   keyframes: Keyframe[];
   index: number;
-  selectedNodes: AnimNode[];
+  selectedNodes: Anim[];
   moveOffset: number;
 }
 
@@ -32,8 +32,8 @@ export default function Timeline(props: TimelineProps) {
               isSelected ? keyframe.index + props.moveOffset : keyframe.index
             }
             isSelected={isSelected}
-            key={keyframe.id}
-            keyframeId={keyframe.id}
+            key={keyframe.uuid}
+            keyframeUuid={keyframe.uuid}
           />
         );
       }
@@ -52,8 +52,8 @@ export default function Timeline(props: TimelineProps) {
               isSelected ? keyframe.index + props.moveOffset : keyframe.index
             }
             isSelected={isSelected}
-            key={keyframe.id}
-            keyframeId={keyframe.id}
+            key={keyframe.uuid}
+            keyframeUuid={keyframe.uuid}
           />
         );
       }
@@ -64,11 +64,11 @@ export default function Timeline(props: TimelineProps) {
     <div
       className="timeline"
       style={{ width: "100%", height: props.frameSize.height }}
-      data-channelid={props.channelId}
+      data-trackuuid={props.trackUuid}
       data-index={props.index}
     >
       <TimelineBG
-        channelId={props.channelId}
+        trackUuid={props.trackUuid}
         frameSize={props.frameSize}
         index={props.index}
       />

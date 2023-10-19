@@ -2,7 +2,7 @@ import { useState } from "react";
 import Inspector from "../Inspector";
 import Timebar from "../Timebar";
 import TimelineGroup from "../TimelineGroup";
-import { AnimInfo, AnimNode, Channel } from "../global/AnimInfo";
+import { Anim, AnimInfo, Track } from "../global/Anim";
 import { isArrayEqual } from "../global/Common";
 import FrameSize from "../global/FrameSize";
 import Controller from "./components/Controller";
@@ -13,9 +13,9 @@ interface MyAppProps {
 }
 
 export default function MyApp(props: MyAppProps) {
-  const [channels, setChannels] = useState<Channel[]>(props.animInfo.channels);
+  const [tracks, setTracks] = useState<Track[]>(props.animInfo.tracks);
 
-  const [selectedNodes, setSelectedNodes] = useState<AnimNode[]>([]);
+  const [selectedNodes, setSelectedNodes] = useState<Anim[]>([]);
 
   const timeBarHeight = 30;
   const [frameSize, setFrameSize] = useState<FrameSize>({
@@ -26,22 +26,22 @@ export default function MyApp(props: MyAppProps) {
     fps: 24,
   });
 
-  function onChannelSelect(channel: Channel) {
-    setSelectedNodes([channel]);
+  function onTrackSelect(track: Track) {
+    setSelectedNodes([track]);
   }
 
   function onKeyframeSelect(
-    channelIds: string[],
+    trackUuids: string[],
     frameIndexMin: number,
     frameIndexMax: number
   ) {
-    const _selectedNodes: AnimNode[] = [];
+    const _selectedNodes: Anim[] = [];
 
-    for (let i = 0; i < props.animInfo.channels.length; i++) {
-      const channel = props.animInfo.channels[i];
-      if (channelIds.includes(channel.id)) {
-        for (let j = 0; j < channel.keyframes.length; j++) {
-          const keyframe = channel.keyframes[j];
+    for (let i = 0; i < props.animInfo.tracks.length; i++) {
+      const track = props.animInfo.tracks[i];
+      if (trackUuids.includes(track.uuid)) {
+        for (let j = 0; j < track.keyframes.length; j++) {
+          const keyframe = track.keyframes[j];
           if (
             keyframe.index >= frameIndexMin &&
             keyframe.index <= frameIndexMax
@@ -64,24 +64,24 @@ export default function MyApp(props: MyAppProps) {
   // for(let i=0;i<objs.length;i++)
   // {
   //   const obj = objs[i];
-  //   console.log(obj instanceof Channel);
+  //   console.log(obj instanceof Track);
   // }
 
-  function onAddChannel() {
-    props.animInfo.addChannel();
-    setChannels(props.animInfo.channels);
+  function onAddTrack() {
+    props.animInfo.addTrack();
+    setTracks(props.animInfo.tracks);
   }
 
   const timelineHeight = 20;
 
   return (
     <div id="my-app" style={{ gridTemplateRows: `${timeBarHeight}px auto` }}>
-      <Controller onAddChannel={onAddChannel} />
+      <Controller onAddTrack={onAddTrack} />
       <NameLabelGroup
         height={timelineHeight}
         selectedNodes={selectedNodes}
-        channels={channels}
-        onChannelSelect={onChannelSelect}
+        tracks={tracks}
+        onTrackSelect={onTrackSelect}
       />
 
       <Timebar frameSize={frameSize} height={timeBarHeight} />
@@ -89,14 +89,14 @@ export default function MyApp(props: MyAppProps) {
         frameSize={frameSize}
         selectedNodes={selectedNodes}
         animInfo={props.animInfo}
-        channels={channels}
+        tracks={tracks}
         onKeyframeSelect={onKeyframeSelect}
       />
 
       <Inspector
         animInfo={props.animInfo}
         selectedNodes={selectedNodes}
-        key={selectedNodes.length > 0 ? selectedNodes[0].id : "empty"}
+        key={selectedNodes.length > 0 ? selectedNodes[0].uuid : "empty"}
       />
     </div>
   );

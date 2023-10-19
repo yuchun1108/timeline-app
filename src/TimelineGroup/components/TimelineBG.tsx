@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import FrameSize from "../../global/FrameSize";
 
 interface TimelineBGProps {
-  channelId: string;
+  trackUuid: string;
   index: number;
   frameSize: FrameSize;
 }
@@ -53,7 +53,7 @@ export default function TimelineBG(props: TimelineBGProps) {
     <canvas
       className="timeline-bg"
       ref={canvasRef}
-      data-channelid={props.channelId}
+      data-trackuuid={props.trackUuid}
       data-index={props.index}
       onDragStart={onDragStart}
     ></canvas>

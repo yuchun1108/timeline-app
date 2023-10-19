@@ -1,27 +1,27 @@
-import { AnimNode, Channel } from "../../global/AnimInfo";
+import { Anim, Track } from "../../global/Anim";
 import NameLabel from "./NameLabel";
 
 interface NameLabelGroupProps {
   height: number;
-  channels: Channel[];
-  selectedNodes: AnimNode[];
-  onChannelSelect: (channel: Channel) => void;
+  tracks: Track[];
+  selectedNodes: Anim[];
+  onTrackSelect: (track: Track) => void;
 }
 
 export default function NameLabelGroup(props: NameLabelGroupProps) {
   return (
     <div id="name-label-group">
-      {props.channels.map((channel) => {
+      {props.tracks.map((track) => {
         const isSelected =
-          props.selectedNodes !== null && props.selectedNodes.includes(channel);
+          props.selectedNodes !== null && props.selectedNodes.includes(track);
 
         return (
           <NameLabel
             isSelected={isSelected}
             height={props.height}
-            key={channel.id}
-            channel={channel}
-            onChannelSelect={props.onChannelSelect}
+            key={track.uuid}
+            track={track}
+            onTrackSelect={props.onTrackSelect}
           />
         );
       })}

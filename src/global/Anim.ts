@@ -1,68 +1,68 @@
 import { v4 as uuidv4 } from "uuid";
 
-export interface AnimNode {
+export interface Anim {
   discriminator: string;
-  id: string;
+  uuid: string;
 }
 
-export interface Channel extends AnimNode {
-  discriminator: "channel";
+export interface Track extends Anim {
+  discriminator: "track";
   name: string;
   target: string;
   attr: string;
   keyframes: Keyframe[];
 }
 
-export interface Keyframe extends AnimNode {
+export interface Keyframe extends Anim {
   discriminator: "keyframe";
   index: number;
   value: any;
 }
 export class AnimInfo {
-  public channels: Channel[];
+  public tracks: Track[];
 
-  constructor(channels: Channel[] = []) {
-    this.channels = channels;
+  constructor(tracks: Track[] = []) {
+    this.tracks = tracks;
   }
 
-  addChannel(name: string = "channel"): void {
-    this.channels.push({
-      discriminator: "channel",
+  addTrack(name: string = "track"): void {
+    this.tracks.push({
+      discriminator: "track",
       name,
       target: "box",
       attr: "position",
       keyframes: [],
-      id: uuidv4(),
+      uuid: uuidv4(),
     });
   }
 
-  addKeyframe(channelId: string, index: number): void {
-    const channel = this.channels.find((c) => c.id === channelId);
-    if (!channel) return;
+  addKeyframe(trackUuid: string, index: number): void {
+    const track = this.tracks.find((t) => t.uuid === trackUuid);
+    if (!track) return;
 
-    const keyframe = channel.keyframes.find((k) => k.index === index);
+    const keyframe = track.keyframes.find((k) => k.index === index);
     if (!keyframe) {
       const _keyframe: Keyframe = {
         discriminator: "keyframe",
         index: index,
-        id: uuidv4(),
+        uuid: uuidv4(),
         value: "",
       };
-      channel.keyframes.push(_keyframe);
+      track.keyframes.push(_keyframe);
     }
   }
 
-  moveKeyFrame(nodes: AnimNode[], offset: number): boolean {
+  moveKeyFrame(nodes: Anim[], offset: number): boolean {
     if (offset === 0) return false;
     if (nodes.length === 0) return false;
 
     let hasChange = false;
 
-    this.channels.forEach((channel) => {
+    this.tracks.forEach((track) => {
       const oldKeyframes: Keyframe[] = [];
       const newFrameIndices: number[] = [];
 
-      channel.keyframes.forEach((keyframe) => {
+      track.keyframes.forEach((keyframe) => {
         if (nodes.includes(keyframe)) {
           keyframe.index += offset;
           newFrameIndices.push(keyframe.index);
@@ -72,13 +72,13 @@ export class AnimInfo {
         }
       });
 
-      for (let i = channel.keyframes.length - 1; i >= 0; i--) {
-        const keyframe = channel.keyframes[i];
+      for (let i = track.keyframes.length - 1; i >= 0; i--) {
+        const keyframe = track.keyframes[i];
         if (
           oldKeyframes.includes(keyframe) &&
           newFrameIndices.includes(keyframe.index)
         ) {
-          channel.keyframes.splice(i, 1);
+          track.keyframes.splice(i, 1);
         }
       }
     });
@@ -88,7 +88,7 @@ export class AnimInfo {
 
   toJson(): string {
     function replacer(key: string, value: any) {
-      if (key === "id") return undefined;
+      if (key === "uuid") return undefined;
       else if (key === "discriminator") return undefined;
       else return value;
     }

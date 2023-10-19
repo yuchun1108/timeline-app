@@ -5,7 +5,6 @@ export default class World {
   camera: THREE.PerspectiveCamera;
   scene: THREE.Scene;
   renderer: THREE.WebGLRenderer;
-  entities: Entity[] = [];
 
   myAppHeight: number;
 
@@ -22,6 +21,19 @@ export default class World {
     this.renderer = this.setupRenderer({ antialias: true }, width, height);
 
     this.registerResize();
+
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 5);
+    hemiLight.position.set(0, 200, 0);
+    this.scene.add(hemiLight);
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 5);
+    dirLight.position.set(0, 200, 100);
+    dirLight.castShadow = true;
+    dirLight.shadow.camera.top = 180;
+    dirLight.shadow.camera.bottom = -100;
+    dirLight.shadow.camera.left = -120;
+    dirLight.shadow.camera.right = 120;
+    this.scene.add(dirLight);
   }
 
   setupCamera(width: number, height: number) {
@@ -43,16 +55,21 @@ export default class World {
   }
 
   update(time: number) {
-    this.entities.forEach((entity) => {
-      entity.update(time);
+    // this.entities.forEach((entity) => {
+    //   entity.update(time);
+    // });
+
+    this.scene.traverse((obj) => {
+      if (obj.userData instanceof Entity) {
+        obj.userData.update(time);
+      }
     });
 
     this.renderer.render(this.scene, this.camera);
   }
 
-  addEntity(entity: Entity) {
-    this.scene.add(entity.mesh);
-    this.entities.push(entity);
+  addObject(obj: THREE.Object3D) {
+    this.scene.add(obj);
   }
 
   onResize() {
