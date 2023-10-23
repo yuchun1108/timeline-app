@@ -4,9 +4,11 @@ import FrameSize from "../global/FrameSize";
 interface TimebarProps {
   frameSize: FrameSize;
   height: number;
+  scrollLeft: number;
 }
 
 export default function Timebar(props: TimebarProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const frameCount = useRef(0);
@@ -21,7 +23,7 @@ export default function Timebar(props: TimebarProps) {
 
     if (canvasRef.current) {
       const canvas = canvasRef.current;
-      const width = props.frameSize.totalWidth;
+      const width = props.frameSize.count * props.frameSize.width;
       canvas.width = width;
       canvas.height = props.height;
       const context: CanvasRenderingContext2D | null = canvas.getContext("2d");
@@ -74,6 +76,8 @@ export default function Timebar(props: TimebarProps) {
     isMouseDown.current = false;
   }
 
+  if (scrollRef.current) scrollRef.current.scrollLeft = props.scrollLeft;
+
   return (
     <div
       id="timebar"
@@ -82,6 +86,7 @@ export default function Timebar(props: TimebarProps) {
       onMouseUp={onMouseUp}
       onMouseLeave={onMouseLeave}
       onDragStart={(e) => false}
+      ref={scrollRef}
     >
       <canvas className="timeline-bg" ref={canvasRef}></canvas>
       <div

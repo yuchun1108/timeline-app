@@ -30,6 +30,7 @@ body {
   grid-area: timebar;
   background-color: green;
   position: relative;
+  overflow: hidden;
 }
 
 #timeline-group {

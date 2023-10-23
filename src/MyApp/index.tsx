@@ -22,11 +22,12 @@ export default function MyApp(props: MyAppProps) {
   const timeBarHeight = 30;
   const [frameSize, setFrameSize] = useState<FrameSize>({
     width: 20,
-    count: 20,
-    totalWidth: 20 * 20,
+    count: 60,
     height: 20,
     fps: 24,
   });
+
+  const [scrollLeft, setScrollLeft] = useState(0);
 
   useEffect(() => {
     const { world } = props;
@@ -127,6 +128,10 @@ export default function MyApp(props: MyAppProps) {
 
   const timelineHeight = 20;
 
+  function onTimelineGroupScroll(scrollLeft: number) {
+    setScrollLeft(scrollLeft);
+  }
+
   return (
     <div id="my-app" style={{ gridTemplateRows: `${timeBarHeight}px auto` }}>
       <Controller
@@ -141,13 +146,18 @@ export default function MyApp(props: MyAppProps) {
         onTrackSelect={onTrackSelect}
       />
 
-      <Timebar frameSize={frameSize} height={timeBarHeight} />
+      <Timebar
+        frameSize={frameSize}
+        height={timeBarHeight}
+        scrollLeft={scrollLeft}
+      />
       <TimelineGroup
         frameSize={frameSize}
         selectedNodes={selectedNodes}
         anim={anim}
         tracks={tracks}
         onKeyframeSelect={onKeyframeSelect}
+        onTimelineGroupScroll={onTimelineGroupScroll}
       />
 
       <Inspector

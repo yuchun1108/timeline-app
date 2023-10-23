@@ -14,6 +14,7 @@ interface TimelineGroupProps {
     frameIndexMin: number,
     frameIndexMax: number
   ) => void;
+  onTimelineGroupScroll: (scrollLeft: number) => void;
 }
 
 interface MarqueePos {
@@ -234,6 +235,10 @@ export default function TimelineGroup(props: TimelineGroupProps) {
     }
   }
 
+  function onScroll(e: any) {
+    props.onTimelineGroupScroll(e.target.scrollLeft);
+  }
+
   return (
     <div
       id="timeline-group"
@@ -242,6 +247,7 @@ export default function TimelineGroup(props: TimelineGroupProps) {
       onMouseUp={onMouseUp}
       onDoubleClick={onDoubleClick}
       onMouseLeave={onMouseLeave}
+      onScroll={onScroll}
     >
       {isMarqueeShow ? (
         <MarqueeRect

@@ -22,7 +22,7 @@ export default function TimelineBG(props: TimelineBGProps) {
 
     if (canvasRef.current) {
       const canvas = canvasRef.current;
-      const width = props.frameSize.totalWidth;
+      const width = props.frameSize.count * props.frameSize.width;
       canvas.width = width;
       canvas.height = props.frameSize.height;
       const context: CanvasRenderingContext2D | null = canvas.getContext("2d");
