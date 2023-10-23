@@ -1,5 +1,4 @@
 import * as THREE from "three";
-import Entity from "./Entity";
 
 export default class World {
   camera: THREE.PerspectiveCamera;
@@ -7,6 +6,9 @@ export default class World {
   renderer: THREE.WebGLRenderer;
 
   myAppHeight: number;
+  onHierarchyChange: (() => void)[] = [];
+
+  private lastTime: number = -1;
 
   constructor(myAppHeight: number) {
     this.myAppHeight = myAppHeight;
@@ -36,6 +38,8 @@ export default class World {
     this.scene.add(dirLight);
   }
 
+  //#region setup
+
   setupCamera(width: number, height: number) {
     const camera = new THREE.PerspectiveCamera(70, width / height, 0.01, 10);
     return camera;
@@ -54,15 +58,16 @@ export default class World {
     return renderer;
   }
 
+  //#endregion
+
   update(time: number) {
-    // this.entities.forEach((entity) => {
-    //   entity.update(time);
-    // });
+    time *= 0.001;
+    if (this.lastTime < 0) this.lastTime = time;
+    const deltaTime = time - this.lastTime;
+    this.lastTime = time;
 
     this.scene.traverse((obj) => {
-      if (obj.userData instanceof Entity) {
-        obj.userData.update(time);
-      }
+      obj.entity?.update(deltaTime);
     });
 
     this.renderer.render(this.scene, this.camera);
@@ -70,7 +75,24 @@ export default class World {
 
   addObject(obj: THREE.Object3D) {
     this.scene.add(obj);
+    this.scene.traverse((obj) => {
+      obj.entity?.fillPath();
+    });
+
+    this.onHierarchyChange.forEach((f) => f());
   }
+
+  getAllObjects(): THREE.Object3D[] {
+    const objs: THREE.Object3D[] = [];
+    this.scene.traverse((obj) => {
+      if (obj.entity) {
+        objs.push(obj);
+      }
+    });
+    return objs;
+  }
+
+  //#region window-resize
 
   onResize() {
     const width = window.innerWidth;
@@ -78,10 +100,11 @@ export default class World {
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(width, height);
-    console.log("resize", width, height);
   }
 
   registerResize() {
     window.addEventListener("resize", this.onResize.bind(this));
   }
+
+  //#endregion
 }

@@ -1,21 +1,23 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Inspector from "../Inspector";
 import Timebar from "../Timebar";
 import TimelineGroup from "../TimelineGroup";
-import { Anim, AnimInfo, Track } from "../global/Anim";
+import { Anim, AnimNode, Track } from "../global/Anim";
 import { isArrayEqual } from "../global/Common";
 import FrameSize from "../global/FrameSize";
+import World from "../three/World";
 import Controller from "./components/Controller";
 import NameLabelGroup from "./components/NameLabelGroup";
 
 interface MyAppProps {
-  animInfo: AnimInfo;
+  world: World;
 }
 
 export default function MyApp(props: MyAppProps) {
-  const [tracks, setTracks] = useState<Track[]>(props.animInfo.tracks);
+  const [anim, setAnim] = useState<Anim | undefined>(undefined);
+  const [tracks, setTracks] = useState<Track[] | undefined>(undefined);
 
-  const [selectedNodes, setSelectedNodes] = useState<Anim[]>([]);
+  const [selectedNodes, setSelectedNodes] = useState<AnimNode[]>([]);
 
   const timeBarHeight = 30;
   const [frameSize, setFrameSize] = useState<FrameSize>({
@@ -26,6 +28,32 @@ export default function MyApp(props: MyAppProps) {
     fps: 24,
   });
 
+  useEffect(() => {
+    const { world } = props;
+    world.onHierarchyChange.push(() => {
+      const objs = world.getAllObjects();
+      if (objs.length > 0) {
+        setAnim(objs[0].entity?.animController.anim);
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    if (anim) {
+      setTracks([...anim.tracks]);
+      setFrameSize((prev) => ({ ...prev, fps: anim.fps }));
+    } else {
+      setTracks(undefined);
+      setFrameSize((prev) => ({ ...prev, fps: 24 }));
+    }
+    setSelectedNodes([]);
+  }, [anim]);
+
+  function onObjectSelect(objId: number) {
+    const obj = props.world.scene.getObjectById(objId);
+    setAnim(obj?.entity?.animController.anim);
+  }
+
   function onTrackSelect(track: Track) {
     setSelectedNodes([track]);
   }
@@ -35,10 +63,12 @@ export default function MyApp(props: MyAppProps) {
     frameIndexMin: number,
     frameIndexMax: number
   ) {
-    const _selectedNodes: Anim[] = [];
+    if (!anim) return;
 
-    for (let i = 0; i < props.animInfo.tracks.length; i++) {
-      const track = props.animInfo.tracks[i];
+    const _selectedNodes: AnimNode[] = [];
+
+    for (let i = 0; i < anim.tracks.length; i++) {
+      const track = anim.tracks[i];
       if (trackUuids.includes(track.uuid)) {
         for (let j = 0; j < track.keyframes.length; j++) {
           const keyframe = track.keyframes[j];
@@ -53,30 +83,28 @@ export default function MyApp(props: MyAppProps) {
     }
     setSelectedNodes((prev) => {
       if (isArrayEqual(prev, _selectedNodes)) {
-        console.log("is same");
         return prev;
       }
-      console.log("is not same");
       return _selectedNodes;
     });
   }
 
-  // for(let i=0;i<objs.length;i++)
-  // {
-  //   const obj = objs[i];
-  //   console.log(obj instanceof Track);
-  // }
-
   function onAddTrack() {
-    props.animInfo.addTrack();
-    setTracks(props.animInfo.tracks);
+    if (anim) {
+      anim.addTrack();
+      setTracks([...anim.tracks]);
+    }
   }
 
   const timelineHeight = 20;
 
   return (
     <div id="my-app" style={{ gridTemplateRows: `${timeBarHeight}px auto` }}>
-      <Controller onAddTrack={onAddTrack} />
+      <Controller
+        world={props.world}
+        onObjectSelect={onObjectSelect}
+        onAddTrack={onAddTrack}
+      />
       <NameLabelGroup
         height={timelineHeight}
         selectedNodes={selectedNodes}
@@ -88,13 +116,13 @@ export default function MyApp(props: MyAppProps) {
       <TimelineGroup
         frameSize={frameSize}
         selectedNodes={selectedNodes}
-        animInfo={props.animInfo}
+        anim={anim}
         tracks={tracks}
         onKeyframeSelect={onKeyframeSelect}
       />
 
       <Inspector
-        animInfo={props.animInfo}
+        anim={anim}
         selectedNodes={selectedNodes}
         key={selectedNodes.length > 0 ? selectedNodes[0].uuid : "empty"}
       />

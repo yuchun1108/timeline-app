@@ -47,12 +47,12 @@ export default function Timebar(props: TimebarProps) {
   const [timePos, setTimePos] = useState(0);
 
   function updateTimePos(posX: number) {
-    const _timePos = posX / props.frameSize.width / 24;
+    const _timePos = posX / props.frameSize.width / props.frameSize.fps;
     setTimePos(_timePos);
   }
 
   function getPosX(timePos: number) {
-    return timePos * props.frameSize.width * 24;
+    return timePos * props.frameSize.width * props.frameSize.fps;
   }
 
   function onMouseDown(e: any) {

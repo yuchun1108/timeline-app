@@ -1,5 +1,5 @@
 import { ReactElement } from "react";
-import { Anim, Keyframe } from "../../global/Anim";
+import { AnimNode, Keyframe } from "../../global/Anim";
 import FrameSize from "../../global/FrameSize";
 import KeyframeDot from "./KeyFrame";
 import TimelineBG from "./TimelineBG";
@@ -9,7 +9,7 @@ interface TimelineProps {
   trackUuid: string;
   keyframes: Keyframe[];
   index: number;
-  selectedNodes: Anim[];
+  selectedNodes: AnimNode[];
   moveOffset: number;
 }
 

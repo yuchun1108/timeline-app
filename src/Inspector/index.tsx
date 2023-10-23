@@ -1,13 +1,13 @@
 import { ReactNode, useState } from "react";
-import { Anim, AnimInfo, Keyframe, Track } from "../global/Anim";
+import { Anim, AnimNode, Keyframe, Track } from "../global/Anim";
 import { printToNewTab } from "../global/Common";
 interface InspectorProps {
-  animInfo: AnimInfo;
-  selectedNodes: Anim[];
+  anim: Anim | undefined;
+  selectedNodes: AnimNode[];
 }
 
-function exportAnimInfo(animInfo: AnimInfo) {
-  printToNewTab(animInfo.toJson());
+function exportAnim(anim: Anim) {
+  printToNewTab(anim.toJson());
 }
 
 export default function Inspector(props: InspectorProps) {
@@ -26,7 +26,6 @@ export default function Inspector(props: InspectorProps) {
   //     if (firstNode.discriminator === "keyframe") {
   //       const keyframe = firstNode as Keyframe;
   //       setValue(keyframe.value);
-  //       console.log('setValue', keyframe);
   //     }
   //   }
   // }
@@ -39,9 +38,7 @@ export default function Inspector(props: InspectorProps) {
   //   ) {
   //     const keyframe = props.selectedNodes[0] as Keyframe;
   //     keyframe.value = value;
-  //     console.log(keyframe.value);
   //   }
-  //   // console.log(value);
   // }, [value]);
 
   if (selectedNodes.length === 0) {
@@ -53,10 +50,17 @@ export default function Inspector(props: InspectorProps) {
       element = (
         <>
           <div className="select-type">Track</div>
-          <label>Target</label>
-          <input type="text"></input>
-          <label>Attr</label>
-          <input type="text"></input>
+
+          <label>
+            Attr
+            <input
+              type="text"
+              defaultValue={track.attr}
+              onChange={(e: any) => {
+                track.attr = e.target.value;
+              }}
+            />
+          </label>
         </>
       );
     }
@@ -65,14 +69,16 @@ export default function Inspector(props: InspectorProps) {
       element = (
         <>
           <div className="select-type">Keyframe</div>
-          <label>Value</label>
-          <input
-            type="text"
-            defaultValue={keyframe.value}
-            onChange={(e: any) => {
-              keyframe.value = e.target.value;
-            }}
-          ></input>
+          <label>
+            Value
+            <input
+              type="text"
+              defaultValue={keyframe.value}
+              onChange={(e: any) => {
+                keyframe.value = e.target.value;
+              }}
+            />
+          </label>
         </>
       );
     }
@@ -81,8 +87,13 @@ export default function Inspector(props: InspectorProps) {
   return (
     <div id="inspector">
       {element}
-      {/* <a href={exportAnimInfo(props.animInfo)}>AAA</a> */}
-      <button onClick={() => exportAnimInfo(props.animInfo)}>export</button>
+      <button
+        onClick={() => {
+          if (props.anim) exportAnim(props.anim);
+        }}
+      >
+        export
+      </button>
     </div>
   );
 }

@@ -17,3 +17,9 @@ export function printToNewTab(str: string) {
     w.document.body.appendChild(span);
   }
 }
+
+export function onlyNumbers(array: Array<any>) {
+  return array.every((item) => {
+    return typeof item === "number";
+  });
+}

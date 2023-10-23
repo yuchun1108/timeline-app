@@ -1,14 +1,14 @@
 import { ReactNode, useEffect, useReducer, useRef, useState } from "react";
-import { Anim, AnimInfo, Track } from "../global/Anim";
+import { Anim, AnimNode, Track } from "../global/Anim";
 import FrameSize from "../global/FrameSize";
 import MarqueeRect from "./components/MarqueeRect";
 import Timeline from "./components/Timeline";
 
 interface TimelineGroupProps {
   frameSize: FrameSize;
-  selectedNodes: Anim[];
-  animInfo: AnimInfo;
-  tracks: Track[];
+  selectedNodes: AnimNode[];
+  anim: Anim | undefined;
+  tracks: Track[] | undefined;
   onKeyframeSelect: (
     trackUuids: string[],
     frameIndexMin: number,
@@ -42,8 +42,6 @@ export default function TimelineGroup(props: TimelineGroupProps) {
     trackIndex: 0,
     frameIndex: 0,
   });
-
-  console.log("refresh timeline group");
 
   function getMarqueeTrackIndexMin() {
     return isMarqueeMaking.current
@@ -82,7 +80,7 @@ export default function TimelineGroup(props: TimelineGroupProps) {
       const frameIndex = getFrameIndex(posX);
       currMoveIndex.current = beginMoveIndex.current = frameIndex;
 
-      const track = props.tracks.find((track) => track.uuid === trackUuid);
+      const track = props.tracks?.find((track) => track.uuid === trackUuid);
       if (track) {
         isMarqueeMaking.current = true;
         beginMarqueePos.current = {
@@ -147,7 +145,10 @@ export default function TimelineGroup(props: TimelineGroupProps) {
   }
 
   useEffect(() => {
+    if (!props.tracks) return;
+
     const _trackUuids: string[] = [];
+
     for (let i = 0; i < props.tracks.length; i++) {
       if (i >= getMarqueeTrackIndexMin() && i <= getMarqueeTrackIndexMax()) {
         const _track = props.tracks[i];
@@ -179,7 +180,7 @@ export default function TimelineGroup(props: TimelineGroupProps) {
     if (isMoving.current) {
       isMoving.current = false;
       if (props.selectedNodes.length > 0) {
-        const hasChange = props.animInfo.moveKeyFrame(
+        const hasChange = props.anim?.moveKeyFrame(
           props.selectedNodes,
           moveOffset
         );
@@ -194,13 +195,12 @@ export default function TimelineGroup(props: TimelineGroupProps) {
   }
 
   function onDoubleClick(e: any) {
-    console.log(e);
     if (e.target.nodeName === "CANVAS") {
       const trackUuid = e.target.dataset["trackuuid"];
       const posX = e.nativeEvent.offsetX;
       const index = getFrameIndex(posX);
 
-      props.animInfo.addKeyframe(trackUuid, index);
+      props.anim?.addKeyframe(trackUuid, index);
       forceUpdate();
     }
   }
@@ -217,19 +217,21 @@ export default function TimelineGroup(props: TimelineGroupProps) {
 
   const timelines: ReactNode[] = [];
 
-  for (let i = 0; i < props.tracks.length; i++) {
-    const track = props.tracks[i];
-    timelines.push(
-      <Timeline
-        frameSize={props.frameSize}
-        trackUuid={track.uuid}
-        keyframes={track.keyframes}
-        index={i}
-        key={track.uuid}
-        moveOffset={moveOffset}
-        selectedNodes={props.selectedNodes}
-      />
-    );
+  if (props.tracks) {
+    for (let i = 0; i < props.tracks.length; i++) {
+      const track = props.tracks[i];
+      timelines.push(
+        <Timeline
+          frameSize={props.frameSize}
+          trackUuid={track.uuid}
+          keyframes={track.keyframes}
+          index={i}
+          key={track.uuid}
+          moveOffset={moveOffset}
+          selectedNodes={props.selectedNodes}
+        />
+      );
+    }
   }
 
   return (
