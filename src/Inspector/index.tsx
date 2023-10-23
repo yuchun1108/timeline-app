@@ -1,13 +1,38 @@
 import { ReactNode, useState } from "react";
 import { Anim, AnimNode, Keyframe, Track } from "../global/Anim";
 import { printToNewTab } from "../global/Common";
+import { saveWorldAnim } from "../global/Storage";
+import World from "../three/World";
 interface InspectorProps {
+  world: World;
   anim: Anim | undefined;
   selectedNodes: AnimNode[];
 }
 
 function exportAnim(anim: Anim) {
   printToNewTab(anim.toJson());
+}
+
+function importAnim(anim: Anim) {
+  const str: string =
+    "{" +
+    '"fps": 24,' +
+    '"tracks": [' +
+    "{" +
+    '"name": "new track",' +
+    ' "attr": "position",' +
+    '"keyframes": [' +
+    "{" +
+    '"index": 6,' +
+    '"value": ""' +
+    "}" +
+    "]" +
+    "}" +
+    "]," +
+    '"timeLength": 0.25' +
+    "}";
+
+  anim.fromJson(str);
 }
 
 export default function Inspector(props: InspectorProps) {
@@ -76,6 +101,7 @@ export default function Inspector(props: InspectorProps) {
               defaultValue={keyframe.value}
               onChange={(e: any) => {
                 keyframe.value = e.target.value;
+                props.anim?.setDirty();
               }}
             />
           </label>
@@ -93,6 +119,28 @@ export default function Inspector(props: InspectorProps) {
         }}
       >
         export
+      </button>
+      <button
+        onClick={() => {
+          if (props.anim) importAnim(props.anim);
+        }}
+      >
+        import
+      </button>
+      <button
+        onClick={() => {
+          saveWorldAnim(props.world);
+        }}
+      >
+        save
+      </button>
+
+      <button
+        onClick={() => {
+          localStorage.clear();
+        }}
+      >
+        clear storage
       </button>
     </div>
   );

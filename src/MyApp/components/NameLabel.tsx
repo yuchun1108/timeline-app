@@ -17,7 +17,7 @@ export default function NameLabel(props: NameLabelProps) {
       style={{ height: props.height }}
       onClick={onClick}
     >
-      {props.track.name}
+      {props.track.attr}
     </div>
   );
 }

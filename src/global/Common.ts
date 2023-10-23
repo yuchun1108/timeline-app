@@ -23,3 +23,7 @@ export function onlyNumbers(array: Array<any>) {
     return typeof item === "number";
   });
 }
+
+export function toDecimal2(num: number): number {
+  return Math.round((num + Number.EPSILON) * 100) / 100;
+}

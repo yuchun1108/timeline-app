@@ -1,6 +1,6 @@
 import { inverseLerp, lerp } from "three/src/math/MathUtils";
 import { v4 as uuidv4 } from "uuid";
-import { onlyNumbers } from "./Common";
+import { onlyNumbers, toDecimal2 } from "./Common";
 
 export interface AnimNode {
   discriminator: string;
@@ -9,7 +9,6 @@ export interface AnimNode {
 
 export interface Track extends AnimNode {
   discriminator: "track";
-  name: string;
   attr: string;
   keyframes: Keyframe[];
 }
@@ -20,22 +19,31 @@ export interface Keyframe extends AnimNode {
   value: any;
 }
 export class Anim {
-  fps: number = 24;
+  fps: number = 30;
   tracks: Track[];
   timeLength: number = 0;
+  isDirty: boolean = false;
 
   constructor(tracks: Track[] = []) {
     this.tracks = tracks;
   }
 
-  addTrack(name: string = "new track"): void {
+  addTrack(): void {
     this.tracks.push({
       discriminator: "track",
-      name,
       attr: "position",
       keyframes: [],
       uuid: uuidv4(),
     });
+    this.isDirty = true;
+  }
+
+  removeTrack(trackUuid: string): void {
+    for (let i = this.tracks.length - 1; i >= 0; i--) {
+      if (this.tracks[i].uuid === trackUuid) {
+        this.tracks.splice(i, 1);
+      }
+    }
   }
 
   addKeyframe(trackUuid: string, index: number): void {
@@ -43,33 +51,34 @@ export class Anim {
     if (!track) return;
 
     const keyframe = track.keyframes.find((k) => k.index === index);
-    if (!keyframe) {
-      const _keyframe: Keyframe = {
-        discriminator: "keyframe",
-        index: index,
-        uuid: uuidv4(),
-        value: "",
-      };
-      track.keyframes.push(_keyframe);
+    if (keyframe) return;
 
-      this.sortKeyframes(track);
-      this.calcTimeLength();
+    const time = this.keyframeIndexToTime(index);
+    let value: any = this.getTrackValue(track, time);
+
+    if (value === undefined) {
+      value = "";
+    } else if (!isNaN(value)) {
+      value = toDecimal2(value);
+    } else if (Array.isArray(value) && onlyNumbers(value)) {
+      for (let i = 0; i < value.length; i++) {
+        value[i] = toDecimal2(value[i]);
+      }
+      value = "[" + value + "]";
     }
-  }
 
-  private sortKeyframes(track: Track) {
-    track.keyframes.sort((a, b) => a.index - b.index);
-  }
+    const _keyframe: Keyframe = {
+      discriminator: "keyframe",
+      index: index,
+      uuid: uuidv4(),
+      value: value,
+    };
+    track.keyframes.push(_keyframe);
 
-  private calcTimeLength() {
-    this.timeLength = 0;
-    this.tracks.forEach((track) => {
-      if (track.keyframes.length === 0) return;
-      const lastKeyframe = track.keyframes[track.keyframes.length - 1];
-      const lastKeyframeTime = this.keyframeIndexToTime(lastKeyframe.index);
-      this.timeLength = Math.max(this.timeLength, lastKeyframeTime);
-    });
-    console.log("timeLength", this.timeLength);
+    this.sortKeyframes(track);
+    this.calcTimeLength();
+
+    this.isDirty = true;
   }
 
   moveKeyFrame(nodes: AnimNode[], offset: number): boolean {
@@ -105,18 +114,65 @@ export class Anim {
       this.sortKeyframes(track);
     });
 
-    if (hasChange) this.calcTimeLength();
+    if (hasChange) {
+      this.calcTimeLength();
+      this.isDirty = true;
+    }
 
     return hasChange;
   }
 
+  removeKeyframe(keyframeUUids: string[]) {
+    this.tracks.forEach((track) => {
+      const keyframes = track.keyframes;
+      for (let i = keyframes.length - 1; i >= 0; i--) {
+        const keyframe = keyframes[i];
+        if (keyframeUUids.includes(keyframe.uuid)) {
+          console.log("nono");
+          keyframes.splice(i, 1);
+        }
+      }
+    });
+  }
+
+  private sortKeyframes(track: Track) {
+    track.keyframes.sort((a, b) => a.index - b.index);
+  }
+
+  private calcTimeLength() {
+    this.timeLength = 0;
+    this.tracks.forEach((track) => {
+      if (track.keyframes.length === 0) return;
+      const lastKeyframe = track.keyframes[track.keyframes.length - 1];
+      const lastKeyframeTime = this.keyframeIndexToTime(lastKeyframe.index);
+      this.timeLength = Math.max(this.timeLength, lastKeyframeTime);
+    });
+  }
+
   toJson(): string {
     function replacer(key: string, value: any) {
-      if (key === "uuid") return undefined;
-      else if (key === "discriminator") return undefined;
+      if (key === "uuid" || key === "discriminator" || key === "isDirty")
+        return undefined;
       else return value;
     }
     return JSON.stringify(this, replacer, "\t");
+  }
+
+  fromJson(text: string) {
+    const json = JSON.parse(text);
+    Object.assign(this, json);
+
+    this.tracks.forEach((track) => {
+      if (track.uuid === undefined) {
+        track.discriminator = "track";
+        track.uuid = uuidv4();
+      }
+
+      track.keyframes.forEach((keyframe) => {
+        keyframe.discriminator = "keyframe";
+        keyframe.uuid = uuidv4();
+      });
+    });
   }
 
   apply(obj: THREE.Object3D, time: number) {
@@ -198,5 +254,9 @@ export class Anim {
     } catch (e) {}
 
     return undefined;
+  }
+
+  setDirty() {
+    this.isDirty = true;
   }
 }

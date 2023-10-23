@@ -96,6 +96,35 @@ export default function MyApp(props: MyAppProps) {
     }
   }
 
+  function onKeyDown(e: any) {
+    if (e.code === "Delete") {
+      if (anim === undefined) return;
+
+      if (selectedNodes.length === 0) return;
+
+      if (selectedNodes[0].discriminator === "track") {
+        anim.removeTrack(selectedNodes[0].uuid);
+        setTracks([...anim.tracks]);
+      } else if (selectedNodes[0].discriminator === "keyframe") {
+        const keyframeUuids = selectedNodes
+          .filter((node) => node.discriminator === "keyframe")
+          .map((node) => node.uuid);
+
+        if (keyframeUuids.length > 0) {
+          anim.removeKeyframe(keyframeUuids);
+          setSelectedNodes([]);
+        }
+      }
+    }
+  }
+
+  useEffect(() => {
+    window.addEventListener("keydown", onKeyDown, true);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [anim, selectedNodes]);
+
   const timelineHeight = 20;
 
   return (
@@ -122,6 +151,7 @@ export default function MyApp(props: MyAppProps) {
       />
 
       <Inspector
+        world={props.world}
         anim={anim}
         selectedNodes={selectedNodes}
         key={selectedNodes.length > 0 ? selectedNodes[0].uuid : "empty"}

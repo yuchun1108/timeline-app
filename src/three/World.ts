@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { saveWorldAnim } from "../global/Storage";
 
 export default class World {
   camera: THREE.PerspectiveCamera;
@@ -71,6 +72,24 @@ export default class World {
     });
 
     this.renderer.render(this.scene, this.camera);
+
+    this.checkHasDirtyAndSave();
+  }
+
+  checkHasDirtyAndSave() {
+    let isDirty = false;
+    this.scene.traverse((obj) => {
+      if (obj.entity) {
+        const anim = obj.entity.animController.anim;
+        if (anim.isDirty) isDirty = true;
+        anim.isDirty = false;
+      }
+    });
+
+    if (isDirty) {
+      saveWorldAnim(this);
+      console.log("save");
+    }
   }
 
   addObject(obj: THREE.Object3D) {

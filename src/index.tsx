@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader.js";
 import MyApp from "./MyApp";
-import { Anim } from "./global/Anim";
+import { loadWorldAnim } from "./global/Storage";
 import "./index.css";
 import Entity from "./three/Entity";
 import World from "./three/World";
@@ -10,10 +10,6 @@ import World from "./three/World";
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
-
-const anim = new Anim();
-anim.addTrack("track-A");
-anim.addTrack("track-B");
 
 const world = new World(200);
 
@@ -54,26 +50,6 @@ loader.load("Box.fbx", function (object) {
 
   console.log(world.scene);
   console.log(object.children.find((c) => c.name === "Cube"));
+
+  loadWorldAnim(world);
 });
-
-const a = 1.5;
-const b = 2.0;
-const c = 1.6;
-
-const str = "123";
-
-const valueA = JSON.parse(str);
-
-const arr = new Array<number>(3);
-arr[0] = 1;
-arr[1] = 2;
-arr[2] = 3;
-
-const u = undefined;
-
-console.log(Array.isArray(u));
-
-let aa = 7.1;
-const bb = 2;
-aa %= bb;
-console.log(aa);

@@ -16,7 +16,6 @@ export default class AnimController {
       this.animTime %= this.anim.timeLength;
 
       this.anim.apply(this.target, this.animTime);
-      console.log(this.anim.timeLength, this.animTime);
     }
   }
 }
