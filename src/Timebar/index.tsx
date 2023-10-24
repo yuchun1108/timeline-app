@@ -1,18 +1,32 @@
 import { useEffect, useRef, useState } from "react";
+import { ScrollSyncPane } from "react-scroll-sync";
 import FrameSize from "../global/FrameSize";
+import AnimController from "../three/AnimController";
 
 interface TimebarProps {
   frameSize: FrameSize;
   height: number;
-  scrollLeft: number;
+  animController: AnimController | undefined;
 }
 
 export default function Timebar(props: TimebarProps) {
-  const scrollRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const frameCount = useRef(0);
   const frameWidth = useRef(0);
+
+  const lastAnimController = useRef<AnimController | undefined>(undefined);
+  if (lastAnimController.current !== props.animController) {
+    if (lastAnimController.current)
+      lastAnimController.current.onAnimTimeChange = undefined;
+    if (props.animController)
+      props.animController.onAnimTimeChange = onAnimTimeChange;
+    lastAnimController.current = props.animController;
+  }
+
+  function onAnimTimeChange(animTime: number) {
+    setAnimTime(animTime);
+  }
 
   function refresh() {
     if (
@@ -46,15 +60,28 @@ export default function Timebar(props: TimebarProps) {
   refresh();
 
   const isMouseDown = useRef(false);
-  const [timePos, setTimePos] = useState(0);
+  const [animTime, setAnimTime] = useState(0);
 
   function updateTimePos(posX: number) {
-    const _timePos = posX / props.frameSize.width / props.frameSize.fps;
-    setTimePos(_timePos);
+    const _animTime = posXtoTime(posX);
+    props.animController?.stop();
+    props.animController?.setAnimTime(_animTime);
+    setAnimTime(_animTime);
   }
 
-  function getPosX(timePos: number) {
-    return timePos * props.frameSize.width * props.frameSize.fps;
+  function posXtoTime(posX: number) {
+    return (
+      (posX - props.frameSize.width * 0.5) /
+      props.frameSize.width /
+      props.frameSize.fps
+    );
+  }
+
+  function timeToPosX(timePos: number) {
+    return (
+      timePos * props.frameSize.width * props.frameSize.fps +
+      props.frameSize.width * 0.5
+    );
   }
 
   function onMouseDown(e: any) {
@@ -75,26 +102,24 @@ export default function Timebar(props: TimebarProps) {
   function onMouseLeave(e: any) {
     isMouseDown.current = false;
   }
-
-  if (scrollRef.current) scrollRef.current.scrollLeft = props.scrollLeft;
-
   return (
-    <div
-      id="timebar"
-      onMouseDown={onMouseDown}
-      onMouseMove={onMouseMove}
-      onMouseUp={onMouseUp}
-      onMouseLeave={onMouseLeave}
-      onDragStart={(e) => false}
-      ref={scrollRef}
-    >
-      <canvas className="timeline-bg" ref={canvasRef}></canvas>
+    <ScrollSyncPane>
       <div
-        className="time-pos"
-        style={{
-          left: getPosX(timePos),
-        }}
-      />
-    </div>
+        id="timebar"
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={onMouseUp}
+        onMouseLeave={onMouseLeave}
+        onDragStart={(e) => false}
+      >
+        <canvas className="timeline-bg" ref={canvasRef}></canvas>
+        <div
+          className="time-pos"
+          style={{
+            left: timeToPosX(animTime),
+          }}
+        />
+      </div>
+    </ScrollSyncPane>
   );
 }

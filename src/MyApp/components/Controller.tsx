@@ -1,50 +1,47 @@
-import { useEffect, useState } from "react";
-import World from "../../three/World";
+import { useState } from "react";
+import FrameSize from "../../global/FrameSize";
+import AnimController from "../../three/AnimController";
 
-interface InspectorProps {
-  world: World;
-  onAddTrack: () => void;
-  onObjectSelect: (objId: number) => void;
+interface ControllerProps {
+  frameSize: FrameSize;
+  animController: AnimController | undefined;
+  onFrameCountChange: (count: number) => void;
+  onFrameWidthChange: (count: number) => void;
 }
 
-interface Option {
-  path: string | undefined;
-  id: number;
-  uuid: string;
-}
+export default function Controller(props: ControllerProps) {
+  const [frameCount, setFrameCount] = useState(props.frameSize.count);
 
-export default function Controller(props: InspectorProps) {
-  const [options, setOptions] = useState<Option[]>([]);
+  function onPlayClick(e: any) {
+    props.animController?.play();
+  }
 
-  useEffect(() => {
-    const { world } = props;
-    world.onHierarchyChange.push(() => {
-      const objs = world.getAllObjects();
-      setOptions(
-        objs.map<Option>((obj) => ({
-          path: obj.entity ? obj.entity.path : "no path",
-          id: obj.id,
-          uuid: obj.uuid,
-        }))
-      );
-    });
-  }, []);
+  function onFrameCountChange(e: any) {
+    props.onFrameCountChange(frameCount);
+  }
 
-  function onOptionSelect(e: any) {
-    props.onObjectSelect(Number(e.target.value));
+  function onFrameWidthChange(e: any) {
+    props.onFrameWidthChange(e.target.value);
   }
 
   return (
     <div id="controller">
-      <select onChange={onOptionSelect}>
-        {options.map((opt) => (
-          <option key={opt.uuid} value={opt.id}>
-            {opt.path}
-          </option>
-        ))}
-      </select>
-      <button>play</button>
-      <button onClick={props.onAddTrack}>+</button>
+      <button onClick={onPlayClick}>play</button>
+      <label>
+        frame count
+        <input
+          type={"number"}
+          value={frameCount}
+          onChange={(e: any) => {
+            setFrameCount(e.target.value);
+          }}
+        />
+        <button onClick={onFrameCountChange}>apply</button>
+      </label>
+      <label>
+        width
+        <input type={"range"} min={5} max={25} onChange={onFrameWidthChange} />
+      </label>
     </div>
   );
 }

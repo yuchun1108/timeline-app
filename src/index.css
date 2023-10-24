@@ -4,20 +4,34 @@ body {
 
 #my-app {
   position: absolute;
+  left: 0;
   bottom: 0;
   background-color: #aff;
   width: 100%;
   height: 200px;
   display: grid;
   grid-template-columns: 200px auto 200px;
-  grid-template-rows: 30px auto;
   grid-template-areas:
-    "controller timebar inspector"
+    "controller controller controller"
+    "model-selector timebar inspector"
     "name-label timeline inspector";
 }
 
 #three-container {
+  width: 100%;
   height: 80%;
+}
+
+#three-container > canvas {
+  width: 100% !important;
+}
+
+#controller {
+  grid-area: controller;
+}
+
+#modelSelector {
+  grid-area: model-selector;
 }
 
 #name-label-group {
@@ -37,11 +51,7 @@ body {
   grid-area: timeline;
   position: relative;
   background-color: #eee;
-  overflow: scroll;
-}
-
-#controller {
-  grid-area: controller;
+  overflow: auto;
 }
 
 #inspector {

@@ -1,10 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { ScrollSync } from "react-scroll-sync";
 import Inspector from "../Inspector";
+import ModelSelector from "../ModelSelector";
 import Timebar from "../Timebar";
 import TimelineGroup from "../TimelineGroup";
-import { Anim, AnimNode, Track } from "../global/Anim";
 import { isArrayEqual } from "../global/Common";
 import FrameSize from "../global/FrameSize";
+import { Anim, AnimNode, Track } from "../three/Anim";
+import AnimController from "../three/AnimController";
 import World from "../three/World";
 import Controller from "./components/Controller";
 import NameLabelGroup from "./components/NameLabelGroup";
@@ -14,6 +17,9 @@ interface MyAppProps {
 }
 
 export default function MyApp(props: MyAppProps) {
+  const [animController, setAnimController] = useState<
+    AnimController | undefined
+  >(undefined);
   const [anim, setAnim] = useState<Anim | undefined>(undefined);
   const [tracks, setTracks] = useState<Track[] | undefined>(undefined);
 
@@ -23,17 +29,19 @@ export default function MyApp(props: MyAppProps) {
   const [frameSize, setFrameSize] = useState<FrameSize>({
     width: 20,
     count: 60,
-    height: 20,
+    height: 24,
     fps: 24,
   });
 
   const [scrollLeft, setScrollLeft] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const { world } = props;
     world.onHierarchyChange.push(() => {
       const objs = world.getAllObjects();
       if (objs.length > 0) {
+        setAnimController(objs[0].entity?.animController);
         setAnim(objs[0].entity?.animController.anim);
       }
     });
@@ -48,10 +56,22 @@ export default function MyApp(props: MyAppProps) {
       setFrameSize((prev) => ({ ...prev, fps: 24 }));
     }
     setSelectedNodes([]);
+
+    if (anim) anim.onAddKeyframe = onAddKeyframe;
+
+    return () => {
+      if (anim) anim.onAddKeyframe = undefined;
+    };
   }, [anim]);
+
+  function onAddKeyframe(keyframe: AnimNode) {
+    setSelectedNodes([keyframe]);
+  }
 
   function onObjectSelect(objId: number) {
     const obj = props.world.scene.getObjectById(objId);
+
+    setAnimController(obj?.entity?.animController);
     setAnim(obj?.entity?.animController.anim);
   }
 
@@ -129,43 +149,67 @@ export default function MyApp(props: MyAppProps) {
   const timelineHeight = 20;
 
   function onTimelineGroupScroll(scrollLeft: number) {
-    setScrollLeft(scrollLeft);
+    // if (scrollRef.current) scrollRef.current.scrollLeft = scrollLeft;
+  }
+
+  function onFrameCountChange(count: number) {
+    setFrameSize((prev) => {
+      return { ...prev, count };
+    });
+  }
+
+  function onFrameWidthChange(width: number) {
+    setFrameSize((prev) => {
+      return { ...prev, width };
+    });
   }
 
   return (
-    <div id="my-app" style={{ gridTemplateRows: `${timeBarHeight}px auto` }}>
-      <Controller
-        world={props.world}
-        onObjectSelect={onObjectSelect}
-        onAddTrack={onAddTrack}
-      />
-      <NameLabelGroup
-        height={timelineHeight}
-        selectedNodes={selectedNodes}
-        tracks={tracks}
-        onTrackSelect={onTrackSelect}
-      />
+    <ScrollSync>
+      <div
+        id="my-app"
+        style={{ gridTemplateRows: `24px ${timeBarHeight}px auto` }}
+      >
+        <Controller
+          frameSize={frameSize}
+          animController={animController}
+          onFrameCountChange={onFrameCountChange}
+          onFrameWidthChange={onFrameWidthChange}
+        />
 
-      <Timebar
-        frameSize={frameSize}
-        height={timeBarHeight}
-        scrollLeft={scrollLeft}
-      />
-      <TimelineGroup
-        frameSize={frameSize}
-        selectedNodes={selectedNodes}
-        anim={anim}
-        tracks={tracks}
-        onKeyframeSelect={onKeyframeSelect}
-        onTimelineGroupScroll={onTimelineGroupScroll}
-      />
+        <ModelSelector
+          world={props.world}
+          onObjectSelect={onObjectSelect}
+          onAddTrack={onAddTrack}
+        />
+        <NameLabelGroup
+          height={timelineHeight}
+          selectedNodes={selectedNodes}
+          tracks={tracks}
+          onTrackSelect={onTrackSelect}
+        />
 
-      <Inspector
-        world={props.world}
-        anim={anim}
-        selectedNodes={selectedNodes}
-        key={selectedNodes.length > 0 ? selectedNodes[0].uuid : "empty"}
-      />
-    </div>
+        <Timebar
+          frameSize={frameSize}
+          height={timeBarHeight}
+          animController={animController}
+        />
+        <TimelineGroup
+          frameSize={frameSize}
+          selectedNodes={selectedNodes}
+          anim={anim}
+          tracks={tracks}
+          onKeyframeSelect={onKeyframeSelect}
+          onTimelineGroupScroll={onTimelineGroupScroll}
+        />
+
+        <Inspector
+          world={props.world}
+          anim={anim}
+          selectedNodes={selectedNodes}
+          key={selectedNodes.length > 0 ? selectedNodes[0].uuid : "empty"}
+        />
+      </div>
+    </ScrollSync>
   );
 }

@@ -1,6 +1,6 @@
 import { inverseLerp, lerp } from "three/src/math/MathUtils";
 import { v4 as uuidv4 } from "uuid";
-import { onlyNumbers, toDecimal2 } from "./Common";
+import { onlyNumbers, toDecimal2 } from "../global/Common";
 
 export interface AnimNode {
   discriminator: string;
@@ -14,6 +14,7 @@ export interface Track extends AnimNode {
 }
 
 export interface Keyframe extends AnimNode {
+  parent: Track;
   discriminator: "keyframe";
   index: number;
   value: any;
@@ -23,6 +24,8 @@ export class Anim {
   tracks: Track[];
   timeLength: number = 0;
   isDirty: boolean = false;
+
+  onAddKeyframe: ((keyframe: Keyframe) => void) | undefined;
 
   constructor(tracks: Track[] = []) {
     this.tracks = tracks;
@@ -68,6 +71,7 @@ export class Anim {
     }
 
     const _keyframe: Keyframe = {
+      parent: track,
       discriminator: "keyframe",
       index: index,
       uuid: uuidv4(),
@@ -77,6 +81,8 @@ export class Anim {
 
     this.sortKeyframes(track);
     this.calcTimeLength();
+
+    this.onAddKeyframe?.(_keyframe);
 
     this.isDirty = true;
   }
@@ -151,7 +157,12 @@ export class Anim {
 
   toJson(): string {
     function replacer(key: string, value: any) {
-      if (key === "uuid" || key === "discriminator" || key === "isDirty")
+      if (
+        key === "parent" ||
+        key === "uuid" ||
+        key === "discriminator" ||
+        key === "isDirty"
+      )
         return undefined;
       else return value;
     }
@@ -169,6 +180,7 @@ export class Anim {
       }
 
       track.keyframes.forEach((keyframe) => {
+        keyframe.parent = track;
         keyframe.discriminator = "keyframe";
         keyframe.uuid = uuidv4();
       });

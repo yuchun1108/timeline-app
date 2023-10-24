@@ -1,6 +1,7 @@
 import { ReactNode, useEffect, useReducer, useRef, useState } from "react";
-import { Anim, AnimNode, Track } from "../global/Anim";
+import { ScrollSyncPane } from "react-scroll-sync";
 import FrameSize from "../global/FrameSize";
+import { Anim, AnimNode, Track } from "../three/Anim";
 import MarqueeRect from "./components/MarqueeRect";
 import Timeline from "./components/Timeline";
 
@@ -202,7 +203,7 @@ export default function TimelineGroup(props: TimelineGroupProps) {
       const index = getFrameIndex(posX);
 
       props.anim?.addKeyframe(trackUuid, index);
-      forceUpdate();
+      //forceUpdate();
     }
   }
 
@@ -240,25 +241,27 @@ export default function TimelineGroup(props: TimelineGroupProps) {
   }
 
   return (
-    <div
-      id="timeline-group"
-      onMouseDown={onMouseDown}
-      onMouseMove={onMouseMove}
-      onMouseUp={onMouseUp}
-      onDoubleClick={onDoubleClick}
-      onMouseLeave={onMouseLeave}
-      onScroll={onScroll}
-    >
-      {isMarqueeShow ? (
-        <MarqueeRect
-          frameSize={props.frameSize}
-          trackIndexMin={getMarqueeTrackIndexMin()}
-          trackIndexMax={getMarqueeTrackIndexMax()}
-          frameIndexMin={getMarqueeFrameIndexMin()}
-          frameIndexMax={getMarqueeFrameIndexMax()}
-        />
-      ) : undefined}
-      {timelines}
-    </div>
+    <ScrollSyncPane>
+      <div
+        id="timeline-group"
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={onMouseUp}
+        onDoubleClick={onDoubleClick}
+        onMouseLeave={onMouseLeave}
+        onScroll={onScroll}
+      >
+        {isMarqueeShow ? (
+          <MarqueeRect
+            frameSize={props.frameSize}
+            trackIndexMin={getMarqueeTrackIndexMin()}
+            trackIndexMax={getMarqueeTrackIndexMax()}
+            frameIndexMin={getMarqueeFrameIndexMin()}
+            frameIndexMax={getMarqueeFrameIndexMax()}
+          />
+        ) : undefined}
+        {timelines}
+      </div>
+    </ScrollSyncPane>
   );
 }
