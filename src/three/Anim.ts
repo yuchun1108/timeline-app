@@ -1,4 +1,4 @@
-import { onlyNumbers, toDecimal2 } from "../global/Common";
+import { toDecimal2 } from "../global/Common";
 import { AnimNode } from "./AnimNode";
 import { keyframeIndexToTime } from "./AnimTool";
 import { Keyframe } from "./Keyframe";
@@ -42,20 +42,21 @@ export class Anim {
     if (_keyframe) return;
 
     const time = keyframeIndexToTime(index, this.fps);
-    let value: any = track.getValue(time, this.fps);
+    let text = "";
+    let values: number[] | undefined = track.getValue(time, this.fps);
 
-    if (value === undefined) {
-      value = "";
-    } else if (!isNaN(value)) {
-      value = toDecimal2(value);
-    } else if (Array.isArray(value) && onlyNumbers(value)) {
-      for (let i = 0; i < value.length; i++) {
-        value[i] = toDecimal2(value[i]);
+    if (values === undefined || values.length === 0) {
+      text = "";
+    } else {
+      for (let i = 0; i < values.length; i++) {
+        text += toDecimal2(values[i]);
+        if (i < values.length - 1) {
+          text += ", ";
+        }
       }
-      value = "[" + value + "]";
     }
 
-    const keyframe: Keyframe = new Keyframe(track, { index, value });
+    const keyframe: Keyframe = new Keyframe(track, { index, text });
     track.keyframes.push(keyframe);
 
     track.sortKeyframes();
@@ -163,25 +164,16 @@ export class Anim {
     this.tracks = new Array(tracksLen);
     for (let i = 0; i < tracksLen; i++) {
       this.tracks[i] = new Track(tracks[i]);
+      this.tracks[i].sortKeyframes();
     }
+
+    this.calcTimeLength();
   }
 
   apply(obj: THREE.Object3D, time: number) {
     this.tracks.forEach((track) => {
-      this.applyTrack(obj, track, time);
+      track.apply(obj, time, this.fps);
     });
-  }
-
-  private applyTrack(obj: THREE.Object3D, track: Track, time: number) {
-    switch (track.attr) {
-      case "position":
-        console.log(track.getValue);
-        const value = track.getValue(time, this.fps);
-        if (Array.isArray(value) && value.length === 3) {
-          obj.position.set(value[0], value[1], value[2]);
-        }
-        break;
-    }
   }
 
   setDirty() {

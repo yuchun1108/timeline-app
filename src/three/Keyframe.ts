@@ -1,51 +1,50 @@
 import { v4 as uuidv4 } from "uuid";
 import { AnimNode } from "./AnimNode";
+import { getAttrNeedValueCount, isNumArray } from "./AnimTool";
 import { Track } from "./Track";
-
-function isNum(value: any): boolean {
-  return !isNaN(value);
-}
-
-function isNumArray(value: any, len: number): boolean {
-  return (
-    Array.isArray(value) && value.length === len && value.every((v) => isNum(v))
-  );
-}
 
 export class Keyframe implements AnimNode {
   uuid: string;
   parent: Track;
   index: number = 0;
-  value: string = "";
-  isCorrect: boolean;
-  lastIsCorrect: boolean;
+
+  text: string = "";
+  values: number[] | undefined = undefined;
   ease: string = "";
-  onIsCorrectChange: ((isCorrect: boolean) => void) | undefined;
+  onValuesChange: ((values: number[] | undefined) => void) | undefined;
 
   constructor(parent: Track, attrs: any = {}) {
     Object.assign(this, attrs);
     this.uuid = uuidv4();
     this.parent = parent;
-    this.lastIsCorrect = this.isCorrect = this.checkIsCorrect();
+    this.parseValues();
+    // this.lastIsCorrect = this.isCorrect = this.checkIsCorrect();
   }
 
-  setValue(value: string) {
-    this.value = value;
-    this.isCorrect = this.checkIsCorrect();
-    if (this.lastIsCorrect !== this.isCorrect) {
-      this.onIsCorrectChange?.(this.isCorrect);
-      this.lastIsCorrect = this.isCorrect;
-    }
+  setText(text: string) {
+    this.text = text;
+    this.parseValues();
+    this.onValuesChange?.(this.values);
   }
 
-  checkIsCorrect(): boolean {
+  // setValue(value: string) {
+  //   this.value = value;
+  //   this.isCorrect = this.checkIsCorrect();
+  //   if (this.lastIsCorrect !== this.isCorrect) {
+  //     this.onIsCorrectChange?.(this.isCorrect);
+  //     this.lastIsCorrect = this.isCorrect;
+  //   }
+  // }
+
+  parseValues() {
+    const needValueCount = getAttrNeedValueCount(this.parent.attr);
     try {
-      const json = JSON.parse(this.value);
-      switch (this.parent.attr) {
-        case "position":
-          return (this.isCorrect = isNumArray(json, 3));
+      const value = JSON.parse("[" + this.text + "]");
+      if (isNumArray(value, needValueCount)) {
+        this.values = value;
+      } else {
+        this.values = undefined;
       }
     } catch (e) {}
-    return false;
   }
 }

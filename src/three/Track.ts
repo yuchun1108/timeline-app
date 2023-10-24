@@ -1,6 +1,5 @@
 import { inverseLerp, lerp } from "three/src/math/MathUtils";
 import { v4 as uuidv4 } from "uuid";
-import { onlyNumbers } from "../global/Common";
 import { AnimNode } from "./AnimNode";
 import { keyframeIndexToTime } from "./AnimTool";
 import { Keyframe } from "./Keyframe";
@@ -27,15 +26,28 @@ export class Track implements AnimNode {
     this.keyframes.sort((a, b) => a.index - b.index);
   }
 
-  getValue(time: number, fps: number): number | Array<number> | undefined {
+  apply(obj: THREE.Object3D, time: number, fps: number) {
+    switch (this.attr) {
+      case "position":
+        const value = this.getValue(time, fps);
+        if (Array.isArray(value) && value.length === 3) {
+          obj.position.set(value[0], value[1], value[2]);
+        }
+        break;
+    }
+  }
+
+  getValue(time: number, fps: number): number[] | undefined {
     const keyframes = this.keyframes;
     let keyA: Keyframe | undefined = undefined;
     let keyB: Keyframe | undefined = undefined;
     let p: number = 0;
 
-    if (keyframes.length === 0) return undefined;
-    else if (keyframes.length === 1) keyA = keyB = keyframes[0];
-    else if (time <= keyframeIndexToTime(keyframes[0].index, fps)) {
+    if (keyframes.length === 0) {
+      return undefined;
+    } else if (keyframes.length === 1) {
+      keyA = keyB = keyframes[0];
+    } else if (time <= keyframeIndexToTime(keyframes[0].index, fps)) {
       keyA = keyB = keyframes[0];
     } else if (
       time >= keyframeIndexToTime(keyframes[keyframes.length - 1].index, fps)
@@ -58,27 +70,15 @@ export class Track implements AnimNode {
     }
 
     if (!keyA || !keyB) return undefined;
+    if (!keyA.values || !keyB.values) return undefined;
 
-    try {
-      const valueA = JSON.parse(keyA.value);
-      const valueB = JSON.parse(keyB.value);
-
-      if (!isNaN(valueA) && !isNaN(valueB)) {
-        return lerp(valueA, valueB, p);
-      } else if (Array.isArray(valueA) && Array.isArray(valueB)) {
-        if (
-          valueA.length === valueB.length &&
-          onlyNumbers(valueA) &&
-          onlyNumbers(valueB)
-        ) {
-          const arr = new Array<number>(valueA.length);
-          for (let i = 0; i < arr.length; i++) {
-            arr[i] = lerp(valueA[i], valueB[i], p);
-          }
-          return arr;
-        }
+    if (keyA.values.length === keyB.values.length) {
+      const arr = new Array<number>(keyA.values.length);
+      for (let i = 0; i < arr.length; i++) {
+        arr[i] = lerp(keyA.values[i], keyB.values[i], p);
       }
-    } catch (e) {}
+      return arr;
+    }
 
     return undefined;
   }

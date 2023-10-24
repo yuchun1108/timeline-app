@@ -1,4 +1,4 @@
-import { ReactNode, useState } from "react";
+import { ReactNode } from "react";
 import { printToNewTab } from "../global/Common";
 import { saveWorldAnim } from "../global/Storage";
 import { Anim, AnimNode, Keyframe, Track } from "../three/Anim";
@@ -15,34 +15,15 @@ function exportAnim(anim: Anim) {
 
 export default function Inspector(props: InspectorProps) {
   const { selectedNodes } = props;
-  // const animNodes = props.selectedNodes;
   let element: ReactNode;
 
-  // const selectedNodes = useRef<AnimNode[]>(null);
-  const [value, setValue] = useState<string>();
+  function onEaseChange(e: any) {
+    console.log(e.target.value);
+  }
 
-  // if (selectedNodes.current !== props.selectedNodes) {
-  //   selectedNodes.current = props.selectedNodes;
-
-  //   if (props.selectedNodes !== null && props.selectedNodes.length > 0) {
-  //     const firstNode = props.selectedNodes[0];
-  //     if (firstNode.discriminator === "keyframe") {
-  //       const keyframe = firstNode as Keyframe;
-  //       setValue(keyframe.value);
-  //     }
-  //   }
-  // }
-
-  // useEffect(() => {
-  //   if (
-  //     props.selectedNodes !== null &&
-  //     props.selectedNodes.length > 0 &&
-  //     props.selectedNodes[0].discriminator === "keyframe"
-  //   ) {
-  //     const keyframe = props.selectedNodes[0] as Keyframe;
-  //     keyframe.value = value;
-  //   }
-  // }, [value]);
+  function onInOutChange(e: any) {
+    console.log(e.target.value);
+  }
 
   if (selectedNodes.length === 0) {
     element = <></>;
@@ -77,12 +58,33 @@ export default function Inspector(props: InspectorProps) {
             Value
             <input
               type="text"
-              defaultValue={keyframe.value}
+              defaultValue={keyframe.text}
               onChange={(e: any) => {
-                keyframe.setValue(e.target.value);
+                keyframe.setText(e.target.value);
                 props.anim?.setDirty();
               }}
             />
+          </label>
+
+          <label>
+            Easing
+            <select onChange={onEaseChange}>
+              <option value="linear">Linear</option>
+              <option value="quad">Quad</option>
+              <option value="qubic">Qubic</option>
+              <option value="quart">Quart</option>
+              <option value="quint">Quint</option>
+              <option value="expo">Expo</option>
+              <option value="circ">Circ</option>
+              <option value="back">Back</option>
+              <option value="elastic">Elastic</option>
+              <option value="bounce">Bounce</option>
+            </select>
+            <select onChange={onInOutChange}>
+              <option>In</option>
+              <option>Out</option>
+              <option>InOut</option>
+            </select>
           </label>
         </>
       );

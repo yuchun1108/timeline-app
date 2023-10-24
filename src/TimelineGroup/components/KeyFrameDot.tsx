@@ -14,15 +14,17 @@ interface KeyframeProps {
 }
 
 export default function KeyframeDot(props: KeyframeProps) {
-  const [isCorrect, setIsCorrect] = useState(props.keyframe.isCorrect);
+  const [isCorrect, setIsCorrect] = useState(
+    props.keyframe.values !== undefined
+  );
 
   useEffect(() => {
-    props.keyframe.onIsCorrectChange = (_isCorrect) => {
-      setIsCorrect(_isCorrect);
+    props.keyframe.onValuesChange = (values) => {
+      setIsCorrect(values !== undefined);
     };
 
     return () => {
-      props.keyframe.onIsCorrectChange = undefined;
+      props.keyframe.onValuesChange = undefined;
     };
   }, []);
 
