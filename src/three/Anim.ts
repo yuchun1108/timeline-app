@@ -1,24 +1,13 @@
-import { inverseLerp, lerp } from "three/src/math/MathUtils";
-import { v4 as uuidv4 } from "uuid";
 import { onlyNumbers, toDecimal2 } from "../global/Common";
+import { AnimNode } from "./AnimNode";
+import { keyframeIndexToTime } from "./AnimTool";
+import { Keyframe } from "./Keyframe";
+import { Track } from "./Track";
 
-export interface AnimNode {
-  discriminator: string;
-  uuid: string;
-}
+export type { AnimNode } from "./AnimNode";
+export { Keyframe } from "./Keyframe";
+export { Track } from "./Track";
 
-export interface Track extends AnimNode {
-  discriminator: "track";
-  attr: string;
-  keyframes: Keyframe[];
-}
-
-export interface Keyframe extends AnimNode {
-  parent: Track;
-  discriminator: "keyframe";
-  index: number;
-  value: any;
-}
 export class Anim {
   fps: number = 30;
   tracks: Track[];
@@ -32,12 +21,8 @@ export class Anim {
   }
 
   addTrack(): void {
-    this.tracks.push({
-      discriminator: "track",
-      attr: "position",
-      keyframes: [],
-      uuid: uuidv4(),
-    });
+    const track = new Track({ attr: "position" });
+    this.tracks.push(track);
     this.isDirty = true;
   }
 
@@ -53,11 +38,11 @@ export class Anim {
     const track = this.tracks.find((t) => t.uuid === trackUuid);
     if (!track) return;
 
-    const keyframe = track.keyframes.find((k) => k.index === index);
-    if (keyframe) return;
+    const _keyframe = track.keyframes.find((k) => k.index === index);
+    if (_keyframe) return;
 
-    const time = this.keyframeIndexToTime(index);
-    let value: any = this.getTrackValue(track, time);
+    const time = keyframeIndexToTime(index, this.fps);
+    let value: any = track.getValue(time, this.fps);
 
     if (value === undefined) {
       value = "";
@@ -70,19 +55,13 @@ export class Anim {
       value = "[" + value + "]";
     }
 
-    const _keyframe: Keyframe = {
-      parent: track,
-      discriminator: "keyframe",
-      index: index,
-      uuid: uuidv4(),
-      value: value,
-    };
-    track.keyframes.push(_keyframe);
+    const keyframe: Keyframe = new Keyframe(track, { index, value });
+    track.keyframes.push(keyframe);
 
-    this.sortKeyframes(track);
+    track.sortKeyframes();
     this.calcTimeLength();
 
-    this.onAddKeyframe?.(_keyframe);
+    this.onAddKeyframe?.(keyframe);
 
     this.isDirty = true;
   }
@@ -117,7 +96,7 @@ export class Anim {
         }
       }
 
-      this.sortKeyframes(track);
+      track.sortKeyframes();
     });
 
     if (hasChange) {
@@ -129,20 +108,20 @@ export class Anim {
   }
 
   removeKeyframe(keyframeUUids: string[]) {
+    let hasChange = false;
+
     this.tracks.forEach((track) => {
       const keyframes = track.keyframes;
       for (let i = keyframes.length - 1; i >= 0; i--) {
         const keyframe = keyframes[i];
         if (keyframeUUids.includes(keyframe.uuid)) {
-          console.log("nono");
           keyframes.splice(i, 1);
+          hasChange = true;
         }
       }
     });
-  }
 
-  private sortKeyframes(track: Track) {
-    track.keyframes.sort((a, b) => a.index - b.index);
+    this.isDirty = hasChange;
   }
 
   private calcTimeLength() {
@@ -150,7 +129,10 @@ export class Anim {
     this.tracks.forEach((track) => {
       if (track.keyframes.length === 0) return;
       const lastKeyframe = track.keyframes[track.keyframes.length - 1];
-      const lastKeyframeTime = this.keyframeIndexToTime(lastKeyframe.index);
+      const lastKeyframeTime = keyframeIndexToTime(
+        lastKeyframe.index,
+        this.fps
+      );
       this.timeLength = Math.max(this.timeLength, lastKeyframeTime);
     });
   }
@@ -158,10 +140,12 @@ export class Anim {
   toJson(): string {
     function replacer(key: string, value: any) {
       if (
+        key === "timeLength" ||
         key === "parent" ||
         key === "uuid" ||
-        key === "discriminator" ||
-        key === "isDirty"
+        key === "isDirty" ||
+        key === "isCorrect" ||
+        key === "lastIsCorrect"
       )
         return undefined;
       else return value;
@@ -171,20 +155,15 @@ export class Anim {
 
   fromJson(text: string) {
     const json = JSON.parse(text);
-    Object.assign(this, json);
+    const { tracks, ...anim } = json;
+    Object.assign(this, anim);
 
-    this.tracks.forEach((track) => {
-      if (track.uuid === undefined) {
-        track.discriminator = "track";
-        track.uuid = uuidv4();
-      }
+    const tracksLen = tracks ? tracks.length : 0;
 
-      track.keyframes.forEach((keyframe) => {
-        keyframe.parent = track;
-        keyframe.discriminator = "keyframe";
-        keyframe.uuid = uuidv4();
-      });
-    });
+    this.tracks = new Array(tracksLen);
+    for (let i = 0; i < tracksLen; i++) {
+      this.tracks[i] = new Track(tracks[i]);
+    }
   }
 
   apply(obj: THREE.Object3D, time: number) {
@@ -196,76 +175,13 @@ export class Anim {
   private applyTrack(obj: THREE.Object3D, track: Track, time: number) {
     switch (track.attr) {
       case "position":
-        const value = this.getTrackValue(track, time);
+        console.log(track.getValue);
+        const value = track.getValue(time, this.fps);
         if (Array.isArray(value) && value.length === 3) {
           obj.position.set(value[0], value[1], value[2]);
         }
         break;
     }
-  }
-
-  keyframeIndexToTime(index: number): number {
-    return index / this.fps;
-  }
-
-  getTrackValue(
-    track: Track,
-    time: number
-  ): undefined | number | Array<number> {
-    const { keyframes } = track;
-
-    let keyA: Keyframe | undefined = undefined;
-    let keyB: Keyframe | undefined = undefined;
-    let p: number = 0;
-
-    if (keyframes.length === 0) return undefined;
-    else if (keyframes.length === 1) keyA = keyB = track.keyframes[0];
-    else if (time <= this.keyframeIndexToTime(keyframes[0].index)) {
-      keyA = keyB = keyframes[0];
-    } else if (
-      time >= this.keyframeIndexToTime(keyframes[keyframes.length - 1].index)
-    ) {
-      keyA = keyB = keyframes[keyframes.length - 1];
-    } else {
-      for (let i = 0; i < keyframes.length - 1; i++) {
-        const _keyA = keyframes[i];
-        const _keyB = keyframes[i + 1];
-        const _timeA = this.keyframeIndexToTime(_keyA.index);
-        const _timeB = this.keyframeIndexToTime(_keyB.index);
-
-        if (time >= _timeA && time < _timeB) {
-          keyA = _keyA;
-          keyB = _keyB;
-          p = inverseLerp(_timeA, _timeB, time);
-          break;
-        }
-      }
-    }
-
-    if (!keyA || !keyB) return undefined;
-
-    try {
-      const valueA = JSON.parse(keyA.value);
-      const valueB = JSON.parse(keyB.value);
-
-      if (!isNaN(valueA) && !isNaN(valueB)) {
-        return lerp(valueA, valueB, p);
-      } else if (Array.isArray(valueA) && Array.isArray(valueB)) {
-        if (
-          valueA.length === valueB.length &&
-          onlyNumbers(valueA) &&
-          onlyNumbers(valueB)
-        ) {
-          const arr = new Array<number>(valueA.length);
-          for (let i = 0; i < arr.length; i++) {
-            arr[i] = lerp(valueA[i], valueB[i], p);
-          }
-          return arr;
-        }
-      }
-    } catch (e) {}
-
-    return undefined;
   }
 
   setDirty() {

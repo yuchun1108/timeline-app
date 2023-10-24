@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
 import FrameSize from "../../global/FrameSize";
 import { AnimNode, Keyframe } from "../../three/Anim";
-import KeyframeDot from "./KeyFrame";
+import KeyframeDot from "./KeyFrameDot";
 import TimelineBG from "./TimelineBG";
 
 interface TimelineProps {
@@ -27,13 +27,13 @@ export default function Timeline(props: TimelineProps) {
       if (!isSelected) {
         keyFrameDots.push(
           <KeyframeDot
-            frameWidth={props.frameSize.width}
+            frameSize={props.frameSize}
             index={
               isSelected ? keyframe.index + props.moveOffset : keyframe.index
             }
             isSelected={isSelected}
+            keyframe={keyframe}
             key={keyframe.uuid}
-            keyframeUuid={keyframe.uuid}
           />
         );
       }
@@ -47,13 +47,13 @@ export default function Timeline(props: TimelineProps) {
       if (isSelected) {
         keyFrameDots.push(
           <KeyframeDot
-            frameWidth={props.frameSize.width}
+            frameSize={props.frameSize}
             index={
               isSelected ? keyframe.index + props.moveOffset : keyframe.index
             }
             isSelected={isSelected}
+            keyframe={keyframe}
             key={keyframe.uuid}
-            keyframeUuid={keyframe.uuid}
           />
         );
       }

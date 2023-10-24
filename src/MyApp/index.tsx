@@ -6,7 +6,7 @@ import Timebar from "../Timebar";
 import TimelineGroup from "../TimelineGroup";
 import { isArrayEqual } from "../global/Common";
 import FrameSize from "../global/FrameSize";
-import { Anim, AnimNode, Track } from "../three/Anim";
+import { Anim, AnimNode, Keyframe, Track } from "../three/Anim";
 import AnimController from "../three/AnimController";
 import World from "../three/World";
 import Controller from "./components/Controller";
@@ -123,12 +123,12 @@ export default function MyApp(props: MyAppProps) {
 
       if (selectedNodes.length === 0) return;
 
-      if (selectedNodes[0].discriminator === "track") {
+      if (selectedNodes[0] instanceof Track) {
         anim.removeTrack(selectedNodes[0].uuid);
         setTracks([...anim.tracks]);
-      } else if (selectedNodes[0].discriminator === "keyframe") {
+      } else if (selectedNodes[0] instanceof Keyframe) {
         const keyframeUuids = selectedNodes
-          .filter((node) => node.discriminator === "keyframe")
+          .filter((node) => node instanceof Keyframe)
           .map((node) => node.uuid);
 
         if (keyframeUuids.length > 0) {

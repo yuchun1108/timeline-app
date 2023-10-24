@@ -48,8 +48,9 @@ export default function Inspector(props: InspectorProps) {
     element = <></>;
   } else {
     const firstNode = selectedNodes[0];
-    if (firstNode.discriminator === "track") {
-      const track = firstNode as Track;
+
+    if (firstNode instanceof Track) {
+      const track: Track = firstNode;
       element = (
         <>
           <div className="select-type">Track</div>
@@ -67,8 +68,8 @@ export default function Inspector(props: InspectorProps) {
         </>
       );
     }
-    if (firstNode.discriminator === "keyframe") {
-      const keyframe = firstNode as Keyframe;
+    if (firstNode instanceof Keyframe) {
+      const keyframe: Keyframe = firstNode;
       element = (
         <>
           <div className="select-type">Keyframe</div>
@@ -78,7 +79,7 @@ export default function Inspector(props: InspectorProps) {
               type="text"
               defaultValue={keyframe.value}
               onChange={(e: any) => {
-                keyframe.value = e.target.value;
+                keyframe.setValue(e.target.value);
                 props.anim?.setDirty();
               }}
             />

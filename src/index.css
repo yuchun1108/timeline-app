@@ -99,6 +99,14 @@ body {
   background-color: blue;
 }
 
+.keyframe.incorrect {
+  background-color: pink;
+}
+
+.keyframe.selected.incorrect {
+  background-color: red;
+}
+
 .time-pos {
   position: absolute;
   top: 0;
