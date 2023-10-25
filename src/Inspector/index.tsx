@@ -44,10 +44,18 @@ export default function Inspector(props: InspectorProps) {
         <div className="select-type">Track</div>
 
         <label>
+          Target
+          <input
+            type="text"
+            defaultValue={track.targetText}
+            onChange={(e: any) => {
+              track.setTargetText(e.target.value);
+            }}
+          />
+        </label>
+
+        <label>
           Attr
-          <select>
-            <option>position</option>
-          </select>
           <input
             type="text"
             defaultValue={track.attr}

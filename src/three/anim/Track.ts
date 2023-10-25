@@ -7,9 +7,12 @@ import { Keyframe } from "./Keyframe";
 
 export class Track implements AnimNode {
   uuid: string;
+  targetText: string = "";
+  targetPath: string[] = [""];
   attr: string = "";
   keyframes: Keyframe[] = [];
   _isDirty: boolean = false;
+  onChange: (() => void) | undefined;
 
   constructor(attrs: any = {}) {
     const { keyframes, ...track } = attrs;
@@ -22,6 +25,26 @@ export class Track implements AnimNode {
     for (let i = 0; i < keyframesLen; i++) {
       this.keyframes[i] = new Keyframe(this, keyframes[i]);
     }
+
+    this.parseTargetPath();
+  }
+
+  setTargetText(target: string) {
+    this.targetText = target;
+
+    this.parseTargetPath();
+    console.log(this.targetText, this.targetPath);
+    this.onChange?.();
+    this.markDirty();
+  }
+
+  parseTargetPath() {
+    let target = this.targetText.trim();
+    if (target.startsWith(".")) {
+      target = target.slice(1);
+    }
+
+    this.targetPath = target.split(".");
   }
 
   setAttr(attr: string) {
@@ -29,6 +52,7 @@ export class Track implements AnimNode {
     this.keyframes.forEach((keyframe) => {
       keyframe.parseValues();
     });
+    this.onChange?.();
     this.markDirty();
   }
 
@@ -37,6 +61,22 @@ export class Track implements AnimNode {
   }
 
   apply(obj: THREE.Object3D, time: number, fps: number) {
+    let target: THREE.Object3D | undefined = obj;
+
+    if (this.targetPath.length === 0 || this.targetPath[0] === "") {
+      target = obj;
+    } else {
+      for (let i = 0; i < this.targetPath.length; i++) {
+        if (!target) break;
+        target = target.children.find(
+          (child) => child.name === this.targetPath[i]
+        );
+        if (!target) break;
+      }
+
+      if (!target) return;
+    }
+
     const values = this.getValues(time, fps);
     if (values === undefined) return;
 
@@ -45,66 +85,66 @@ export class Track implements AnimNode {
 
     switch (this.attr) {
       case "position":
-        obj.position.set(values[0], values[1], values[2]);
+        target.position.set(values[0], values[1], values[2]);
         break;
       case "position-x":
-        obj.position.setX(values[0]);
+        target.position.setX(values[0]);
         break;
       case "position-y":
-        obj.position.setY(values[0]);
+        target.position.setY(values[0]);
         break;
       case "position-z":
-        obj.position.setZ(values[0]);
+        target.position.setZ(values[0]);
         break;
       case "position-xy":
-        obj.position.setX(values[0]).setY(values[1]);
+        target.position.setX(values[0]).setY(values[1]);
         break;
       case "position-yz":
-        obj.position.setY(values[0]).setZ(values[1]);
+        target.position.setY(values[0]).setZ(values[1]);
         break;
       case "position-xz":
-        obj.position.setX(values[0]).setZ(values[1]);
+        target.position.setX(values[0]).setZ(values[1]);
         break;
       case "scale-xyz":
-        obj.scale.set(values[0], values[1], values[2]);
+        target.scale.set(values[0], values[1], values[2]);
         break;
       case "scale":
-        obj.scale.set(values[0], values[0], values[0]);
+        target.scale.set(values[0], values[0], values[0]);
         break;
       case "scale-x":
-        obj.scale.setX(values[0]);
+        target.scale.setX(values[0]);
         break;
       case "scale-y":
-        obj.scale.setY(values[0]);
+        target.scale.setY(values[0]);
         break;
       case "scale-z":
-        obj.scale.setZ(values[0]);
+        target.scale.setZ(values[0]);
         break;
       case "rotation":
-        obj.rotation.set(
+        target.rotation.set(
           (values[0] / 180) * Math.PI,
           (values[1] / 180) * Math.PI,
           (values[2] / 180) * Math.PI
         );
         break;
       case "rotation-x":
-        obj.rotation.set(
+        target.rotation.set(
           (values[0] / 180) * Math.PI,
-          obj.rotation.y,
-          obj.rotation.z
+          target.rotation.y,
+          target.rotation.z
         );
         break;
       case "rotation-y":
-        obj.rotation.set(
-          obj.rotation.x,
+        target.rotation.set(
+          target.rotation.x,
           (values[0] / 180) * Math.PI,
-          obj.rotation.z
+          target.rotation.z
         );
         break;
       case "rotation-z":
-        obj.rotation.set(
-          obj.rotation.x,
-          obj.rotation.y,
+        target.rotation.set(
+          target.rotation.x,
+          target.rotation.y,
           (values[0] / 180) * Math.PI
         );
         break;
@@ -169,6 +209,7 @@ export class Track implements AnimNode {
 
   toAttrs() {
     return {
+      targetText: this.targetText,
       attr: this.attr,
       keyframes: this.keyframes.map((keyframe) => keyframe.toAttrs()),
     };

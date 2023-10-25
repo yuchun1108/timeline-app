@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ScrollSyncPane } from "react-scroll-sync";
-import FrameSize from "../global/FrameSize";
+import FrameSize, { drawTimelineFrame } from "../global/FrameSize";
 import AnimController from "../three/anim/AnimController";
 
 interface TimebarProps {
@@ -28,7 +28,7 @@ export default function Timebar(props: TimebarProps) {
     setAnimTime(animTime);
   }
 
-  const refresh = useCallback(() => {
+  useEffect(() => {
     if (
       frameCount.current === props.frameSize.count &&
       frameWidth.current === props.frameSize.width
@@ -41,23 +41,9 @@ export default function Timebar(props: TimebarProps) {
       canvas.width = width;
       canvas.height = props.height;
       const context: CanvasRenderingContext2D | null = canvas.getContext("2d");
-      if (context) {
-        context.beginPath();
-        for (let i = 0; i < props.frameSize.count; i++) {
-          const posX = Math.round((i + 0.5) * props.frameSize.width);
-          context.moveTo(posX, 0);
-          context.lineTo(posX, props.height);
-        }
-        context.closePath();
-        context.stroke();
-      }
+      if (context) drawTimelineFrame(context, props.frameSize, props.height);
     }
   }, [props.frameSize, props.height]);
-
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
-  refresh();
 
   const isMouseDown = useRef(false);
   const [animTime, setAnimTime] = useState(0);
