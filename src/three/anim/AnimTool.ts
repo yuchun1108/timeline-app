@@ -21,8 +21,25 @@ export function isNumArray(value: any, len: number = -1): boolean {
 export function getAttrNeedValueCount(attr: string): number {
   switch (attr) {
     case "position":
+    case "scale-xyz":
+    case "rotation":
       return 3;
-    default:
+    case "position-xy":
+    case "position-yz":
+    case "position-xz":
+      return 2;
+    case "position-x":
+    case "position-y":
+    case "position-z":
+    case "scale-x":
+    case "scale-y":
+    case "scale-z":
+    case "rotation-x":
+    case "rotation-y":
+    case "rotation-z":
+    case "scale":
       return 1;
+    default:
+      return 0;
   }
 }

@@ -1,7 +1,8 @@
 import { inverseLerp, lerp } from "three/src/math/MathUtils";
 import { v4 as uuidv4 } from "uuid";
 import { AnimNode } from "./AnimNode";
-import { keyframeIndexToTime } from "./AnimTool";
+import { getAttrNeedValueCount, keyframeIndexToTime } from "./AnimTool";
+import getEaseFunc from "./EaseFunc";
 import { Keyframe } from "./Keyframe";
 
 export class Track implements AnimNode {
@@ -23,22 +24,94 @@ export class Track implements AnimNode {
     }
   }
 
+  setAttr(attr: string) {
+    this.attr = attr;
+    this.keyframes.forEach((keyframe) => {
+      keyframe.parseValues();
+    });
+    this.markDirty();
+  }
+
   sortKeyframes() {
     this.keyframes.sort((a, b) => a.index - b.index);
   }
 
   apply(obj: THREE.Object3D, time: number, fps: number) {
+    const values = this.getValues(time, fps);
+    if (values === undefined) return;
+
+    const needValueCount = getAttrNeedValueCount(this.attr);
+    if (needValueCount === 0 || values.length !== needValueCount) return;
+
     switch (this.attr) {
       case "position":
-        const value = this.getValue(time, fps);
-        if (Array.isArray(value) && value.length === 3) {
-          obj.position.set(value[0], value[1], value[2]);
-        }
+        obj.position.set(values[0], values[1], values[2]);
+        break;
+      case "position-x":
+        obj.position.setX(values[0]);
+        break;
+      case "position-y":
+        obj.position.setY(values[0]);
+        break;
+      case "position-z":
+        obj.position.setZ(values[0]);
+        break;
+      case "position-xy":
+        obj.position.setX(values[0]).setY(values[1]);
+        break;
+      case "position-yz":
+        obj.position.setY(values[0]).setZ(values[1]);
+        break;
+      case "position-xz":
+        obj.position.setX(values[0]).setZ(values[1]);
+        break;
+      case "scale-xyz":
+        obj.scale.set(values[0], values[1], values[2]);
+        break;
+      case "scale":
+        obj.scale.set(values[0], values[0], values[0]);
+        break;
+      case "scale-x":
+        obj.scale.setX(values[0]);
+        break;
+      case "scale-y":
+        obj.scale.setY(values[0]);
+        break;
+      case "scale-z":
+        obj.scale.setZ(values[0]);
+        break;
+      case "rotation":
+        obj.rotation.set(
+          (values[0] / 180) * Math.PI,
+          (values[1] / 180) * Math.PI,
+          (values[2] / 180) * Math.PI
+        );
+        break;
+      case "rotation-x":
+        obj.rotation.set(
+          (values[0] / 180) * Math.PI,
+          obj.rotation.y,
+          obj.rotation.z
+        );
+        break;
+      case "rotation-y":
+        obj.rotation.set(
+          obj.rotation.x,
+          (values[0] / 180) * Math.PI,
+          obj.rotation.z
+        );
+        break;
+      case "rotation-z":
+        obj.rotation.set(
+          obj.rotation.x,
+          obj.rotation.y,
+          (values[0] / 180) * Math.PI
+        );
         break;
     }
   }
 
-  getValue(time: number, fps: number): number[] | undefined {
+  getValues(time: number, fps: number): number[] | undefined {
     const keyframes = this.keyframes;
     let keyA: Keyframe | undefined = undefined;
     let keyB: Keyframe | undefined = undefined;
@@ -72,8 +145,18 @@ export class Track implements AnimNode {
 
     if (!keyA || !keyB) return undefined;
     if (!keyA.values || !keyB.values) return undefined;
+    if (keyA === keyB) return keyA.values;
 
     if (keyA.values.length === keyB.values.length) {
+      let _easeFunc = getEaseFunc("linear");
+      if (keyA.easeName !== "" && keyA.easeName !== "linear") {
+        _easeFunc = getEaseFunc(keyA.easeName + "_" + keyA.easeEnd);
+      }
+
+      if (_easeFunc !== undefined) {
+        p = _easeFunc(p);
+      }
+
       const arr = new Array<number>(keyA.values.length);
       for (let i = 0; i < arr.length; i++) {
         arr[i] = lerp(keyA.values[i], keyB.values[i], p);

@@ -15,91 +15,93 @@ function exportAnim(anim: Anim) {
 
 export default function Inspector(props: InspectorProps) {
   const { selectedNodes } = props;
-  let element: ReactNode;
 
-  const [ease, setEase] = useState<string>(
-    props.selectedNodes.length > 0 && props.selectedNodes[0] instanceof Keyframe
-      ? props.selectedNodes[0].easeName
-      : ""
-  );
+  const track =
+    selectedNodes.length > 0 && selectedNodes[0] instanceof Track
+      ? selectedNodes[0]
+      : undefined;
+
+  const keyframe =
+    selectedNodes.length > 0 && selectedNodes[0] instanceof Keyframe
+      ? selectedNodes[0]
+      : undefined;
+
+  const [ease, setEase] = useState<string>(keyframe ? keyframe.easeName : "");
 
   function onEaseChange(e: any) {
-    // console.log(e.target.value);
     setEase(e.target.value);
+    keyframe?.setEaseName(e.target.value);
   }
 
   function onInOutChange(e: any) {
-    console.log(e.target.value);
+    keyframe?.setEaseEnd(e.target.value);
   }
 
-  if (selectedNodes.length === 0) {
-    element = <></>;
+  let element: ReactNode;
+  if (track) {
+    element = (
+      <>
+        <div className="select-type">Track</div>
+
+        <label>
+          Attr
+          <select>
+            <option>position</option>
+          </select>
+          <input
+            type="text"
+            defaultValue={track.attr}
+            onChange={(e: any) => {
+              track.setAttr(e.target.value);
+            }}
+          />
+        </label>
+      </>
+    );
+  } else if (keyframe) {
+    element = (
+      <>
+        <div className="select-type">Keyframe</div>
+        <label>
+          Value
+          <input
+            type="text"
+            defaultValue={keyframe.text}
+            onChange={(e: any) => {
+              keyframe.setText(e.target.value);
+            }}
+          />
+        </label>
+
+        <label>
+          Easing
+          <select defaultValue={keyframe.easeName} onChange={onEaseChange}>
+            <option value="linear">linear</option>
+            <option value="quad">quad</option>
+            <option value="qubic">qubic</option>
+            <option value="quart">quart</option>
+            <option value="quint">quint</option>
+            <option value="sine">sine</option>
+            <option value="expo">expo</option>
+            <option value="circ">circ</option>
+            <option value="back">back</option>
+            <option value="elastic">elastic</option>
+            <option value="bounce">bounce</option>
+          </select>
+          <select
+            defaultValue={keyframe.easeEnd}
+            onChange={onInOutChange}
+            disabled={ease === "" || ease === "linear"}
+          >
+            <option value="in">in</option>
+            <option value="out">out</option>
+            <option value="inout">in-out</option>
+          </select>
+        </label>
+      </>
+    );
   } else {
-    const firstNode = selectedNodes[0];
-
-    if (firstNode instanceof Track) {
-      const track: Track = firstNode;
-      element = (
-        <>
-          <div className="select-type">Track</div>
-
-          <label>
-            Attr
-            <input
-              type="text"
-              defaultValue={track.attr}
-              onChange={(e: any) => {
-                track.attr = e.target.value;
-              }}
-            />
-          </label>
-        </>
-      );
-    }
-    if (firstNode instanceof Keyframe) {
-      const keyframe: Keyframe = firstNode;
-      element = (
-        <>
-          <div className="select-type">Keyframe</div>
-          <label>
-            Value
-            <input
-              type="text"
-              defaultValue={keyframe.text}
-              onChange={(e: any) => {
-                keyframe.setText(e.target.value);
-              }}
-            />
-          </label>
-
-          <label>
-            Easing
-            <select defaultValue={keyframe.easeName} onChange={onEaseChange}>
-              <option value="linear">Linear</option>
-              <option value="quad">Quad</option>
-              <option value="qubic">Qubic</option>
-              <option value="quart">Quart</option>
-              <option value="quint">Quint</option>
-              <option value="sine">Sine</option>
-              <option value="expo">Expo</option>
-              <option value="circ">Circ</option>
-              <option value="back">Back</option>
-              <option value="elastic">Elastic</option>
-              <option value="bounce">Bounce</option>
-            </select>
-            <select
-              defaultValue={keyframe.easeEnd}
-              onChange={onInOutChange}
-              disabled={ease === "" || ease === "linear"}
-            >
-              <option value="in">In</option>
-              <option value="out">Out</option>
-              <option value="inout">InOut</option>
-            </select>
-          </label>
-        </>
-      );
-    }
+    element = <></>;
   }
 
   return (

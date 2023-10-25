@@ -43,7 +43,7 @@ export class Anim {
 
     const time = keyframeIndexToTime(index, this.fps);
     let text = "";
-    let values: number[] | undefined = track.getValue(time, this.fps);
+    let values: number[] | undefined = track.getValues(time, this.fps);
 
     if (values === undefined || values.length === 0) {
       text = "";

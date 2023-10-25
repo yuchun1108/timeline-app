@@ -1,4 +1,4 @@
-const easeFunc = {
+const easeFunc: { [funcName: string]: (x: number) => number } = {
   linear: function (x: number): number {
     return x;
   },
@@ -160,4 +160,10 @@ const easeFunc = {
   },
 };
 
-export default easeFunc;
+export default function getEaseFunc(
+  funcName: string
+): ((x: number) => number) | undefined {
+  return easeFunc[funcName];
+}
+
+// export default easeFunc;

@@ -1,11 +1,17 @@
 export const globalVar = {};
 
-export function isArrayEqual(a: any[], b: any): boolean {
-  if (a.length !== b.length) return false;
-  for (let i = 0; i < a.length; i++) {
-    if (a[i] !== b[i]) return false;
-  }
-  return true;
+export function isArrayEqual(
+  a: any[] | undefined,
+  b: any[] | undefined
+): boolean {
+  if (a && b) {
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+      if (a[i] !== b[i]) return false;
+    }
+    return true;
+  } else if (!a && !b) return true;
+  return false;
 }
 
 export function printToNewTab(str: string) {
