@@ -10,7 +10,9 @@ export class Keyframe implements AnimNode {
 
   text: string = "";
   values: number[] | undefined = undefined;
-  ease: string = "";
+  easeName: string = "linear";
+  easeEnd: string = "in";
+  private _isDirty: boolean = false;
   onValuesChange: ((values: number[] | undefined) => void) | undefined;
 
   constructor(parent: Track, attrs: any = {}) {
@@ -18,23 +20,14 @@ export class Keyframe implements AnimNode {
     this.uuid = uuidv4();
     this.parent = parent;
     this.parseValues();
-    // this.lastIsCorrect = this.isCorrect = this.checkIsCorrect();
   }
 
   setText(text: string) {
     this.text = text;
     this.parseValues();
     this.onValuesChange?.(this.values);
+    this.markDirty();
   }
-
-  // setValue(value: string) {
-  //   this.value = value;
-  //   this.isCorrect = this.checkIsCorrect();
-  //   if (this.lastIsCorrect !== this.isCorrect) {
-  //     this.onIsCorrectChange?.(this.isCorrect);
-  //     this.lastIsCorrect = this.isCorrect;
-  //   }
-  // }
 
   parseValues() {
     const needValueCount = getAttrNeedValueCount(this.parent.attr);
@@ -46,5 +39,26 @@ export class Keyframe implements AnimNode {
         this.values = undefined;
       }
     } catch (e) {}
+  }
+
+  toAttrs() {
+    return {
+      index: this.index,
+      easeName: this.easeName,
+      easeEnd: this.easeEnd,
+      text: this.text,
+    };
+  }
+
+  markDirty() {
+    this._isDirty = true;
+  }
+
+  isDirty() {
+    return this._isDirty;
+  }
+
+  cleanDirty() {
+    this._isDirty = false;
   }
 }

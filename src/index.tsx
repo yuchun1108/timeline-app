@@ -53,3 +53,6 @@ loader.load("Box.fbx", function (object) {
 
   loadWorldAnim(world);
 });
+
+// easeFunc["a"]?.(a);
+// easeFunc["b"]();

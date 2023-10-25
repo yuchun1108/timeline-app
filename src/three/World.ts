@@ -81,8 +81,10 @@ export default class World {
     this.scene.traverse((obj) => {
       if (obj.entity) {
         const anim = obj.entity.animController.anim;
-        if (anim.isDirty) isDirty = true;
-        anim.isDirty = false;
+        if (anim.isDirty()) {
+          isDirty = true;
+          anim.cleanDirty();
+        }
       }
     });
 

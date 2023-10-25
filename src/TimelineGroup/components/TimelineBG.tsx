@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import FrameSize from "../../global/FrameSize";
 
 interface TimelineBGProps {
@@ -13,7 +13,7 @@ export default function TimelineBG(props: TimelineBGProps) {
   const frameCount = useRef(0);
   const frameWidth = useRef(0);
 
-  function refresh() {
+  const refresh = useCallback(() => {
     if (
       frameCount.current === props.frameSize.count &&
       frameWidth.current === props.frameSize.width
@@ -37,11 +37,11 @@ export default function TimelineBG(props: TimelineBGProps) {
         context.stroke();
       }
     }
-  }
+  }, [props.frameSize]);
 
   useEffect(() => {
     refresh();
-  }, []);
+  }, [refresh]);
   refresh();
 
   function onDragStart(e: any) {

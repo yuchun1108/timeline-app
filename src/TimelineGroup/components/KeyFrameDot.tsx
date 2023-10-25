@@ -26,7 +26,7 @@ export default function KeyframeDot(props: KeyframeProps) {
     return () => {
       props.keyframe.onValuesChange = undefined;
     };
-  }, []);
+  }, [props.keyframe]);
 
   function onDragStart(e: any) {
     e.preventDefault();

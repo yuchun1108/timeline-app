@@ -12,7 +12,7 @@ export class Anim {
   fps: number = 30;
   tracks: Track[];
   timeLength: number = 0;
-  isDirty: boolean = false;
+  private _isDirty: boolean = false;
 
   onAddKeyframe: ((keyframe: Keyframe) => void) | undefined;
 
@@ -23,7 +23,7 @@ export class Anim {
   addTrack(): void {
     const track = new Track({ attr: "position" });
     this.tracks.push(track);
-    this.isDirty = true;
+    this._isDirty = true;
   }
 
   removeTrack(trackUuid: string): void {
@@ -64,7 +64,7 @@ export class Anim {
 
     this.onAddKeyframe?.(keyframe);
 
-    this.isDirty = true;
+    this._isDirty = true;
   }
 
   moveKeyFrame(nodes: AnimNode[], offset: number): boolean {
@@ -102,7 +102,7 @@ export class Anim {
 
     if (hasChange) {
       this.calcTimeLength();
-      this.isDirty = true;
+      this._isDirty = true;
     }
 
     return hasChange;
@@ -122,7 +122,7 @@ export class Anim {
       }
     });
 
-    this.isDirty = hasChange;
+    this._isDirty = hasChange;
   }
 
   private calcTimeLength() {
@@ -139,19 +139,11 @@ export class Anim {
   }
 
   toJson(): string {
-    function replacer(key: string, value: any) {
-      if (
-        key === "timeLength" ||
-        key === "parent" ||
-        key === "uuid" ||
-        key === "isDirty" ||
-        key === "isCorrect" ||
-        key === "lastIsCorrect"
-      )
-        return undefined;
-      else return value;
-    }
-    return JSON.stringify(this, replacer, "\t");
+    const attrs = {
+      fps: this.fps,
+      tracks: this.tracks.map((track) => track.toAttrs()),
+    };
+    return JSON.stringify(attrs, null, "\t");
   }
 
   fromJson(text: string) {
@@ -176,7 +168,16 @@ export class Anim {
     });
   }
 
-  setDirty() {
-    this.isDirty = true;
+  markDirty() {
+    this._isDirty = true;
+  }
+
+  isDirty() {
+    return this._isDirty || !this.tracks.every((track) => !track.isDirty());
+  }
+
+  cleanDirty() {
+    this._isDirty = false;
+    this.tracks.forEach((track) => track.cleanDirty());
   }
 }

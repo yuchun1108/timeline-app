@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ScrollSyncPane } from "react-scroll-sync";
 import FrameSize from "../global/FrameSize";
 import AnimController from "../three/anim/AnimController";
@@ -28,7 +28,7 @@ export default function Timebar(props: TimebarProps) {
     setAnimTime(animTime);
   }
 
-  function refresh() {
+  const refresh = useCallback(() => {
     if (
       frameCount.current === props.frameSize.count &&
       frameWidth.current === props.frameSize.width
@@ -52,11 +52,11 @@ export default function Timebar(props: TimebarProps) {
         context.stroke();
       }
     }
-  }
+  }, [props.frameSize, props.height]);
 
   useEffect(() => {
     refresh();
-  }, []);
+  }, [refresh]);
   refresh();
 
   const isMouseDown = useRef(false);

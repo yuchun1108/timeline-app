@@ -1,4 +1,11 @@
-import { ReactNode, useEffect, useReducer, useRef, useState } from "react";
+import {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 import { ScrollSyncPane } from "react-scroll-sync";
 import FrameSize from "../global/FrameSize";
 import { Anim, AnimNode, Track } from "../three/anim/Anim";
@@ -24,6 +31,7 @@ interface MarqueePos {
 }
 
 export default function TimelineGroup(props: TimelineGroupProps) {
+  const { tracks, onKeyframeSelect } = props;
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
   const [moveOffset, setMoveOffset] = useState(0);
@@ -45,29 +53,29 @@ export default function TimelineGroup(props: TimelineGroupProps) {
     frameIndex: 0,
   });
 
-  function getMarqueeTrackIndexMin() {
+  const getMarqueeTrackIndexMin = useCallback(() => {
     return isMarqueeMaking.current
       ? Math.min(beginMarqueePos.current.trackIndex, endMarqueePos.trackIndex)
       : 0;
-  }
+  }, [endMarqueePos]);
 
-  function getMarqueeTrackIndexMax() {
+  const getMarqueeTrackIndexMax = useCallback(() => {
     return isMarqueeMaking.current
       ? Math.max(beginMarqueePos.current.trackIndex, endMarqueePos.trackIndex)
       : 0;
-  }
+  }, [endMarqueePos]);
 
-  function getMarqueeFrameIndexMin() {
+  const getMarqueeFrameIndexMin = useCallback(() => {
     return isMarqueeMaking.current
       ? Math.min(beginMarqueePos.current.frameIndex, endMarqueePos.frameIndex)
       : 0;
-  }
+  }, [endMarqueePos]);
 
-  function getMarqueeFrameIndexMax() {
+  const getMarqueeFrameIndexMax = useCallback(() => {
     return isMarqueeMaking.current
       ? Math.max(beginMarqueePos.current.frameIndex, endMarqueePos.frameIndex)
       : 0;
-  }
+  }, [endMarqueePos]);
 
   function getFrameIndex(posX: number) {
     const frameWidth = props.frameSize.width;
@@ -82,7 +90,7 @@ export default function TimelineGroup(props: TimelineGroupProps) {
       const frameIndex = getFrameIndex(posX);
       currMoveIndex.current = beginMoveIndex.current = frameIndex;
 
-      const track = props.tracks?.find((track) => track.uuid === trackUuid);
+      const track = tracks?.find((track) => track.uuid === trackUuid);
       if (track) {
         isMarqueeMaking.current = true;
         beginMarqueePos.current = {
@@ -147,23 +155,31 @@ export default function TimelineGroup(props: TimelineGroupProps) {
   }
 
   useEffect(() => {
-    if (!props.tracks) return;
+    if (!tracks) return;
 
     const _trackUuids: string[] = [];
 
-    for (let i = 0; i < props.tracks.length; i++) {
+    for (let i = 0; i < tracks.length; i++) {
       if (i >= getMarqueeTrackIndexMin() && i <= getMarqueeTrackIndexMax()) {
-        const _track = props.tracks[i];
+        const _track = tracks[i];
         _trackUuids.push(_track.uuid);
       }
     }
 
-    props.onKeyframeSelect(
+    onKeyframeSelect(
       _trackUuids,
       getMarqueeFrameIndexMin(),
       getMarqueeFrameIndexMax()
     );
-  }, [endMarqueePos]);
+  }, [
+    tracks,
+    onKeyframeSelect,
+    endMarqueePos,
+    getMarqueeTrackIndexMin,
+    getMarqueeTrackIndexMax,
+    getMarqueeFrameIndexMin,
+    getMarqueeFrameIndexMax,
+  ]);
 
   function onMouseUp(e: any) {
     // if (
@@ -219,9 +235,9 @@ export default function TimelineGroup(props: TimelineGroupProps) {
 
   const timelines: ReactNode[] = [];
 
-  if (props.tracks) {
-    for (let i = 0; i < props.tracks.length; i++) {
-      const track = props.tracks[i];
+  if (tracks) {
+    for (let i = 0; i < tracks.length; i++) {
+      const track = tracks[i];
       timelines.push(
         <Timeline
           frameSize={props.frameSize}

@@ -14,10 +14,10 @@ interface Option {
 }
 
 export default function ModelSelector(props: ModelSelectorProps) {
+  const { world } = props;
   const [options, setOptions] = useState<Option[]>([]);
 
   useEffect(() => {
-    const { world } = props;
     world.onHierarchyChange.push(() => {
       const objs = world.getAllObjects();
       setOptions(
@@ -28,7 +28,7 @@ export default function ModelSelector(props: ModelSelectorProps) {
         }))
       );
     });
-  }, []);
+  }, [world]);
 
   function onOptionSelect(e: any) {
     props.onObjectSelect(Number(e.target.value));

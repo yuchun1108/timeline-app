@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ScrollSync } from "react-scroll-sync";
 import Inspector from "../Inspector";
 import ModelSelector from "../ModelSelector";
@@ -17,6 +17,7 @@ interface MyAppProps {
 }
 
 export default function MyApp(props: MyAppProps) {
+  const { world } = props;
   const [animController, setAnimController] = useState<
     AnimController | undefined
   >(undefined);
@@ -33,11 +34,7 @@ export default function MyApp(props: MyAppProps) {
     fps: 24,
   });
 
-  const [scrollLeft, setScrollLeft] = useState(0);
-  const scrollRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
-    const { world } = props;
     world.onHierarchyChange.push(() => {
       const objs = world.getAllObjects();
       if (objs.length > 0) {
@@ -45,7 +42,7 @@ export default function MyApp(props: MyAppProps) {
         setAnim(objs[0].entity?.animController.anim);
       }
     });
-  }, []);
+  }, [world]);
 
   useEffect(() => {
     if (anim) {
@@ -69,7 +66,7 @@ export default function MyApp(props: MyAppProps) {
   }
 
   function onObjectSelect(objId: number) {
-    const obj = props.world.scene.getObjectById(objId);
+    const obj = world.scene.getObjectById(objId);
 
     setAnimController(obj?.entity?.animController);
     setAnim(obj?.entity?.animController.anim);
@@ -79,36 +76,35 @@ export default function MyApp(props: MyAppProps) {
     setSelectedNodes([track]);
   }
 
-  function onKeyframeSelect(
-    trackUuids: string[],
-    frameIndexMin: number,
-    frameIndexMax: number
-  ) {
-    if (!anim) return;
+  const onKeyframeSelect = useCallback(
+    (trackUuids: string[], frameIndexMin: number, frameIndexMax: number) => {
+      if (!anim) return;
 
-    const _selectedNodes: AnimNode[] = [];
+      const _selectedNodes: AnimNode[] = [];
 
-    for (let i = 0; i < anim.tracks.length; i++) {
-      const track = anim.tracks[i];
-      if (trackUuids.includes(track.uuid)) {
-        for (let j = 0; j < track.keyframes.length; j++) {
-          const keyframe = track.keyframes[j];
-          if (
-            keyframe.index >= frameIndexMin &&
-            keyframe.index <= frameIndexMax
-          ) {
-            _selectedNodes.push(keyframe);
+      for (let i = 0; i < anim.tracks.length; i++) {
+        const track = anim.tracks[i];
+        if (trackUuids.includes(track.uuid)) {
+          for (let j = 0; j < track.keyframes.length; j++) {
+            const keyframe = track.keyframes[j];
+            if (
+              keyframe.index >= frameIndexMin &&
+              keyframe.index <= frameIndexMax
+            ) {
+              _selectedNodes.push(keyframe);
+            }
           }
         }
       }
-    }
-    setSelectedNodes((prev) => {
-      if (isArrayEqual(prev, _selectedNodes)) {
-        return prev;
-      }
-      return _selectedNodes;
-    });
-  }
+      setSelectedNodes((prev) => {
+        if (isArrayEqual(prev, _selectedNodes)) {
+          return prev;
+        }
+        return _selectedNodes;
+      });
+    },
+    [anim]
+  );
 
   function onAddTrack() {
     if (anim) {
@@ -117,34 +113,37 @@ export default function MyApp(props: MyAppProps) {
     }
   }
 
-  function onKeyDown(e: any) {
-    if (e.code === "Delete") {
-      if (anim === undefined) return;
+  const onKeyDown = useCallback(
+    (e: any) => {
+      if (e.code === "Delete") {
+        if (anim === undefined) return;
 
-      if (selectedNodes.length === 0) return;
+        if (selectedNodes.length === 0) return;
 
-      if (selectedNodes[0] instanceof Track) {
-        anim.removeTrack(selectedNodes[0].uuid);
-        setTracks([...anim.tracks]);
-      } else if (selectedNodes[0] instanceof Keyframe) {
-        const keyframeUuids = selectedNodes
-          .filter((node) => node instanceof Keyframe)
-          .map((node) => node.uuid);
+        if (selectedNodes[0] instanceof Track) {
+          anim.removeTrack(selectedNodes[0].uuid);
+          setTracks([...anim.tracks]);
+        } else if (selectedNodes[0] instanceof Keyframe) {
+          const keyframeUuids = selectedNodes
+            .filter((node) => node instanceof Keyframe)
+            .map((node) => node.uuid);
 
-        if (keyframeUuids.length > 0) {
-          anim.removeKeyframe(keyframeUuids);
-          setSelectedNodes([]);
+          if (keyframeUuids.length > 0) {
+            anim.removeKeyframe(keyframeUuids);
+            setSelectedNodes([]);
+          }
         }
       }
-    }
-  }
+    },
+    [anim, selectedNodes]
+  );
 
   useEffect(() => {
     window.addEventListener("keydown", onKeyDown, true);
     return () => {
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [anim, selectedNodes]);
+  }, [onKeyDown]);
 
   const timelineHeight = 20;
 
@@ -178,7 +177,7 @@ export default function MyApp(props: MyAppProps) {
         />
 
         <ModelSelector
-          world={props.world}
+          world={world}
           onObjectSelect={onObjectSelect}
           onAddTrack={onAddTrack}
         />
@@ -204,7 +203,7 @@ export default function MyApp(props: MyAppProps) {
         />
 
         <Inspector
-          world={props.world}
+          world={world}
           anim={anim}
           selectedNodes={selectedNodes}
           key={selectedNodes.length > 0 ? selectedNodes[0].uuid : "empty"}

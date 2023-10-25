@@ -8,6 +8,7 @@ export class Track implements AnimNode {
   uuid: string;
   attr: string = "";
   keyframes: Keyframe[] = [];
+  _isDirty: boolean = false;
 
   constructor(attrs: any = {}) {
     const { keyframes, ...track } = attrs;
@@ -81,5 +82,27 @@ export class Track implements AnimNode {
     }
 
     return undefined;
+  }
+
+  toAttrs() {
+    return {
+      attr: this.attr,
+      keyframes: this.keyframes.map((keyframe) => keyframe.toAttrs()),
+    };
+  }
+
+  markDirty() {
+    this._isDirty = true;
+  }
+
+  isDirty() {
+    return (
+      this._isDirty || !this.keyframes.every((keyframe) => !keyframe.isDirty())
+    );
+  }
+
+  cleanDirty() {
+    this._isDirty = false;
+    this.keyframes.forEach((keyframe) => keyframe.cleanDirty());
   }
 }

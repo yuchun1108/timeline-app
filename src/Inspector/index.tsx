@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { printToNewTab } from "../global/Common";
 import { saveWorldAnim } from "../global/Storage";
 import World from "../three/World";
@@ -17,8 +17,15 @@ export default function Inspector(props: InspectorProps) {
   const { selectedNodes } = props;
   let element: ReactNode;
 
+  const [ease, setEase] = useState<string>(
+    props.selectedNodes.length > 0 && props.selectedNodes[0] instanceof Keyframe
+      ? props.selectedNodes[0].easeName
+      : ""
+  );
+
   function onEaseChange(e: any) {
-    console.log(e.target.value);
+    // console.log(e.target.value);
+    setEase(e.target.value);
   }
 
   function onInOutChange(e: any) {
@@ -61,29 +68,33 @@ export default function Inspector(props: InspectorProps) {
               defaultValue={keyframe.text}
               onChange={(e: any) => {
                 keyframe.setText(e.target.value);
-                props.anim?.setDirty();
               }}
             />
           </label>
 
           <label>
             Easing
-            <select onChange={onEaseChange}>
+            <select defaultValue={keyframe.easeName} onChange={onEaseChange}>
               <option value="linear">Linear</option>
               <option value="quad">Quad</option>
               <option value="qubic">Qubic</option>
               <option value="quart">Quart</option>
               <option value="quint">Quint</option>
+              <option value="sine">Sine</option>
               <option value="expo">Expo</option>
               <option value="circ">Circ</option>
               <option value="back">Back</option>
               <option value="elastic">Elastic</option>
               <option value="bounce">Bounce</option>
             </select>
-            <select onChange={onInOutChange}>
-              <option>In</option>
-              <option>Out</option>
-              <option>InOut</option>
+            <select
+              defaultValue={keyframe.easeEnd}
+              onChange={onInOutChange}
+              disabled={ease === "" || ease === "linear"}
+            >
+              <option value="in">In</option>
+              <option value="out">Out</option>
+              <option value="inout">InOut</option>
             </select>
           </label>
         </>
