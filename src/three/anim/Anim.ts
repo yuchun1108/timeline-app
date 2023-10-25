@@ -1,4 +1,4 @@
-import { toDecimal2 } from "../global/Common";
+import { toDecimal2 } from "../../global/Common";
 import { AnimNode } from "./AnimNode";
 import { keyframeIndexToTime } from "./AnimTool";
 import { Keyframe } from "./Keyframe";

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import FrameSize from "../../global/FrameSize";
-import AnimController from "../../three/AnimController";
+import AnimController from "../../three/anim/AnimController";
 
 interface ControllerProps {
   frameSize: FrameSize;

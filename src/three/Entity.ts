@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import AnimController from "./AnimController";
+import AnimController from "./anim/AnimController";
 
 declare module "three" {
   interface Object3D {

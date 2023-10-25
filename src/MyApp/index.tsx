@@ -6,9 +6,9 @@ import Timebar from "../Timebar";
 import TimelineGroup from "../TimelineGroup";
 import { isArrayEqual } from "../global/Common";
 import FrameSize from "../global/FrameSize";
-import { Anim, AnimNode, Keyframe, Track } from "../three/Anim";
-import AnimController from "../three/AnimController";
 import World from "../three/World";
+import { Anim, AnimNode, Keyframe, Track } from "../three/anim/Anim";
+import AnimController from "../three/anim/AnimController";
 import Controller from "./components/Controller";
 import NameLabelGroup from "./components/NameLabelGroup";
 

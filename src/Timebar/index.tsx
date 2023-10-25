@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ScrollSyncPane } from "react-scroll-sync";
 import FrameSize from "../global/FrameSize";
-import AnimController from "../three/AnimController";
+import AnimController from "../three/anim/AnimController";
 
 interface TimebarProps {
   frameSize: FrameSize;

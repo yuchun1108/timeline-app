@@ -1,4 +1,4 @@
-import { AnimNode, Track } from "../../three/Anim";
+import { AnimNode, Track } from "../../three/anim/Anim";
 import NameLabel from "./NameLabel";
 
 interface NameLabelGroupProps {

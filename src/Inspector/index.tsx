@@ -1,8 +1,8 @@
 import { ReactNode } from "react";
 import { printToNewTab } from "../global/Common";
 import { saveWorldAnim } from "../global/Storage";
-import { Anim, AnimNode, Keyframe, Track } from "../three/Anim";
 import World from "../three/World";
+import { Anim, AnimNode, Keyframe, Track } from "../three/anim/Anim";
 interface InspectorProps {
   world: World;
   anim: Anim | undefined;

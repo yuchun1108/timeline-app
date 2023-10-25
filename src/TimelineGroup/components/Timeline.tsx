@@ -1,6 +1,6 @@
 import { ReactElement } from "react";
 import FrameSize from "../../global/FrameSize";
-import { AnimNode, Keyframe } from "../../three/Anim";
+import { AnimNode, Keyframe } from "../../three/anim/Anim";
 import KeyframeDot from "./KeyFrameDot";
 import TimelineBG from "./TimelineBG";
 

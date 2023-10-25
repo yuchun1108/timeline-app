@@ -1,4 +1,4 @@
-import { Track } from "../../three/Anim";
+import { Track } from "../../three/anim/Anim";
 
 interface NameLabelProps {
   height: number;

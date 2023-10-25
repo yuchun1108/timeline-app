@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import FrameSize from "../../global/FrameSize";
-import { Keyframe } from "../../three/Anim";
+import { Keyframe } from "../../three/anim/Anim";
 
 interface KeyframeProps {
   frameSize: FrameSize;

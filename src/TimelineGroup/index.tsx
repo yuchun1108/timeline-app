@@ -1,7 +1,7 @@
 import { ReactNode, useEffect, useReducer, useRef, useState } from "react";
 import { ScrollSyncPane } from "react-scroll-sync";
 import FrameSize from "../global/FrameSize";
-import { Anim, AnimNode, Track } from "../three/Anim";
+import { Anim, AnimNode, Track } from "../three/anim/Anim";
 import MarqueeRect from "./components/MarqueeRect";
 import Timeline from "./components/Timeline";
 
