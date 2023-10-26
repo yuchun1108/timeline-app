@@ -21,7 +21,7 @@ export default function NameLabel(props: NameLabelProps) {
 
   useEffect(() => {
     track.onChange = onTrackChange;
-  }, [track]);
+  }, [track, onTrackChange]);
 
   function onClick(e: any) {
     props.onTrackSelect(track);

@@ -63,7 +63,10 @@ export default function Timeline(props: TimelineProps) {
   return (
     <div
       className="timeline"
-      style={{ width: "100%", height: props.frameSize.height }}
+      style={{
+        width: props.frameSize.count * props.frameSize.width,
+        height: props.frameSize.height - 1,
+      }}
       data-trackuuid={props.trackUuid}
       data-index={props.index}
     >

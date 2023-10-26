@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { ScrollSync } from "react-scroll-sync";
+import { Tooltip } from "react-tooltip";
+import Controller from "../Controller";
 import Inspector from "../Inspector";
 import ModelSelector from "../ModelSelector";
 import Timebar from "../Timebar";
@@ -9,7 +11,6 @@ import FrameSize from "../global/FrameSize";
 import World from "../three/World";
 import { Anim, AnimNode, Keyframe, Track } from "../three/anim/Anim";
 import AnimController from "../three/anim/AnimController";
-import Controller from "./components/Controller";
 import NameLabelGroup from "./components/NameLabelGroup";
 
 interface MyAppProps {
@@ -26,7 +27,7 @@ export default function MyApp(props: MyAppProps) {
 
   const [selectedNodes, setSelectedNodes] = useState<AnimNode[]>([]);
 
-  const timeBarHeight = 24;
+  const timeBarHeight = 26;
   const [frameSize, setFrameSize] = useState<FrameSize>({
     width: 20,
     count: 60,
@@ -165,7 +166,7 @@ export default function MyApp(props: MyAppProps) {
     <ScrollSync>
       <div
         id="my-app"
-        style={{ gridTemplateRows: `24px ${timeBarHeight}px auto` }}
+        style={{ gridTemplateRows: `28px ${timeBarHeight - 1}px auto` }}
       >
         <Controller
           frameSize={frameSize}
@@ -206,6 +207,7 @@ export default function MyApp(props: MyAppProps) {
           selectedNodes={selectedNodes}
           key={selectedNodes.length > 0 ? selectedNodes[0].uuid : "empty"}
         />
+        <Tooltip id="tooltip" />
       </div>
     </ScrollSync>
   );

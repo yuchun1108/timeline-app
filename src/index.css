@@ -1,5 +1,6 @@
 body {
   background-color: black;
+  font-family: sans-serif;
 }
 
 #my-app {
@@ -17,6 +18,14 @@ body {
     "name-label timeline inspector";
 }
 
+.btn {
+  border: solid 2px black;
+  background-color: #2a373a;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
 #three-container {
   width: 100%;
   height: 80%;
@@ -30,23 +39,44 @@ body {
   grid-area: controller;
   background-color: #293538;
   color: white;
+  position: relative;
 }
 
 #controller > .control-buttons {
+  /* position: absolute; */
   margin: auto;
+  width: 100px;
+}
+
+#controller > .control-buttons > .btn {
+  /* background-color: #2a373a; */
 }
 
 #controller > .frame-size {
-  float: right;
+  font-size: 0.4em;
+  color: #b1b8ba;
+  position: absolute;
+  top: 0;
+  right: 0;
 }
 
-#modelSelector {
+#model-selector {
   grid-area: model-selector;
+  background-color: #293538;
+  padding: 3px;
+}
+
+#model-selector > .btn {
+  background: none;
+  border: none;
+  float: right;
 }
 
 #timebar {
   grid-area: timebar;
   background-color: #232d30;
+
+  border-bottom: solid 1px;
   position: relative;
   overflow: hidden;
 }
@@ -56,18 +86,40 @@ body {
   position: relative;
   background-color: #2c393c;
   overflow: auto;
+  scrollbar-color: rebeccapurple green;
 }
 
 #inspector {
   grid-area: inspector;
+  background-color: #364346;
+  position: relative;
+  color: white;
+}
+
+#inspector > .export-btn {
+  background-color: #2a373a;
+  border: none;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  position: absolute;
+  width: 100%;
+  left: 0;
+  bottom: 0;
+  padding: 8px 0 8px 0;
+}
+
+#inspector > .export-btn > span {
+  margin-left: 8px;
 }
 
 #inspector > .select-type {
-  background-color: yellow;
+  background-color: #293538;
 }
 
 .timeline {
   position: relative;
+  border-bottom: solid 1px #232d30;
 }
 
 .timeline-bg {
@@ -78,8 +130,9 @@ body {
 
 .marquee-rect {
   position: absolute;
-  background-color: aquamarine;
+  background-color: #304c53;
   pointer-events: none;
+  border: solid #206c7e 1px;
 }
 
 #name-label-group {
@@ -91,32 +144,31 @@ body {
 .name-label {
   background-color: #364346;
   color: white;
-  font-size: 0.75em;
+  font-size: 0.85em;
 }
 
 .name-label.selected {
-  background-color: #2c393c;
+  background-color: #2c7387;
 }
 
 .keyframe {
   position: absolute;
   top: 4px;
-  width: 10px;
-  height: 12px;
-  background-color: cyan;
-  /* pointer-events: none; */
+  width: 11px;
+  height: 11px;
+  background-image: url("/public/image/keyframe.png");
 }
 
 .keyframe.selected {
-  background-color: blue;
+  background-image: url("/public/image/keyframe-selected.png");
 }
 
 .keyframe.incorrect {
-  background-color: pink;
+  background-image: url("/public/image/keyframe-error.png");
 }
 
 .keyframe.selected.incorrect {
-  background-color: red;
+  background-image: url("/public/image/keyframe-selected-error.png");
 }
 
 .time-pos {

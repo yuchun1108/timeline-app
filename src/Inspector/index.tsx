@@ -1,6 +1,7 @@
+import { icon } from "@fortawesome/fontawesome-svg-core/import.macro";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ReactNode, useState } from "react";
 import { printToNewTab } from "../global/Common";
-import { saveWorldAnim } from "../global/Storage";
 import World from "../three/World";
 import { Anim, AnimNode, Keyframe, Track } from "../three/anim/Anim";
 interface InspectorProps {
@@ -41,12 +42,16 @@ export default function Inspector(props: InspectorProps) {
   if (track) {
     element = (
       <>
-        <div className="select-type">Track</div>
+        <div className="select-type">
+          <FontAwesomeIcon icon={icon({ name: "bars-staggered" })} />
+          Track
+        </div>
 
         <label>
           Target
           <input
             type="text"
+            autoCorrect="off"
             defaultValue={track.targetText}
             onChange={(e: any) => {
               track.setTargetText(e.target.value);
@@ -58,6 +63,7 @@ export default function Inspector(props: InspectorProps) {
           Attr
           <input
             type="text"
+            autoCorrect="off"
             defaultValue={track.attr}
             onChange={(e: any) => {
               track.setAttr(e.target.value);
@@ -69,11 +75,15 @@ export default function Inspector(props: InspectorProps) {
   } else if (keyframe) {
     element = (
       <>
-        <div className="select-type">Keyframe</div>
+        <div className="select-type">
+          <FontAwesomeIcon icon={icon({ name: "diamond" })} />
+          Keyframe
+        </div>
         <label>
           Value
           <input
             type="text"
+            autoCorrect="off"
             defaultValue={keyframe.text}
             onChange={(e: any) => {
               keyframe.setText(e.target.value);
@@ -115,28 +125,24 @@ export default function Inspector(props: InspectorProps) {
   return (
     <div id="inspector">
       {element}
+
       <button
+        className="export-btn"
         onClick={() => {
           if (props.anim) exportAnim(props.anim);
         }}
       >
-        export
-      </button>
-      <button
-        onClick={() => {
-          saveWorldAnim(props.world);
-        }}
-      >
-        save
+        <FontAwesomeIcon icon={icon({ name: "file-export" })} />
+        <span>Export</span>
       </button>
 
-      <button
+      {/* <button
         onClick={() => {
           localStorage.clear();
         }}
       >
         clear storage
-      </button>
+      </button> */}
     </div>
   );
 }

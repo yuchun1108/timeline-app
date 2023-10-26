@@ -24,11 +24,11 @@ export default function TimelineBG(props: TimelineBGProps) {
     if (canvas) {
       const width = props.frameSize.count * props.frameSize.width;
       canvas.width = width;
-      canvas.height = props.frameSize.height;
+      canvas.height = props.frameSize.height - 1;
       const context: CanvasRenderingContext2D | null = canvas.getContext("2d");
 
       if (context)
-        drawTimelineFrame(context, props.frameSize, props.frameSize.height);
+        drawTimelineFrame(context, props.frameSize, props.frameSize.height - 1);
     }
   }, [props.frameSize]);
 

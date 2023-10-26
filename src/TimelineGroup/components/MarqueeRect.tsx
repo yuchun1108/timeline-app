@@ -27,11 +27,13 @@ export default function MarqueeRect(props: MarqueeRectProps) {
         top: props.trackIndexMin * props.frameSize.height,
         height:
           (props.trackIndexMax + 1 - props.trackIndexMin) *
-          props.frameSize.height,
+            props.frameSize.height -
+          3,
         left: props.frameIndexMin * props.frameSize.width,
         width:
           (props.frameIndexMax + 1 - props.frameIndexMin) *
-          props.frameSize.width,
+            props.frameSize.width -
+          2,
       }}
     />
   );

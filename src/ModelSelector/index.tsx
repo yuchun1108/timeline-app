@@ -1,3 +1,5 @@
+import { icon } from "@fortawesome/fontawesome-svg-core/import.macro";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import World from "../three/World";
 
@@ -35,14 +37,18 @@ export default function ModelSelector(props: ModelSelectorProps) {
   }
   return (
     <div id="model-selector">
-      <select onChange={onOptionSelect}>
+      <select aria-label="model-selector" onChange={onOptionSelect}>
         {options.map((opt) => (
           <option key={opt.uuid} value={opt.id}>
             {opt.path}
           </option>
         ))}
       </select>
-      <button onClick={props.onAddTrack}>+</button>
+      <button className="btn" onClick={props.onAddTrack}>
+        <a data-tooltip-id="tooltip" data-tooltip-content="Add Track">
+          <FontAwesomeIcon icon={icon({ name: "plus" })} />
+        </a>
+      </button>
     </div>
   );
 }

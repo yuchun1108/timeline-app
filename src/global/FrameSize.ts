@@ -18,7 +18,7 @@ export function drawTimelineFrame(
     if (i % frameSize.fps === 0) continue;
     if (i % frameSize.fps === halfSec) continue;
 
-    const posX = Math.round((i + 0.5) * frameSize.width);
+    const posX = Math.round((i + 0.5) * frameSize.width) + 0.5;
     context.moveTo(posX, 0);
     context.lineTo(posX, frameHeight);
   }
@@ -29,7 +29,7 @@ export function drawTimelineFrame(
   context.beginPath();
   for (let i = 0; i < frameSize.count; i++) {
     if (i % frameSize.fps === 0) {
-      const posX = Math.round((i + 0.5) * frameSize.width);
+      const posX = Math.round((i + 0.5) * frameSize.width) + 0.5;
       context.moveTo(posX, 0);
       context.lineTo(posX, frameHeight);
     }
@@ -37,12 +37,12 @@ export function drawTimelineFrame(
   context.closePath();
   context.stroke();
 
-  context.lineWidth = 1;
+  context.lineWidth = 1.5;
   context.beginPath();
   for (let i = 0; i < frameSize.count; i++) {
     if (i % frameSize.fps === 0) continue;
     if (i % frameSize.fps === halfSec) {
-      const posX = Math.round((i + 0.5) * frameSize.width);
+      const posX = Math.round((i + 0.5) * frameSize.width) + 0.5;
       context.moveTo(posX, 0);
       context.lineTo(posX, frameHeight);
     }

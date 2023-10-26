@@ -39,9 +39,10 @@ export default function Timebar(props: TimebarProps) {
       const canvas = canvasRef.current;
       const width = props.frameSize.count * props.frameSize.width;
       canvas.width = width;
-      canvas.height = props.height;
+      canvas.height = props.height - 1;
       const context: CanvasRenderingContext2D | null = canvas.getContext("2d");
-      if (context) drawTimelineFrame(context, props.frameSize, props.height);
+      if (context)
+        drawTimelineFrame(context, props.frameSize, props.height - 1);
     }
   }, [props.frameSize, props.height]);
 
