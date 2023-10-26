@@ -26,11 +26,11 @@ export default function MyApp(props: MyAppProps) {
 
   const [selectedNodes, setSelectedNodes] = useState<AnimNode[]>([]);
 
-  const timeBarHeight = 30;
+  const timeBarHeight = 24;
   const [frameSize, setFrameSize] = useState<FrameSize>({
     width: 20,
     count: 60,
-    height: 24,
+    height: 20,
     fps: 24,
   });
 
@@ -145,8 +145,6 @@ export default function MyApp(props: MyAppProps) {
     };
   }, [onKeyDown]);
 
-  const timelineHeight = 20;
-
   function onTimelineGroupScroll(scrollLeft: number) {
     // if (scrollRef.current) scrollRef.current.scrollLeft = scrollLeft;
   }
@@ -182,7 +180,7 @@ export default function MyApp(props: MyAppProps) {
           onAddTrack={onAddTrack}
         />
         <NameLabelGroup
-          height={timelineHeight}
+          height={frameSize.height}
           selectedNodes={selectedNodes}
           tracks={tracks}
           onTrackSelect={onTrackSelect}

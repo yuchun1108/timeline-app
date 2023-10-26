@@ -33,8 +33,9 @@ export default function NameLabel(props: NameLabelProps) {
       style={{ height: props.height }}
       onClick={onClick}
     >
-      <span>{target}</span>
-      <span>{attr}</span>
+      {target}
+      {" : "}
+      {attr}
     </div>
   );
 }
