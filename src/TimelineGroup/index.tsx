@@ -5,6 +5,7 @@ import { ScrollSyncPane } from "react-scroll-sync";
 import FrameSize from "../global/FrameSize";
 import AnimSelector from "../three/AnimSelector";
 import { Anim, Track } from "../three/anim/Anim";
+import Marquee from "./components/Marquee";
 import MarqueeRect from "./components/MarqueeRect";
 import Timeline from "./components/Timeline";
 
@@ -27,6 +28,8 @@ const css_timeline_group = css`
   overflow: auto;
 `;
 
+const marquee: Marquee = new Marquee();
+
 export default function TimelineGroup(props: TimelineGroupProps) {
   const { tracks, selector } = props;
 
@@ -37,41 +40,6 @@ export default function TimelineGroup(props: TimelineGroupProps) {
   const isMoving = useRef(false);
   const beginMoveIndex = useRef(0);
   const currMoveIndex = useRef(0);
-
-  const isMarqueeMaking = useRef(false);
-  const [isMarqueeShow, setMarqueeShow] = useState(false);
-  const beginMarqueePos = useRef({
-    trackIndex: 0,
-    frameIndex: 0,
-  });
-  const [endMarqueePos, setEndMarqueePos] = useState<MarqueePos>({
-    trackIndex: 0,
-    frameIndex: 0,
-  });
-
-  const getMarqueeTrackIndexMin = useCallback(() => {
-    return isMarqueeMaking.current
-      ? Math.min(beginMarqueePos.current.trackIndex, endMarqueePos.trackIndex)
-      : 0;
-  }, [endMarqueePos]);
-
-  const getMarqueeTrackIndexMax = useCallback(() => {
-    return isMarqueeMaking.current
-      ? Math.max(beginMarqueePos.current.trackIndex, endMarqueePos.trackIndex)
-      : 0;
-  }, [endMarqueePos]);
-
-  const getMarqueeFrameIndexMin = useCallback(() => {
-    return isMarqueeMaking.current
-      ? Math.min(beginMarqueePos.current.frameIndex, endMarqueePos.frameIndex)
-      : 0;
-  }, [endMarqueePos]);
-
-  const getMarqueeFrameIndexMax = useCallback(() => {
-    return isMarqueeMaking.current
-      ? Math.max(beginMarqueePos.current.frameIndex, endMarqueePos.frameIndex)
-      : 0;
-  }, [endMarqueePos]);
 
   function getFrameIndex(posX: number) {
     const frameWidth = props.frameSize.width;
@@ -88,13 +56,8 @@ export default function TimelineGroup(props: TimelineGroupProps) {
 
       const track = tracks?.find((track) => track.uuid === trackUuid);
       if (track) {
-        isMarqueeMaking.current = true;
-        beginMarqueePos.current = {
-          trackIndex: trackIndex,
-          frameIndex: frameIndex,
-        };
+        marquee.setBeginPos(trackIndex, frameIndex);
         selector.clear();
-        //props.onKeyframeSelect([trackUuid], frameIndex, frameIndex);
       }
     } else if (
       e.target.nodeName === "DIV" &&
@@ -127,56 +90,44 @@ export default function TimelineGroup(props: TimelineGroupProps) {
 
         clickedKeyframeId.current = "";
       }
-    } else if (isMarqueeMaking.current) {
+    } else if (marquee.isMaking) {
       if (e.target.nodeName === "CANVAS") {
         const trackIndex = e.target.dataset["index"];
 
-        const _isMarqueeShow =
-          trackIndex !== beginMarqueePos.current.trackIndex ||
-          frameIndex !== beginMarqueePos.current.frameIndex;
-
-        if (
-          _isMarqueeShow &&
-          (endMarqueePos.trackIndex !== trackIndex ||
-            endMarqueePos.frameIndex !== frameIndex)
-        ) {
-          setEndMarqueePos({
-            trackIndex: trackIndex,
-            frameIndex: frameIndex,
-          });
-        }
-
-        setMarqueeShow(_isMarqueeShow);
+        marquee.setEndPos(trackIndex, frameIndex);
       }
     }
   }
 
-  useEffect(() => {
-    if (!tracks) return;
+  const onRectChange = useCallback(() => {
+    marquee.onRectChange.add(() => {
+      if (!tracks) return;
 
-    const _tracks: Track[] = [];
-
-    for (let i = 0; i < tracks.length; i++) {
-      if (i >= getMarqueeTrackIndexMin() && i <= getMarqueeTrackIndexMax()) {
-        const _track = tracks[i];
-        _tracks.push(_track);
+      const _tracks: Track[] = [];
+      for (let i = 0; i < tracks.length; i++) {
+        if (
+          i >= marquee.getTrackIndexMin() &&
+          i <= marquee.getTrackIndexMax()
+        ) {
+          const _track = tracks[i];
+          _tracks.push(_track);
+        }
       }
-    }
 
-    selector.selectByRange(
-      _tracks,
-      getMarqueeFrameIndexMin(),
-      getMarqueeFrameIndexMax()
-    );
-  }, [
-    tracks,
-    selector,
-    endMarqueePos,
-    getMarqueeTrackIndexMin,
-    getMarqueeTrackIndexMax,
-    getMarqueeFrameIndexMin,
-    getMarqueeFrameIndexMax,
-  ]);
+      selector.selectByRange(
+        _tracks,
+        marquee.getFrameIndexMin(),
+        marquee.getFrameIndexMax()
+      );
+    });
+  }, [tracks]);
+
+  useEffect(() => {
+    marquee.onRectChange.add(onRectChange);
+    return () => {
+      marquee.onRectChange.remove(onRectChange);
+    };
+  }, [onRectChange]);
 
   function onMouseUp(e: any) {
     const keyframeUuid = e.target.dataset["keyframeuuid"];
@@ -190,10 +141,8 @@ export default function TimelineGroup(props: TimelineGroupProps) {
         props.anim?.moveKeyFrame(selector.nodes, moveOffset);
       }
       setMoveOffset(0);
-    } else if (isMarqueeMaking.current) {
-      isMarqueeMaking.current = false;
-      setMarqueeShow(false);
     }
+    marquee.clear();
   }
 
   function onDoubleClick(e: any) {
@@ -210,10 +159,8 @@ export default function TimelineGroup(props: TimelineGroupProps) {
     if (isMoving.current) {
       isMoving.current = false;
       setMoveOffset(0);
-    } else if (isMarqueeMaking.current) {
-      isMarqueeMaking.current = false;
-      setMarqueeShow(false);
     }
+    marquee.clear();
   }
 
   const timelines: ReactNode[] = [];
@@ -245,15 +192,7 @@ export default function TimelineGroup(props: TimelineGroupProps) {
         onDoubleClick={onDoubleClick}
         onMouseLeave={onMouseLeave}
       >
-        {isMarqueeShow ? (
-          <MarqueeRect
-            frameSize={props.frameSize}
-            trackIndexMin={getMarqueeTrackIndexMin()}
-            trackIndexMax={getMarqueeTrackIndexMax()}
-            frameIndexMin={getMarqueeFrameIndexMin()}
-            frameIndexMax={getMarqueeFrameIndexMax()}
-          />
-        ) : undefined}
+        <MarqueeRect frameSize={props.frameSize} marquee={marquee} />
         {timelines}
       </div>
     </ScrollSyncPane>
