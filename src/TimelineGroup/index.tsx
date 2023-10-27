@@ -1,30 +1,18 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
-import {
-  ReactNode,
-  useCallback,
-  useEffect,
-  useReducer,
-  useRef,
-  useState,
-} from "react";
+import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { ScrollSyncPane } from "react-scroll-sync";
 import FrameSize from "../global/FrameSize";
-import { Anim, AnimNode, Track } from "../three/anim/Anim";
+import AnimSelector from "../three/AnimSelector";
+import { Anim, Track } from "../three/anim/Anim";
 import MarqueeRect from "./components/MarqueeRect";
 import Timeline from "./components/Timeline";
 
 interface TimelineGroupProps {
   frameSize: FrameSize;
-  selectedNodes: AnimNode[];
+  selector: AnimSelector;
   anim: Anim | undefined;
   tracks: Track[] | undefined;
-  onKeyframeSelect: (
-    trackUuids: string[],
-    frameIndexMin: number,
-    frameIndexMax: number
-  ) => void;
-  onTimelineGroupScroll: (scrollLeft: number) => void;
 }
 
 interface MarqueePos {
@@ -40,8 +28,7 @@ const css_timeline_group = css`
 `;
 
 export default function TimelineGroup(props: TimelineGroupProps) {
-  const { tracks, onKeyframeSelect } = props;
-  const [, forceUpdate] = useReducer((x) => x + 1, 0);
+  const { tracks, selector } = props;
 
   const [moveOffset, setMoveOffset] = useState(0);
 
@@ -106,22 +93,23 @@ export default function TimelineGroup(props: TimelineGroupProps) {
           trackIndex: trackIndex,
           frameIndex: frameIndex,
         };
-        props.onKeyframeSelect([trackUuid], frameIndex, frameIndex);
+        selector.clear();
+        //props.onKeyframeSelect([trackUuid], frameIndex, frameIndex);
       }
     } else if (
       e.target.nodeName === "DIV" &&
       e.target.classList.contains("keyframe")
     ) {
       const keyframeUuid = e.target.dataset["keyframeuuid"];
-      const trackUuid = e.target.parentNode.dataset["trackuuid"];
       const posX = e.target.offsetLeft + e.nativeEvent.offsetX;
 
       const frameIndex = getFrameIndex(posX);
       currMoveIndex.current = beginMoveIndex.current = frameIndex;
       isMoving.current = true;
 
-      if (!props.selectedNodes.find((obj) => obj.uuid === keyframeUuid)) {
-        props.onKeyframeSelect([trackUuid], frameIndex, frameIndex);
+      //如果開始拖曳時，按下的是未選取的keyframe，怎改為選取該keyframe
+      if (!selector.isSelected(keyframeUuid)) {
+        selector.selectByUuids([keyframeUuid]);
       }
 
       clickedKeyframeId.current = keyframeUuid;
@@ -166,23 +154,23 @@ export default function TimelineGroup(props: TimelineGroupProps) {
   useEffect(() => {
     if (!tracks) return;
 
-    const _trackUuids: string[] = [];
+    const _tracks: Track[] = [];
 
     for (let i = 0; i < tracks.length; i++) {
       if (i >= getMarqueeTrackIndexMin() && i <= getMarqueeTrackIndexMax()) {
         const _track = tracks[i];
-        _trackUuids.push(_track.uuid);
+        _tracks.push(_track);
       }
     }
 
-    onKeyframeSelect(
-      _trackUuids,
+    selector.selectByRange(
+      _tracks,
       getMarqueeFrameIndexMin(),
       getMarqueeFrameIndexMax()
     );
   }, [
     tracks,
-    onKeyframeSelect,
+    selector,
     endMarqueePos,
     getMarqueeTrackIndexMin,
     getMarqueeTrackIndexMax,
@@ -191,30 +179,17 @@ export default function TimelineGroup(props: TimelineGroupProps) {
   ]);
 
   function onMouseUp(e: any) {
-    // if (
-    //   e.target.nodeName === "DIV" &&
-    //   e.target.classList.contains("keyframe") &&
-    //   clickedKeyframeId.current !== ""
-    // ){
     const keyframeUuid = e.target.dataset["keyframeuuid"];
     if (keyframeUuid === clickedKeyframeId.current) {
-      const trackUuid = e.target.parentNode.dataset["trackuuid"];
-      const posX = e.target.offsetLeft + e.nativeEvent.offsetX;
-      const frameIndex = getFrameIndex(posX);
-      props.onKeyframeSelect([trackUuid], frameIndex, frameIndex);
+      selector.selectByUuids([keyframeUuid]);
     }
 
     if (isMoving.current) {
       isMoving.current = false;
-      if (props.selectedNodes.length > 0) {
-        const hasChange = props.anim?.moveKeyFrame(
-          props.selectedNodes,
-          moveOffset
-        );
-        if (hasChange) forceUpdate();
+      if (selector.nodes.length > 0) {
+        props.anim?.moveKeyFrame(selector.nodes, moveOffset);
       }
       setMoveOffset(0);
-      //   props.onDragIndexEnd();
     } else if (isMarqueeMaking.current) {
       isMarqueeMaking.current = false;
       setMarqueeShow(false);
@@ -228,7 +203,6 @@ export default function TimelineGroup(props: TimelineGroupProps) {
       const index = getFrameIndex(posX);
 
       props.anim?.addKeyframe(trackUuid, index);
-      //forceUpdate();
     }
   }
 
@@ -250,19 +224,14 @@ export default function TimelineGroup(props: TimelineGroupProps) {
       timelines.push(
         <Timeline
           frameSize={props.frameSize}
-          trackUuid={track.uuid}
-          keyframes={track.keyframes}
+          track={track}
           index={i}
           key={track.uuid}
           moveOffset={moveOffset}
-          selectedNodes={props.selectedNodes}
+          selector={props.selector}
         />
       );
     }
-  }
-
-  function onScroll(e: any) {
-    props.onTimelineGroupScroll(e.target.scrollLeft);
   }
 
   return (
@@ -275,7 +244,6 @@ export default function TimelineGroup(props: TimelineGroupProps) {
         onMouseUp={onMouseUp}
         onDoubleClick={onDoubleClick}
         onMouseLeave={onMouseLeave}
-        onScroll={onScroll}
       >
         {isMarqueeShow ? (
           <MarqueeRect

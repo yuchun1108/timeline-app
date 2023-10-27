@@ -22,7 +22,7 @@ export default function ModelSelector(props: ModelSelectorProps) {
   const [options, setOptions] = useState<Option[]>([]);
 
   useEffect(() => {
-    world.onHierarchyChange.push(() => {
+    world.onHierarchyChange.add(() => {
       const objs = world.getAllObjects();
       setOptions(
         objs.map<Option>((obj) => ({
@@ -32,7 +32,7 @@ export default function ModelSelector(props: ModelSelectorProps) {
         }))
       );
     });
-  }, [world]);
+  }, []);
 
   function onOptionSelect(e: any) {
     props.onObjectSelect(Number(e.target.value));
@@ -60,7 +60,12 @@ export default function ModelSelector(props: ModelSelectorProps) {
           </option>
         ))}
       </select>
-      <button className="btn" css={css_btn} onClick={props.onAddTrack}>
+      <button
+        aria-label="add-track"
+        className="btn"
+        css={css_btn}
+        onClick={props.onAddTrack}
+      >
         <a data-tooltip-id="tooltip" data-tooltip-content="Add Track">
           <FontAwesomeIcon icon={icon({ name: "plus" })} />
         </a>

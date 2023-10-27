@@ -6,7 +6,6 @@ import { Track } from "../../three/anim/Anim";
 interface NameLabelProps {
   height: number;
   track: Track;
-  isSelected: boolean;
   onTrackSelect: (track: Track) => void;
 }
 
@@ -31,17 +30,31 @@ const css_nameLabel_span = css`
 export default function NameLabel(props: NameLabelProps) {
   const { track } = props;
 
+  const [isSelected, setIsSelected] = useState(track.isSelected);
   const [target, setTarget] = useState(track.targetText);
   const [attr, setAttr] = useState(track.attr);
 
-  const onTrackChange = useCallback(() => {
+  const onChange = useCallback(() => {
     setTarget(track.targetText);
     setAttr(track.attr);
   }, [track]);
 
+  const onSelectedChange = useCallback(
+    (_isSelected: boolean) => {
+      setIsSelected(_isSelected);
+    },
+    [track]
+  );
+
   useEffect(() => {
-    track.onChange = onTrackChange;
-  }, [track, onTrackChange]);
+    track.onChange.add(onChange);
+    track.onSelectedChange.add(onSelectedChange);
+
+    return () => {
+      track.onChange.remove(onChange);
+      track.onSelectedChange.remove(onSelectedChange);
+    };
+  }, [onChange, onSelectedChange]);
 
   function onClick(e: any) {
     props.onTrackSelect(track);
@@ -49,8 +62,7 @@ export default function NameLabel(props: NameLabelProps) {
 
   return (
     <div
-      css={props.isSelected ? css_nameLabel_selected : css_nameLabel}
-      className={props.isSelected ? "name-label selected" : "name-label"}
+      css={isSelected ? css_nameLabel_selected : css_nameLabel}
       style={{ height: props.height - 1 }}
       onClick={onClick}
     >

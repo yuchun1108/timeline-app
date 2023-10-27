@@ -1,25 +1,23 @@
-import { v4 as uuidv4 } from "uuid";
 import { isArrayEqual } from "../../global/Common";
 import { AnimNode } from "./AnimNode";
 import { getAttrNeedValueCount, isNumArray } from "./AnimTool";
 import { Track } from "./Track";
 
-export class Keyframe implements AnimNode {
-  uuid: string;
+export class Keyframe extends AnimNode {
   track: Track;
   index: number = 0;
-
   text: string = "";
-  values: number[] | undefined = undefined;
+
   private lastValues: number[] | undefined = undefined;
+  values: number[] | undefined = undefined;
+
   easeName: string = "linear";
   easeEnd: string = "in";
   private _isDirty: boolean = false;
-  onValuesChange: ((values: number[] | undefined) => void) | undefined;
 
   constructor(parent: Track, attrs: any = {}) {
+    super();
     Object.assign(this, attrs);
-    this.uuid = uuidv4();
     this.track = parent;
     this.parseValues();
   }
@@ -28,6 +26,12 @@ export class Keyframe implements AnimNode {
     this.text = text;
     this.parseValues();
     this.markDirty();
+  }
+
+  setIndex(index: number) {
+    this.index = index;
+    this.markDirty();
+    this.onChange.forEach((func) => func());
   }
 
   setEaseName(easeName: string) {
@@ -57,7 +61,7 @@ export class Keyframe implements AnimNode {
     }
 
     if (!isArrayEqual(this.lastValues, this.values)) {
-      this.onValuesChange?.(this.values);
+      this.onChange.forEach((func) => func());
       this.lastValues = this.values ? [...this.values] : undefined;
     }
   }

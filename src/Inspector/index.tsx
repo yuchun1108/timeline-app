@@ -2,14 +2,15 @@
 import { css } from "@emotion/react";
 import { icon } from "@fortawesome/fontawesome-svg-core/import.macro";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ReactNode, useState } from "react";
+import { ReactNode, useCallback, useEffect, useState } from "react";
 import { printToNewTab } from "../global/Common";
+import AnimSelector from "../three/AnimSelector";
 import World from "../three/World";
 import { Anim, AnimNode, Keyframe, Track } from "../three/anim/Anim";
 interface InspectorProps {
   world: World;
   anim: Anim | undefined;
-  selectedNodes: AnimNode[];
+  selector: AnimSelector;
 }
 
 function exportAnim(anim: Anim) {
@@ -28,12 +29,12 @@ const css_exportBtn = css`
   border: none;
   color: white;
   font-size: 14px;
-  cursor: pointer;
   position: absolute;
   width: 100%;
   left: 0;
   bottom: 0;
   padding: 8px 0 8px 0;
+  cursor: pointer;
 `;
 
 const css_exportBtn_text = css`
@@ -78,7 +79,19 @@ const css_attr_input = css`
 `;
 
 export default function Inspector(props: InspectorProps) {
-  const { selectedNodes } = props;
+  const { selector } = props;
+  const [selectedNodes, setSelectedNodes] = useState<AnimNode[]>([]);
+
+  const onSelectChange = useCallback((nodes: AnimNode[]) => {
+    setSelectedNodes([...nodes]);
+  }, []);
+
+  useEffect(() => {
+    selector.onSelectChange.add(onSelectChange);
+    return () => {
+      selector.onSelectChange.remove(onSelectChange);
+    };
+  }, [onSelectChange]);
 
   const track =
     selectedNodes.length > 0 && selectedNodes[0] instanceof Track
@@ -102,7 +115,8 @@ export default function Inspector(props: InspectorProps) {
   }
 
   let element: ReactNode;
-  if (track) {
+  if (selectedNodes.length > 1) {
+  } else if (track) {
     element = (
       <>
         <div css={css_title}>
@@ -112,7 +126,7 @@ export default function Inspector(props: InspectorProps) {
           <span css={css_titleText}>Track</span>
         </div>
 
-        <div css={css_contents}>
+        <div css={css_contents} key={track.uuid}>
           <div css={css_attr}>
             <label css={css_attr_label}>
               target
@@ -129,8 +143,11 @@ export default function Inspector(props: InspectorProps) {
           </div>
 
           <div css={css_attr}>
-            <label css={css_attr_label}>attr</label>
+            <label css={css_attr_label} htmlFor="input-track-attr">
+              attr
+            </label>
             <input
+              id="input-track-attr"
               css={css_attr_input}
               type="text"
               autoCorrect="off"
@@ -154,10 +171,13 @@ export default function Inspector(props: InspectorProps) {
           <span css={css_titleText}>Keyframe</span>
         </div>
 
-        <div css={css_contents}>
+        <div css={css_contents} key={keyframe.uuid}>
           <div css={css_attr}>
-            <label css={css_attr_label}>value</label>
+            <label css={css_attr_label} htmlFor="input-keyframe-value">
+              value
+            </label>
             <input
+              id="input-keyframe-value"
               css={css_attr_input}
               type="text"
               autoCorrect="off"
@@ -169,8 +189,11 @@ export default function Inspector(props: InspectorProps) {
           </div>
 
           <div css={css_attr}>
-            <label css={css_attr_label}>easing</label>
+            <label css={css_attr_label} htmlFor="select-keyframe-easing">
+              easing
+            </label>
             <select
+              id="select-keyframe-easing"
               css={css_attr_input}
               style={{ width: "30%" }}
               defaultValue={keyframe.easeEnd}
@@ -182,6 +205,7 @@ export default function Inspector(props: InspectorProps) {
               <option value="inout">in-out</option>
             </select>
             <select
+              id="select-keyframe-easing"
               css={css_attr_input}
               style={{ width: "40%" }}
               defaultValue={keyframe.easeName}
@@ -204,7 +228,7 @@ export default function Inspector(props: InspectorProps) {
       </>
     );
   } else {
-    element = <></>;
+    element = <div css={css_title}></div>;
   }
 
   return (

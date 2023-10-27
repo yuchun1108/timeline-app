@@ -1,14 +1,13 @@
 /** @jsxImportSource @emotion/react */
 import { SerializedStyles, css } from "@emotion/react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import FrameSize from "../../global/FrameSize";
 import { Keyframe } from "../../three/anim/Anim";
 
 interface KeyframeProps {
   frameSize: FrameSize;
-  isSelected: boolean;
   keyframe: Keyframe;
-  index: number;
+  moveOffset: number;
 }
 
 const css_keyframe = css`
@@ -35,19 +34,35 @@ const css_keyframe_error_selected = css`
 `;
 
 export default function KeyframeDot(props: KeyframeProps) {
+  const { keyframe } = props;
+
+  const [isSelected, setIsSelected] = useState(keyframe.isSelected);
+  const [index, setIndex] = useState(keyframe.index);
+
   const [isCorrect, setIsCorrect] = useState(
     props.keyframe.values !== undefined
   );
 
-  useEffect(() => {
-    props.keyframe.onValuesChange = (values) => {
-      setIsCorrect(values !== undefined);
-    };
+  const onChange = useCallback(() => {
+    setIndex(keyframe.index);
+    setIsCorrect(props.keyframe.values !== undefined);
+  }, [keyframe]);
 
+  const onSelectedChange = useCallback(
+    (_isSelected: boolean) => {
+      setIsSelected(_isSelected);
+    },
+    [keyframe]
+  );
+
+  useEffect(() => {
+    keyframe.onChange.add(onChange);
+    keyframe.onSelectedChange.add(onSelectedChange);
     return () => {
-      props.keyframe.onValuesChange = undefined;
+      keyframe.onChange.remove(onChange);
+      keyframe.onSelectedChange.remove(onSelectedChange);
     };
-  }, [props.keyframe]);
+  }, [onChange, onSelectedChange]);
 
   function onDragStart(e: any) {
     e.preventDefault();
@@ -57,10 +72,10 @@ export default function KeyframeDot(props: KeyframeProps) {
   let style: SerializedStyles;
 
   if (isCorrect) {
-    if (props.isSelected) style = css_keyframe_selected;
+    if (isSelected) style = css_keyframe_selected;
     else style = css_keyframe;
   } else {
-    if (props.isSelected) style = css_keyframe_error_selected;
+    if (isSelected) style = css_keyframe_error_selected;
     else style = css_keyframe_error;
   }
 
@@ -69,7 +84,10 @@ export default function KeyframeDot(props: KeyframeProps) {
       className="keyframe"
       css={style}
       style={{
-        left: props.frameSize.width * (props.index + 0.5) - 5,
+        left:
+          props.frameSize.width *
+            (index + (isSelected ? props.moveOffset : 0) + 0.5) -
+          5,
       }}
       data-keyframeuuid={props.keyframe.uuid}
       onDragStart={onDragStart}

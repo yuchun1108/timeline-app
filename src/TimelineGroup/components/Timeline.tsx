@@ -1,18 +1,18 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
-import { ReactElement } from "react";
+import { ReactElement, useCallback, useEffect, useState } from "react";
 import FrameSize from "../../global/FrameSize";
-import { AnimNode, Keyframe } from "../../three/anim/Anim";
+import AnimSelector from "../../three/AnimSelector";
+import { Keyframe, Track } from "../../three/anim/Anim";
 import KeyframeDot from "./KeyFrameDot";
 import TimelineBG from "./TimelineBG";
 
 interface TimelineProps {
   frameSize: FrameSize;
-  trackUuid: string;
-  keyframes: Keyframe[];
+  track: Track;
   index: number;
-  selectedNodes: AnimNode[];
   moveOffset: number;
+  selector: AnimSelector;
 }
 
 const css_timeline = css`
@@ -21,46 +21,47 @@ const css_timeline = css`
 `;
 
 export default function Timeline(props: TimelineProps) {
-  const { keyframes } = props;
+  const { track } = props;
+
+  const [keyframes, setKeyframes] = useState<Keyframe[]>([...track.keyframes]);
+
+  const onKeyframesChange = useCallback((keyframes: Keyframe[]) => {
+    setKeyframes([...keyframes]);
+  }, []);
+
+  useEffect(() => {
+    track.onKeyframesChange.add(onKeyframesChange);
+    return () => {
+      track.onKeyframesChange.remove(onKeyframesChange);
+    };
+  }, [track]);
 
   const keyFrameDots: ReactElement[] = [];
 
   if (keyframes) {
     keyframes.forEach((keyframe) => {
-      const isSelected =
-        props.selectedNodes !== null
-          ? props.selectedNodes.includes(keyframe)
-          : false;
+      const isSelected = props.selector.isSelected(keyframe);
       if (!isSelected) {
         keyFrameDots.push(
           <KeyframeDot
             frameSize={props.frameSize}
-            index={
-              isSelected ? keyframe.index + props.moveOffset : keyframe.index
-            }
-            isSelected={isSelected}
             keyframe={keyframe}
             key={keyframe.uuid}
+            moveOffset={props.moveOffset}
           />
         );
       }
     });
 
     keyframes.forEach((keyframe) => {
-      const isSelected =
-        props.selectedNodes !== null
-          ? props.selectedNodes.includes(keyframe)
-          : false;
+      const isSelected = props.selector.isSelected(keyframe);
       if (isSelected) {
         keyFrameDots.push(
           <KeyframeDot
             frameSize={props.frameSize}
-            index={
-              isSelected ? keyframe.index + props.moveOffset : keyframe.index
-            }
-            isSelected={isSelected}
             keyframe={keyframe}
             key={keyframe.uuid}
+            moveOffset={props.moveOffset}
           />
         );
       }
@@ -75,11 +76,11 @@ export default function Timeline(props: TimelineProps) {
         width: props.frameSize.count * props.frameSize.width,
         height: props.frameSize.height - 1,
       }}
-      data-trackuuid={props.trackUuid}
+      data-trackuuid={track.uuid}
       data-index={props.index}
     >
       <TimelineBG
-        trackUuid={props.trackUuid}
+        trackUuid={track.uuid}
         frameSize={props.frameSize}
         index={props.index}
       />

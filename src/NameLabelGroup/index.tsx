@@ -1,16 +1,24 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
-import { AnimNode, Track } from "../three/anim/Anim";
+import { useCallback } from "react";
+import AnimSelector from "../three/AnimSelector";
+import { Track } from "../three/anim/Anim";
 import NameLabel from "./components/NameLabel";
 
 interface NameLabelGroupProps {
   height: number;
   tracks: Track[] | undefined;
-  selectedNodes: AnimNode[];
-  onTrackSelect: (track: Track) => void;
+  selector: AnimSelector;
 }
 
 export default function NameLabelGroup(props: NameLabelGroupProps) {
+  const onTrackSelect = useCallback(
+    (track: Track) => {
+      props.selector.selectByNodes([track]);
+    },
+    [props.selector]
+  );
+
   return (
     <div
       id="name-label-group"
@@ -21,16 +29,12 @@ export default function NameLabelGroup(props: NameLabelGroupProps) {
       `}
     >
       {props.tracks?.map((track) => {
-        const isSelected =
-          props.selectedNodes !== null && props.selectedNodes.includes(track);
-
         return (
           <NameLabel
-            isSelected={isSelected}
             height={props.height}
             key={track.uuid}
             track={track}
-            onTrackSelect={props.onTrackSelect}
+            onTrackSelect={onTrackSelect}
           />
         );
       })}

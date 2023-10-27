@@ -4,6 +4,7 @@ import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader.js";
 import MyApp from "./MyApp";
 import { loadWorldAnim } from "./global/Storage";
 import "./index.css";
+import AnimSelector from "./three/AnimSelector";
 import Entity from "./three/Entity";
 import World from "./three/World";
 
@@ -12,10 +13,11 @@ const root = ReactDOM.createRoot(
 );
 
 const world = new World(200);
+const selector = new AnimSelector();
 
 root.render(
   <React.StrictMode>
-    <MyApp world={world} />
+    <MyApp world={world} selector={selector} />
   </React.StrictMode>
 );
 
@@ -44,12 +46,8 @@ loader.load("Box.fbx", function (object) {
   object.scale.set(0.1, 0.1, 0.1);
   object.traverse((obj) => {
     obj.entity = new Entity(obj);
-    console.log(obj);
   });
   world.addObject(object);
-
-  console.log(world.scene);
-  console.log(object.children.find((c) => c.name === "Cube"));
 
   loadWorldAnim(world);
 });

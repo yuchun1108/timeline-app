@@ -1,10 +1,11 @@
+import Action from "../../global/Actions";
 import { toDecimal2 } from "../../global/Common";
 import { AnimNode } from "./AnimNode";
 import { keyframeIndexToTime } from "./AnimTool";
 import { Keyframe } from "./Keyframe";
 import { Track } from "./Track";
 
-export type { AnimNode } from "./AnimNode";
+export { AnimNode } from "./AnimNode";
 export { Keyframe } from "./Keyframe";
 export { Track } from "./Track";
 
@@ -15,6 +16,7 @@ export class Anim {
   private _isDirty: boolean = false;
 
   onAddKeyframe: ((keyframe: Keyframe) => void) | undefined;
+  onTracksChange = new Action<(tracks: Track[]) => void>();
 
   constructor(tracks: Track[] = []) {
     this.tracks = tracks;
@@ -23,14 +25,22 @@ export class Anim {
   addTrack(): void {
     const track = new Track({ attr: "position" });
     this.tracks.push(track);
+    this.onTracksChange.forEach((func) => func(this.tracks));
     this._isDirty = true;
   }
 
   removeTrack(trackUuid: string): void {
+    let hasChange = false;
     for (let i = this.tracks.length - 1; i >= 0; i--) {
       if (this.tracks[i].uuid === trackUuid) {
         this.tracks.splice(i, 1);
+        hasChange = true;
       }
+    }
+
+    if (hasChange) {
+      this.onTracksChange.forEach((func) => func(this.tracks));
+      this._isDirty = true;
     }
   }
 
@@ -62,6 +72,7 @@ export class Anim {
     track.sortKeyframes();
     this.calcTimeLength();
 
+    track.onKeyframesChange.forEach((func) => func(track.keyframes));
     this.onAddKeyframe?.(keyframe);
 
     this._isDirty = true;
@@ -79,13 +90,15 @@ export class Anim {
 
       track.keyframes.forEach((keyframe) => {
         if (nodes.includes(keyframe)) {
-          keyframe.index += offset;
+          keyframe.setIndex(keyframe.index + offset);
           newFrameIndices.push(keyframe.index);
           hasChange = true;
         } else {
           oldKeyframes.push(keyframe);
         }
       });
+
+      let hasRemoveKeyframe = false;
 
       for (let i = track.keyframes.length - 1; i >= 0; i--) {
         const keyframe = track.keyframes[i];
@@ -94,10 +107,15 @@ export class Anim {
           newFrameIndices.includes(keyframe.index)
         ) {
           track.keyframes.splice(i, 1);
+          hasRemoveKeyframe = true;
         }
       }
 
       track.sortKeyframes();
+
+      if (hasRemoveKeyframe) {
+        track.onKeyframesChange.forEach((func) => func(track.keyframes));
+      }
     });
 
     if (hasChange) {
@@ -113,12 +131,16 @@ export class Anim {
 
     this.tracks.forEach((track) => {
       const keyframes = track.keyframes;
+      let _hasChange = false;
       for (let i = keyframes.length - 1; i >= 0; i--) {
         const keyframe = keyframes[i];
         if (keyframeUUids.includes(keyframe.uuid)) {
           keyframes.splice(i, 1);
-          hasChange = true;
+          hasChange = _hasChange = true;
         }
+      }
+      if (_hasChange) {
+        track.onKeyframesChange.forEach((func) => func(keyframes));
       }
     });
 

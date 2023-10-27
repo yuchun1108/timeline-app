@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import Action from "../global/Actions";
 import { saveWorldAnim } from "../global/Storage";
 
 export default class World {
@@ -7,7 +8,7 @@ export default class World {
   renderer: THREE.WebGLRenderer;
 
   myAppHeight: number;
-  onHierarchyChange: (() => void)[] = [];
+  onHierarchyChange = new Action<() => void>();
 
   private lastTime: number = -1;
 

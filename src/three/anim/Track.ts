@@ -1,23 +1,23 @@
 import { inverseLerp, lerp } from "three/src/math/MathUtils";
-import { v4 as uuidv4 } from "uuid";
+import Action from "../../global/Actions";
 import { AnimNode } from "./AnimNode";
 import { getAttrNeedValueCount, keyframeIndexToTime } from "./AnimTool";
 import getEaseFunc from "./EaseFunc";
 import { Keyframe } from "./Keyframe";
 
-export class Track implements AnimNode {
-  uuid: string;
+export class Track extends AnimNode {
   targetText: string = "";
   targetPath: string[] = [""];
   attr: string = "";
   keyframes: Keyframe[] = [];
   _isDirty: boolean = false;
-  onChange: (() => void) | undefined;
+
+  onKeyframesChange = new Action<(keyframes: Keyframe[]) => void>();
 
   constructor(attrs: any = {}) {
+    super();
     const { keyframes, ...track } = attrs;
     Object.assign(this, track);
-    this.uuid = uuidv4();
 
     const keyframesLen = keyframes ? keyframes.length : 0;
 
@@ -34,7 +34,7 @@ export class Track implements AnimNode {
 
     this.parseTargetPath();
     console.log(this.targetText, this.targetPath);
-    this.onChange?.();
+    this.onChange.forEach((func) => func());
     this.markDirty();
   }
 
@@ -52,7 +52,7 @@ export class Track implements AnimNode {
     this.keyframes.forEach((keyframe) => {
       keyframe.parseValues();
     });
-    this.onChange?.();
+    this.onChange.forEach((func) => func());
     this.markDirty();
   }
 
