@@ -1,3 +1,5 @@
+/** @jsxImportSource @emotion/react */
+import { css } from "@emotion/react";
 import { ReactElement } from "react";
 import FrameSize from "../../global/FrameSize";
 import { AnimNode, Keyframe } from "../../three/anim/Anim";
@@ -12,6 +14,11 @@ interface TimelineProps {
   selectedNodes: AnimNode[];
   moveOffset: number;
 }
+
+const css_timeline = css`
+  position: relative;
+  border-bottom: solid 1px #232d30;
+`;
 
 export default function Timeline(props: TimelineProps) {
   const { keyframes } = props;
@@ -62,6 +69,7 @@ export default function Timeline(props: TimelineProps) {
 
   return (
     <div
+      css={css_timeline}
       className="timeline"
       style={{
         width: props.frameSize.count * props.frameSize.width,

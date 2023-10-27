@@ -1,3 +1,5 @@
+/** @jsxImportSource @emotion/react */
+import { css } from "@emotion/react";
 import { useEffect, useRef, useState } from "react";
 import { ScrollSyncPane } from "react-scroll-sync";
 import FrameSize, { drawTimelineFrame } from "../global/FrameSize";
@@ -8,6 +10,25 @@ interface TimebarProps {
   height: number;
   animController: AnimController | undefined;
 }
+
+const css_timebar = css`
+  grid-area: timebar;
+  background-color: #232d30;
+
+  border-bottom: solid 1px;
+  position: relative;
+  overflow: hidden;
+`;
+
+const css_time_pos = css`
+  position: absolute;
+  top: 0;
+  left: 10px;
+  width: 1px;
+  height: 100%;
+  background-color: red;
+  pointer-events: none;
+`;
 
 export default function Timebar(props: TimebarProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -93,6 +114,7 @@ export default function Timebar(props: TimebarProps) {
     <ScrollSyncPane>
       <div
         id="timebar"
+        css={css_timebar}
         onMouseDown={onMouseDown}
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUp}
@@ -101,6 +123,7 @@ export default function Timebar(props: TimebarProps) {
       >
         <canvas className="timeline-bg" ref={canvasRef}></canvas>
         <div
+          css={css_time_pos}
           className="time-pos"
           style={{
             left: timeToPosX(animTime),

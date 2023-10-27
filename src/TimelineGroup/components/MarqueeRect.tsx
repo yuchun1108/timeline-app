@@ -1,3 +1,5 @@
+/** @jsxImportSource @emotion/react */
+import { css } from "@emotion/react";
 import FrameSize from "../../global/FrameSize";
 
 interface MarqueeRectProps {
@@ -7,6 +9,13 @@ interface MarqueeRectProps {
   frameIndexMin: number;
   frameIndexMax: number;
 }
+
+const css_Marquee = css`
+  position: absolute;
+  background-color: #304c53;
+  pointer-events: none;
+  border: solid #206c7e 1px;
+`;
 
 /**
  * 圈選框
@@ -22,6 +31,7 @@ export default function MarqueeRect(props: MarqueeRectProps) {
 
   return (
     <div
+      css={css_Marquee}
       className="marquee-rect"
       style={{
         top: props.trackIndexMin * props.frameSize.height,

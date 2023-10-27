@@ -1,3 +1,5 @@
+/** @jsxImportSource @emotion/react */
+import { css } from "@emotion/react";
 import { useCallback, useEffect, useState } from "react";
 import { Track } from "../../three/anim/Anim";
 
@@ -7,6 +9,24 @@ interface NameLabelProps {
   isSelected: boolean;
   onTrackSelect: (track: Track) => void;
 }
+
+const css_nameLabel = css`
+  background-color: #364346;
+  color: white;
+  font-size: 0.85em;
+  border-bottom: solid 1px #2c393c;
+  padding-left: 4px;
+  user-select: none;
+`;
+
+const css_nameLabel_selected = css`
+  ${css_nameLabel}
+  background-color: #2c7387;
+`;
+
+const css_nameLabel_span = css`
+  vertical-align: middle;
+`;
 
 export default function NameLabel(props: NameLabelProps) {
   const { track } = props;
@@ -29,13 +49,16 @@ export default function NameLabel(props: NameLabelProps) {
 
   return (
     <div
+      css={props.isSelected ? css_nameLabel_selected : css_nameLabel}
       className={props.isSelected ? "name-label selected" : "name-label"}
-      style={{ height: props.height }}
+      style={{ height: props.height - 1 }}
       onClick={onClick}
     >
-      {target}
-      {" : "}
-      {attr}
+      <span css={css_nameLabel_span}>
+        {target}
+        {" : "}
+        {attr}
+      </span>
     </div>
   );
 }

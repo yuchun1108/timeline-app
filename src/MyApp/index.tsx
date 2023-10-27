@@ -1,9 +1,12 @@
+/** @jsxImportSource @emotion/react */
+import { css } from "@emotion/react";
 import { useCallback, useEffect, useState } from "react";
 import { ScrollSync } from "react-scroll-sync";
 import { Tooltip } from "react-tooltip";
 import Controller from "../Controller";
 import Inspector from "../Inspector";
 import ModelSelector from "../ModelSelector";
+import NameLabelGroup from "../NameLabelGroup";
 import Timebar from "../Timebar";
 import TimelineGroup from "../TimelineGroup";
 import { isArrayEqual } from "../global/Common";
@@ -11,7 +14,6 @@ import FrameSize from "../global/FrameSize";
 import World from "../three/World";
 import { Anim, AnimNode, Keyframe, Track } from "../three/anim/Anim";
 import AnimController from "../three/anim/AnimController";
-import NameLabelGroup from "./components/NameLabelGroup";
 
 interface MyAppProps {
   world: World;
@@ -162,12 +164,26 @@ export default function MyApp(props: MyAppProps) {
     });
   }
 
+  const css_myApp = css`
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 200px;
+    display: grid;
+    grid-template-columns: 200px auto 200px;
+    grid-template-rows: 30px ${timeBarHeight - 1}px auto;
+    grid-template-areas:
+      "controller controller controller"
+      "model-selector timebar inspector"
+      "name-label timeline inspector";
+    font-family: sans-serif;
+    color: #b1b8ba;
+  `;
+
   return (
     <ScrollSync>
-      <div
-        id="my-app"
-        style={{ gridTemplateRows: `28px ${timeBarHeight - 1}px auto` }}
-      >
+      <div id="my-app" css={css_myApp}>
         <Controller
           frameSize={frameSize}
           animController={animController}

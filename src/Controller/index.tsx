@@ -1,3 +1,5 @@
+/** @jsxImportSource @emotion/react */
+import { css } from "@emotion/react";
 import { icon } from "@fortawesome/fontawesome-svg-core/import.macro";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
@@ -32,21 +34,49 @@ export default function Controller(props: ControllerProps) {
     props.onFrameWidthChange(e.target.value);
   }
 
+  const css_controller = css`
+    grid-area: controller;
+    background-color: #293538;
+    position: relative;
+    border-bottom: solid 2px #20292b;
+  `;
+
+  const css_control_button_group = css`
+    margin: auto;
+    width: 100px;
+  `;
+
+  const css_control_btn = css`
+    margin: 2px 2px 1px 2px;
+    border: none;
+    background-color: #20292b;
+    color: #b1b8ba;
+    font-size: 20px;
+    width: 36px;
+    cursor: pointer;
+  `;
+
+  const css_frame_size = css`
+    position: absolute;
+    top: 0;
+    right: 0;
+  `;
+
   return (
-    <div id="controller">
-      <div className="control-buttons">
-        <button className="btn" onClick={onPlayClick}>
+    <div id="controller" css={css_controller}>
+      <div className="control-buttons" css={css_control_button_group}>
+        <button className="btn" css={css_control_btn} onClick={onPlayClick}>
           <a data-tooltip-id="tooltip" data-tooltip-content="Play">
             <FontAwesomeIcon icon={icon({ name: "play" })} />
           </a>
         </button>
-        <button className="btn" onClick={onPlayClick}>
+        <button className="btn" css={css_control_btn} onClick={onPlayClick}>
           <a data-tooltip-id="tooltip" data-tooltip-content="Pause">
             <FontAwesomeIcon icon={icon({ name: "pause" })} />
           </a>
         </button>
       </div>
-      <div className="frame-size">
+      <div className="frame-size" css={css_frame_size}>
         <a data-tooltip-id="tooltip" data-tooltip-content="Frame Count">
           <input
             type={"number"}
@@ -57,7 +87,11 @@ export default function Controller(props: ControllerProps) {
             }}
             onKeyDown={onFrameCountKeyDown}
           />
-          <button className="btn" onClick={onFrameCountChange}>
+          <button
+            className="btn"
+            css={css_control_btn}
+            onClick={onFrameCountChange}
+          >
             <FontAwesomeIcon icon={icon({ name: "check" })} />
           </button>
         </a>

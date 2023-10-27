@@ -1,3 +1,5 @@
+/** @jsxImportSource @emotion/react */
+import { css } from "@emotion/react";
 import { icon } from "@fortawesome/fontawesome-svg-core/import.macro";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
@@ -35,8 +37,22 @@ export default function ModelSelector(props: ModelSelectorProps) {
   function onOptionSelect(e: any) {
     props.onObjectSelect(Number(e.target.value));
   }
+
+  const css_btn = css`
+    background: none;
+    border: none;
+    float: right;
+  `;
+
   return (
-    <div id="model-selector">
+    <div
+      id="model-selector"
+      css={css`
+        grid-area: model-selector;
+        background-color: #293538;
+        padding: 3px;
+      `}
+    >
       <select aria-label="model-selector" onChange={onOptionSelect}>
         {options.map((opt) => (
           <option key={opt.uuid} value={opt.id}>
@@ -44,7 +60,7 @@ export default function ModelSelector(props: ModelSelectorProps) {
           </option>
         ))}
       </select>
-      <button className="btn" onClick={props.onAddTrack}>
+      <button className="btn" css={css_btn} onClick={props.onAddTrack}>
         <a data-tooltip-id="tooltip" data-tooltip-content="Add Track">
           <FontAwesomeIcon icon={icon({ name: "plus" })} />
         </a>

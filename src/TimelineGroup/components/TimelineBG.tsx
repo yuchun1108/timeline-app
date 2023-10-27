@@ -1,3 +1,5 @@
+/** @jsxImportSource @emotion/react */
+import { css } from "@emotion/react";
 import { useEffect, useRef } from "react";
 import FrameSize, { drawTimelineFrame } from "../../global/FrameSize";
 
@@ -6,6 +8,12 @@ interface TimelineBGProps {
   index: number;
   frameSize: FrameSize;
 }
+
+const css_timeline_bg = css`
+  position: absolute;
+  top: 0;
+  left: 0;
+`;
 
 export default function TimelineBG(props: TimelineBGProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -39,6 +47,7 @@ export default function TimelineBG(props: TimelineBGProps) {
 
   return (
     <canvas
+      css={css_timeline_bg}
       className="timeline-bg"
       ref={canvasRef}
       data-trackuuid={props.trackUuid}

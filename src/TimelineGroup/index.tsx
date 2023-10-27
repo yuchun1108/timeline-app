@@ -1,3 +1,5 @@
+/** @jsxImportSource @emotion/react */
+import { css } from "@emotion/react";
 import {
   ReactNode,
   useCallback,
@@ -29,6 +31,13 @@ interface MarqueePos {
   trackIndex: number;
   frameIndex: number;
 }
+
+const css_timeline_group = css`
+  grid-area: timeline;
+  position: relative;
+  background-color: #2c393c;
+  overflow: auto;
+`;
 
 export default function TimelineGroup(props: TimelineGroupProps) {
   const { tracks, onKeyframeSelect } = props;
@@ -260,6 +269,7 @@ export default function TimelineGroup(props: TimelineGroupProps) {
     <ScrollSyncPane>
       <div
         id="timeline-group"
+        css={css_timeline_group}
         onMouseDown={onMouseDown}
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUp}
