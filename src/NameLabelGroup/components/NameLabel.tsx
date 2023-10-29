@@ -30,7 +30,7 @@ const css_nameLabel_span = css`
 export default function NameLabel(props: NameLabelProps) {
   const { track } = props;
 
-  const [isSelected, setIsSelected] = useState(track.isSelected);
+  const [selectState, setSelectState] = useState(track.selectState);
   const [target, setTarget] = useState(track.targetText);
   const [attr, setAttr] = useState(track.attr);
 
@@ -40,8 +40,8 @@ export default function NameLabel(props: NameLabelProps) {
   }, [track]);
 
   const onSelectedChange = useCallback(
-    (_isSelected: boolean) => {
-      setIsSelected(_isSelected);
+    (_selectState: 0 | 1 | 2) => {
+      setSelectState(_selectState);
     },
     [track]
   );
@@ -62,7 +62,7 @@ export default function NameLabel(props: NameLabelProps) {
 
   return (
     <div
-      css={isSelected ? css_nameLabel_selected : css_nameLabel}
+      css={selectState ? css_nameLabel_selected : css_nameLabel}
       style={{ height: props.height - 1 }}
       onClick={onClick}
     >

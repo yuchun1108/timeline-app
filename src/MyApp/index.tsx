@@ -59,7 +59,7 @@ export default function MyApp(props: MyAppProps) {
 
   useEffect(() => {
     anim?.onTracksChange.add(onTracksChange);
-    props.selector.setAnim(anim);
+    props.selector.setAnim(anim, animController);
     if (anim) {
       setTracks([...anim.tracks]);
       setFrameSize((prev) => ({ ...prev, fps: anim.fps }));
@@ -70,7 +70,7 @@ export default function MyApp(props: MyAppProps) {
     return () => {
       anim?.onTracksChange.remove(onTracksChange);
     };
-  }, [anim]);
+  }, [anim, animController]);
 
   function onAddTrack() {
     if (anim) {

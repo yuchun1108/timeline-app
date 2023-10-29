@@ -2,27 +2,32 @@ import { v4 as uuidv4 } from "uuid";
 import Action from "../../global/Actions";
 export class AnimNode {
   uuid: string;
-  isSelected: boolean = false;
+  selectState: 0 | 1 | 2 = 0;
   onChange = new Action<() => void>();
-  onSelectedChange = new Action<(isSelected: boolean) => void>();
+  onSelectedChange = new Action<(selectState: 0 | 1 | 2) => void>();
 
-  private newIsSelected: boolean = false;
+  private newSelectState: 0 | 1 | 2 = 0;
 
   constructor() {
     this.uuid = uuidv4();
   }
 
-  setSelected(isSelected: boolean) {
-    this.newIsSelected = isSelected;
+  setSelectState(selectState: 0 | 1 | 2) {
+    this.newSelectState = selectState;
+  }
+
+  setSelected(isSelected: 0 | 1 | 2) {
+    this.newSelectState = isSelected;
   }
 
   applySelectChange() {
-    if (this.isSelected !== this.newIsSelected) {
-      this.isSelected = this.newIsSelected;
-
+    if (this.selectState !== this.newSelectState) {
+      this.selectState = this.newSelectState;
       this.onSelectedChange.forEach((func) => {
-        func(this.isSelected);
+        func(this.selectState);
       });
     }
   }
+
+  toAttrs() {}
 }

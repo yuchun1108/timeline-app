@@ -151,7 +151,7 @@ export default function TimelineGroup(props: TimelineGroupProps) {
       const posX = e.nativeEvent.offsetX;
       const index = getFrameIndex(posX);
 
-      props.anim?.addKeyframe(trackUuid, index);
+      props.anim?.addKeyframeByIndex(trackUuid, index);
     }
   }
 

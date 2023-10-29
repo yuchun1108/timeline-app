@@ -66,7 +66,7 @@ export class Keyframe extends AnimNode {
     }
   }
 
-  toAttrs() {
+  toAttrs(): any {
     return {
       index: this.index,
       easeName: this.easeName,

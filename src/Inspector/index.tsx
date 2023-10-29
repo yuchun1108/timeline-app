@@ -115,8 +115,9 @@ export default function Inspector(props: InspectorProps) {
   }
 
   let element: ReactNode;
-  if (selectedNodes.length > 1) {
-  } else if (track) {
+  // if (selectedNodes.length > 1) {
+  // } else
+  if (track) {
     element = (
       <>
         <div css={css_title}>

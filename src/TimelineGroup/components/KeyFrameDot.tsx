@@ -15,28 +15,38 @@ const css_keyframe = css`
   top: 4px;
   width: 11px;
   height: 11px;
-  background-image: url("/image/keyframe.png");
+  background: url("/image/keyframe.png") 0 0;
 `;
 
 const css_keyframe_selected = css`
   ${css_keyframe}
-  background-image: url("/image/keyframe-selected.png");
+  background: url("/image/keyframe.png") -11px 0;
+`;
+
+const css_keyframe_firstSelect = css`
+  ${css_keyframe}
+  background: url("/image/keyframe.png") -22px 0;
 `;
 
 const css_keyframe_error = css`
   ${css_keyframe}
-  background-image: url("/image/keyframe-error.png");
+  background: url("/image/keyframe.png") -33px 0;
 `;
 
 const css_keyframe_error_selected = css`
   ${css_keyframe}
-  background-image: url("/image/keyframe-selected-error.png");
+  background: url("/image/keyframe.png") -44px 0;
+`;
+
+const css_keyframe_error_firstSelect = css`
+  ${css_keyframe}
+  background: url("/image/keyframe.png") -55px 0;
 `;
 
 export default function KeyframeDot(props: KeyframeProps) {
   const { keyframe } = props;
 
-  const [isSelected, setIsSelected] = useState(keyframe.isSelected);
+  const [selectState, setSelectState] = useState(keyframe.selectState);
   const [index, setIndex] = useState(keyframe.index);
 
   const [isCorrect, setIsCorrect] = useState(
@@ -49,8 +59,8 @@ export default function KeyframeDot(props: KeyframeProps) {
   }, [keyframe]);
 
   const onSelectedChange = useCallback(
-    (_isSelected: boolean) => {
-      setIsSelected(_isSelected);
+    (_selectState: 0 | 1 | 2) => {
+      setSelectState(_selectState);
     },
     [keyframe]
   );
@@ -72,10 +82,12 @@ export default function KeyframeDot(props: KeyframeProps) {
   let style: SerializedStyles;
 
   if (isCorrect) {
-    if (isSelected) style = css_keyframe_selected;
+    if (selectState === 1) style = css_keyframe_selected;
+    else if (selectState === 2) style = css_keyframe_firstSelect;
     else style = css_keyframe;
   } else {
-    if (isSelected) style = css_keyframe_error_selected;
+    if (selectState === 1) style = css_keyframe_error_selected;
+    else if (selectState === 2) style = css_keyframe_error_firstSelect;
     else style = css_keyframe_error;
   }
 
@@ -86,7 +98,7 @@ export default function KeyframeDot(props: KeyframeProps) {
       style={{
         left:
           props.frameSize.width *
-            (index + (isSelected ? props.moveOffset : 0) + 0.5) -
+            (index + (selectState ? props.moveOffset : 0) + 0.5) -
           5,
       }}
       data-keyframeuuid={props.keyframe.uuid}

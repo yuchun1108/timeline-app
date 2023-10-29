@@ -2,6 +2,10 @@ export function keyframeIndexToTime(index: number, fps: number): number {
   return index / fps;
 }
 
+export function animTimeToFrameIndex(animTime: number, fps: number): number {
+  return Math.round(animTime * fps);
+}
+
 export function isNum(value: any): boolean {
   return !isNaN(value);
 }

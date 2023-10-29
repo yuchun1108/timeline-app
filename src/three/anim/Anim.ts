@@ -15,7 +15,7 @@ export class Anim {
   timeLength: number = 0;
   private _isDirty: boolean = false;
 
-  onAddKeyframe: ((keyframe: Keyframe) => void) | undefined;
+  onAddKeyframe: ((keyframes: Keyframe[]) => void) | undefined;
   onTracksChange = new Action<(tracks: Track[]) => void>();
 
   constructor(tracks: Track[] = []) {
@@ -44,7 +44,7 @@ export class Anim {
     }
   }
 
-  addKeyframe(trackUuid: string, index: number): void {
+  addKeyframeByIndex(trackUuid: string, index: number) {
     const track = this.tracks.find((t) => t.uuid === trackUuid);
     if (!track) return;
 
@@ -66,17 +66,80 @@ export class Anim {
       }
     }
 
-    const keyframe: Keyframe = new Keyframe(track, { index, text });
+    const keyframe = new Keyframe(track, { index, text });
     track.keyframes.push(keyframe);
 
     track.sortKeyframes();
     this.calcTimeLength();
 
     track.onKeyframesChange.forEach((func) => func(track.keyframes));
-    this.onAddKeyframe?.(keyframe);
+    this.onAddKeyframe?.([keyframe]);
 
     this._isDirty = true;
   }
+
+  addKeyframes(keyframes: Keyframe[]) {
+    const changedTracks: Track[] = [];
+
+    keyframes.forEach((keyframe) => {
+      const track = keyframe.track;
+      const index = keyframe.index;
+
+      for (let i = track.keyframes.length - 1; i >= 0; i--) {
+        const _keyframe = track.keyframes[i];
+        if (_keyframe.index === index) {
+          keyframes.splice(i, 1);
+        }
+      }
+      track.keyframes.push(keyframe);
+      if (!changedTracks.includes(track)) changedTracks.push(track);
+    });
+
+    changedTracks.forEach((track) => {
+      track.sortKeyframes();
+      track.onKeyframesChange.forEach((func) => func(track.keyframes));
+    });
+    this.calcTimeLength();
+
+    this.onAddKeyframe?.(keyframes);
+
+    this._isDirty = true;
+  }
+
+  // addKeyframe(
+  //   track: string | Track | undefined,
+  //   indexOrKeyframes: number | Keyframe[]
+  // ): void {
+  //   // if (typeof track === "string") {
+  //   //   track = this.tracks.find((t) => t.uuid === track);
+  //   // }
+  //   // if (!track) return;
+
+  //   // let addKeyframes: Keyframe[] = [];
+
+  //   // if (typeof indexOrKeyframes === "number") {
+  //   //   const index = indexOrKeyframes;
+  //   // } else {
+  //   //   addKeyframes = indexOrKeyframes;
+  //   //   addKeyframes.forEach((keyframe) => {
+  //   //     if (track instanceof Track) keyframe.track = track;
+  //   //   });
+  //   // }
+
+  //   track.keyframes.push(...addKeyframes);
+
+  //   track.sortKeyframes();
+  //   this.calcTimeLength();
+
+  //   track.onKeyframesChange.forEach((func) => {
+  //     if (track instanceof Track) {
+  //       func(track.keyframes);
+  //     }
+  //   });
+  //   this.onAddKeyframe?.(addKeyframes);
+
+  //   this._isDirty = true;
+  // }
 
   moveKeyFrame(nodes: AnimNode[], offset: number): boolean {
     if (offset === 0) return false;
