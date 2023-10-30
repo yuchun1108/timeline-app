@@ -22,6 +22,19 @@ export function isNumArray(value: any, len: number = -1): boolean {
   }
 }
 
+export function getDefaultAttrValue(attr: string): string {
+  switch (getAttrNeedValueCount(attr)) {
+    case 3:
+      return "0,0,0";
+    case 2:
+      return "0,0";
+    case 1:
+      return "0";
+    default:
+      return "";
+  }
+}
+
 export function getAttrNeedValueCount(attr: string): number {
   switch (attr) {
     case "position":

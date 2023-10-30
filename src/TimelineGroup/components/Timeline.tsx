@@ -24,10 +24,17 @@ export default function Timeline(props: TimelineProps) {
   const { track } = props;
 
   const [keyframes, setKeyframes] = useState<Keyframe[]>([...track.keyframes]);
+  const [tempKeyframes, setTempKeyframes] = useState<Keyframe[]>([
+    ...track.cloneKeyframes,
+  ]);
 
-  const onKeyframesChange = useCallback((keyframes: Keyframe[]) => {
-    setKeyframes([...keyframes]);
-  }, []);
+  const onKeyframesChange = useCallback(
+    (keyframes: Keyframe[], tempKeyframes: Keyframe[]) => {
+      setKeyframes([...keyframes]);
+      setTempKeyframes([...tempKeyframes]);
+    },
+    []
+  );
 
   useEffect(() => {
     track.onKeyframesChange.add(onKeyframesChange);
@@ -65,6 +72,17 @@ export default function Timeline(props: TimelineProps) {
           />
         );
       }
+    });
+
+    tempKeyframes.forEach((keyframe) => {
+      keyFrameDots.push(
+        <KeyframeDot
+          frameSize={props.frameSize}
+          keyframe={keyframe}
+          key={keyframe.uuid}
+          moveOffset={0}
+        />
+      );
     });
   }
 

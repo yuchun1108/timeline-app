@@ -10,9 +10,12 @@ export class Track extends AnimNode {
   targetPath: string[] = [""];
   attr: string = "";
   keyframes: Keyframe[] = [];
+  cloneKeyframes: Keyframe[] = [];
   _isDirty: boolean = false;
 
-  onKeyframesChange = new Action<(keyframes: Keyframe[]) => void>();
+  onKeyframesChange = new Action<
+    (keyframes: Keyframe[], cloneKeyframes: Keyframe[]) => void
+  >();
 
   constructor(attrs: any = {}) {
     super();
@@ -228,5 +231,11 @@ export class Track extends AnimNode {
   cleanDirty() {
     this._isDirty = false;
     this.keyframes.forEach((keyframe) => keyframe.cleanDirty());
+  }
+
+  nodifyKeyframeChange() {
+    this.onKeyframesChange.forEach((func) =>
+      func(this.keyframes, this.cloneKeyframes)
+    );
   }
 }

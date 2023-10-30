@@ -38,8 +38,6 @@ export default class AnimSelector {
     if (!this.anim) return;
     if (this.nodes.length === 0) return;
     if (e.code === "Delete") {
-      console.log();
-
       if (this.nodes[0] instanceof Track) {
         this.anim.removeTrack(this.nodes[0].uuid);
       } else if (this.nodes[0] instanceof Keyframe) {
@@ -78,8 +76,6 @@ export default class AnimSelector {
 
       const jsonStr = JSON.stringify(nodeAttrArr, null, "\t");
 
-      console.log(jsonStr);
-
       e.clipboardData.setData("text", jsonStr);
     }
   }
@@ -88,7 +84,6 @@ export default class AnimSelector {
     if (!this.animController || !this.anim) return;
 
     const jsonStr = e.clipboardData.getData("text");
-    console.log(jsonStr);
 
     const baseIndex = animTimeToFrameIndex(
       this.animController.animTime,
@@ -136,43 +131,81 @@ export default class AnimSelector {
     }
   }
 
-  selectByNodes(nodes: AnimNode[]) {
+  selectByNodes(nodes: AnimNode[], add: boolean = false) {
     if (!this.anim) return;
 
-    this.setOldNodesUnselected();
+    if (add && this.nodes.length > 0) {
+      nodes = this.filterNodesType(this.nodes[0], nodes);
 
-    this.nodes.push(...nodes);
+      nodes.forEach((node) => {
+        if (!this.nodes.includes(node)) {
+          this.nodes.push(node);
+        }
+      });
+
+      if (nodes.length === 1) {
+        this.setAsFirstNode(nodes[0]);
+      }
+    } else {
+      this.setOldNodesUnselected();
+
+      if (nodes.length > 0) {
+        nodes = this.filterNodesType(nodes[0], nodes);
+      }
+
+      this.nodes.push(...nodes);
+    }
 
     const hasChange = this.setNodesSelectedAndApply();
     if (hasChange) this.notifySelectChange();
   }
 
-  selectByUuids(uuids: string[]) {
+  private filterNodesType(firstNode: AnimNode, nodes: AnimNode[]): AnimNode[] {
+    if (firstNode instanceof Keyframe) {
+      return nodes.filter((node) => node instanceof Keyframe);
+    } else if (firstNode instanceof Track) {
+      return nodes.filter((node) => node instanceof Track);
+    }
+    return [];
+  }
+
+  selectByUuids(uuids: string[], add: boolean = false) {
     if (!this.anim) return;
 
-    this.setOldNodesUnselected();
+    const nodes: AnimNode[] = [];
 
     this.anim.tracks.forEach((track) => {
       if (uuids.includes(track.uuid)) {
-        this.nodes.push(track);
+        nodes.push(track);
       }
       track.keyframes.forEach((keyframe) => {
         if (uuids.includes(keyframe.uuid)) {
-          this.nodes.push(keyframe);
+          nodes.push(keyframe);
         }
       });
     });
 
-    const hasChange = this.setNodesSelectedAndApply();
-    if (hasChange) this.notifySelectChange();
+    this.selectByNodes(nodes, add);
   }
 
-  selectByRange(tracks: Track[], frameIndexMin: number, frameIndexMax: number) {
+  selectByRange(
+    tracks: Track[],
+    frameIndexMin: number,
+    frameIndexMax: number,
+    add: boolean = false
+  ) {
     if (!this.anim) return;
 
-    const firstNode = this.nodes.length > 0 ? this.nodes[0] : undefined;
+    let firstNode = this.nodes.length > 0 ? this.nodes[0] : undefined;
 
-    this.setOldNodesUnselected();
+    if (add) {
+      if (this.nodes.length > 0 && this.nodes[0] instanceof Track) {
+        this.setOldNodesUnselected();
+        firstNode = undefined;
+      }
+    } else {
+      this.setOldNodesUnselected();
+    }
 
     tracks.forEach((track) => {
       track.keyframes.forEach((keyframe) => {
@@ -180,21 +213,92 @@ export default class AnimSelector {
           keyframe.index >= frameIndexMin &&
           keyframe.index <= frameIndexMax
         ) {
-          this.nodes.push(keyframe);
+          if (!this.nodes.includes(keyframe)) {
+            this.nodes.push(keyframe);
+          }
         }
       });
     });
 
     if (firstNode) {
-      const i = this.nodes.indexOf(firstNode);
-      if (i >= 0) {
-        this.nodes.splice(i, 1);
-      }
-      this.nodes.unshift(firstNode);
+      this.setAsFirstNode(firstNode);
     }
 
     const hasChange = this.setNodesSelectedAndApply();
     if (hasChange) this.notifySelectChange();
+  }
+
+  private setAsFirstNode(node: AnimNode) {
+    const i = this.nodes.indexOf(node);
+    if (i >= 0) {
+      this.nodes.splice(i, 1);
+    }
+    this.nodes.unshift(node);
+  }
+
+  setCloneKeyframesOffset(offset: number) {
+    if (!this.anim) return;
+
+    this.anim.tracks.forEach((track) => {
+      track.cloneKeyframes.length = 0;
+    });
+
+    const changedTracks: Track[] = [];
+
+    if (this.nodes.length > 0) {
+      this.nodes.forEach((node) => {
+        if (node instanceof Keyframe) {
+          const track = node.track;
+
+          const cloneKeyframe = new Keyframe(track, {
+            index: node.index + offset,
+            text: node.text,
+            selectState: node.selectState,
+          });
+
+          track.cloneKeyframes.push(cloneKeyframe);
+
+          changedTracks.push(track);
+        }
+      });
+    }
+
+    changedTracks.forEach((track) => {
+      track.nodifyKeyframeChange();
+    });
+  }
+
+  applyAndClearCloneKeyframes() {
+    if (!this.anim) return;
+
+    const allCloneKeyframes: Keyframe[] = [];
+
+    this.anim.tracks.forEach((track) => {
+      if (track.cloneKeyframes.length > 0) {
+        allCloneKeyframes.push(...track.cloneKeyframes);
+        track.cloneKeyframes.length = 0;
+      }
+    });
+
+    if (allCloneKeyframes.length > 0)
+      this.anim?.addKeyframes(allCloneKeyframes);
+  }
+
+  clearCloneKeyframes() {
+    if (!this.anim) return;
+
+    const changedTracks: Track[] = [];
+
+    this.anim.tracks.forEach((track) => {
+      if (track.cloneKeyframes.length > 0) {
+        track.cloneKeyframes.length = 0;
+        changedTracks.push(track);
+      }
+    });
+
+    changedTracks.forEach((track) => {
+      track.nodifyKeyframeChange();
+    });
   }
 
   isSelected(value: AnimNode | string): boolean {

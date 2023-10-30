@@ -1,7 +1,7 @@
 import Action from "../../global/Actions";
 import { toDecimal2 } from "../../global/Common";
 import { AnimNode } from "./AnimNode";
-import { keyframeIndexToTime } from "./AnimTool";
+import { getDefaultAttrValue, keyframeIndexToTime } from "./AnimTool";
 import { Keyframe } from "./Keyframe";
 import { Track } from "./Track";
 
@@ -56,7 +56,7 @@ export class Anim {
     let values: number[] | undefined = track.getValues(time, this.fps);
 
     if (values === undefined || values.length === 0) {
-      text = "";
+      text = getDefaultAttrValue(track.attr);
     } else {
       for (let i = 0; i < values.length; i++) {
         text += toDecimal2(values[i]);
@@ -72,7 +72,7 @@ export class Anim {
     track.sortKeyframes();
     this.calcTimeLength();
 
-    track.onKeyframesChange.forEach((func) => func(track.keyframes));
+    track.nodifyKeyframeChange();
     this.onAddKeyframe?.([keyframe]);
 
     this._isDirty = true;
@@ -88,7 +88,7 @@ export class Anim {
       for (let i = track.keyframes.length - 1; i >= 0; i--) {
         const _keyframe = track.keyframes[i];
         if (_keyframe.index === index) {
-          keyframes.splice(i, 1);
+          track.keyframes.splice(i, 1);
         }
       }
       track.keyframes.push(keyframe);
@@ -97,7 +97,7 @@ export class Anim {
 
     changedTracks.forEach((track) => {
       track.sortKeyframes();
-      track.onKeyframesChange.forEach((func) => func(track.keyframes));
+      track.nodifyKeyframeChange();
     });
     this.calcTimeLength();
 
@@ -177,7 +177,7 @@ export class Anim {
       track.sortKeyframes();
 
       if (hasRemoveKeyframe) {
-        track.onKeyframesChange.forEach((func) => func(track.keyframes));
+        track.nodifyKeyframeChange();
       }
     });
 
@@ -203,7 +203,7 @@ export class Anim {
         }
       }
       if (_hasChange) {
-        track.onKeyframesChange.forEach((func) => func(keyframes));
+        track.nodifyKeyframeChange();
       }
     });
 
