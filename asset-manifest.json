@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/timeline-app/static/css/main.5b7daa7c.css",
-    "main.js": "/timeline-app/static/js/main.8a7961dc.js",
-    "index.html": "/timeline-app/index.html",
-    "main.5b7daa7c.css.map": "/timeline-app/static/css/main.5b7daa7c.css.map",
-    "main.8a7961dc.js.map": "/timeline-app/static/js/main.8a7961dc.js.map"
+    "main.css": "/static/css/main.092da2d3.css",
+    "main.js": "/static/js/main.0df18aac.js",
+    "index.html": "/index.html",
+    "main.092da2d3.css.map": "/static/css/main.092da2d3.css.map",
+    "main.0df18aac.js.map": "/static/js/main.0df18aac.js.map"
   },
   "entrypoints": [
-    "static/css/main.5b7daa7c.css",
-    "static/js/main.8a7961dc.js"
+    "static/css/main.092da2d3.css",
+    "static/js/main.0df18aac.js"
   ]
 }
