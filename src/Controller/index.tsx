@@ -20,6 +20,10 @@ export default function Controller(props: ControllerProps) {
     props.animController?.play();
   }
 
+  function onPauseClick(e: any) {
+    props.animController?.stop();
+  }
+
   function onFrameCountKeyDown(e: any) {
     if (e.code === "Enter" || e.code === "NumpadEnter") {
       onFrameCountChange();
@@ -70,7 +74,7 @@ export default function Controller(props: ControllerProps) {
             <FontAwesomeIcon icon={icon({ name: "play" })} />
           </a>
         </button>
-        <button className="btn" css={css_control_btn} onClick={onPlayClick}>
+        <button className="btn" css={css_control_btn} onClick={onPauseClick}>
           <a data-tooltip-id="tooltip" data-tooltip-content="Pause">
             <FontAwesomeIcon icon={icon({ name: "pause" })} />
           </a>

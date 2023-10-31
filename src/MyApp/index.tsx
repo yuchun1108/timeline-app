@@ -24,8 +24,16 @@ export default function MyApp(props: MyAppProps) {
   const { world } = props;
   const [animController, setAnimController] = useState<
     AnimController | undefined
-  >(undefined);
-  const [anim, setAnim] = useState<Anim | undefined>(undefined);
+  >(
+    world.getAllObjects().length > 0
+      ? world.getAllObjects()[0].entity?.animController
+      : undefined
+  );
+  const [anim, setAnim] = useState<Anim | undefined>(
+    world.getAllObjects().length > 0
+      ? world.getAllObjects()[0].entity?.animController.anim
+      : undefined
+  );
   const [tracks, setTracks] = useState<Track[] | undefined>(undefined);
 
   const timeBarHeight = 26;

@@ -19,7 +19,7 @@ export function loadWorldAnim(world: World) {
   const pathList = localStorage.getItem("pathList");
 
   if (pathList !== getPathList(objs)) {
-    console.error("world is not the same");
+    console.log("world is not the same");
     return;
   }
 

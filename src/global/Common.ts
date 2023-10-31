@@ -33,3 +33,11 @@ export function onlyNumbers(array: Array<any>) {
 export function toDecimal2(num: number): number {
   return Math.round((num + Number.EPSILON) * 100) / 100;
 }
+
+export function arrayBuffToString(arrBuff: ArrayBuffer): string {
+  return String.fromCharCode(...new Uint8Array(arrBuff));
+}
+
+export function stringToArrayBuff(str: string): ArrayBuffer {
+  return Uint8Array.from([...str].map((ch) => ch.charCodeAt(0))).buffer;
+}

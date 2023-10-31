@@ -19,7 +19,13 @@ interface Option {
 
 export default function ModelSelector(props: ModelSelectorProps) {
   const { world } = props;
-  const [options, setOptions] = useState<Option[]>([]);
+  const [options, setOptions] = useState<Option[]>(
+    world.getAllObjects()?.map<Option>((obj) => ({
+      path: obj.entity ? obj.entity.path : "no path",
+      id: obj.id,
+      uuid: obj.uuid,
+    }))
+  );
 
   useEffect(() => {
     world.onHierarchyChange.add(() => {

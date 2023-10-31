@@ -1,6 +1,8 @@
 import * as THREE from "three";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import Action from "../global/Actions";
 import { saveWorldAnim } from "../global/Storage";
+import Entity from "./Entity";
 
 export default class World {
   camera: THREE.PerspectiveCamera;
@@ -9,6 +11,9 @@ export default class World {
 
   myAppHeight: number;
   onHierarchyChange = new Action<() => void>();
+  boxHelper: THREE.BoxHelper;
+  controls: OrbitControls;
+  group: THREE.Object3D | undefined = undefined;
 
   private lastTime: number = -1;
 
@@ -17,8 +22,8 @@ export default class World {
     const width = window.innerWidth;
     const height = window.innerHeight - this.myAppHeight;
 
-    this.camera = this.setupCamera(width, height);
-    this.camera.position.z = 1;
+    this.camera = new THREE.PerspectiveCamera(70, width / height, 0.05, 1000);
+    this.camera.position.set(0, 0, 10);
 
     this.scene = new THREE.Scene();
 
@@ -38,14 +43,17 @@ export default class World {
     dirLight.shadow.camera.left = -120;
     dirLight.shadow.camera.right = 120;
     this.scene.add(dirLight);
+
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.controls.update();
+    this.controls.enablePan = false;
+    this.controls.enableDamping = true;
+
+    this.boxHelper = new THREE.BoxHelper(this.scene);
+    //this.scene.add(this.boxHelper);
   }
 
   //#region setup
-
-  setupCamera(width: number, height: number) {
-    const camera = new THREE.PerspectiveCamera(70, width / height, 0.01, 10);
-    return camera;
-  }
 
   setupRenderer(
     param: THREE.WebGLRendererParameters,
@@ -95,13 +103,63 @@ export default class World {
     }
   }
 
-  addObject(obj: THREE.Object3D) {
-    this.scene.add(obj);
+  clearGroup() {
+    if (this.group) this.scene.remove(this.group);
+
+    this.onHierarchyChange.forEach((f) => f());
+  }
+
+  setGroup(group: THREE.Object3D) {
+    this.clearGroup();
+    this.group = group;
+
+    this.group.traverse((obj) => {
+      obj.entity = new Entity(obj);
+    });
+
+    this.scene.add(group);
     this.scene.traverse((obj) => {
       obj.entity?.fillPath();
     });
 
+    this.updateBoxHelper();
+
     this.onHierarchyChange.forEach((f) => f());
+  }
+
+  private updateBoxHelper() {
+    this.boxHelper.update();
+    console.log(this.boxHelper);
+    const attr = this.boxHelper.geometry.attributes;
+    const count = attr.position.count;
+    const arr = attr.position.array;
+    const min: THREE.Vector3 = new THREE.Vector3(
+      Number.POSITIVE_INFINITY,
+      Number.POSITIVE_INFINITY,
+      Number.POSITIVE_INFINITY
+    );
+    const max: THREE.Vector3 = new THREE.Vector3(
+      Number.NEGATIVE_INFINITY,
+      Number.NEGATIVE_INFINITY,
+      Number.NEGATIVE_INFINITY
+    );
+    if (arr instanceof Float32Array) {
+      for (let i = 0; i < count; i++) {
+        min.x = Math.min(min.x, arr[i * 3 + 0]);
+        min.y = Math.min(min.y, arr[i * 3 + 1]);
+        min.z = Math.min(min.z, arr[i * 3 + 2]);
+
+        max.x = Math.max(max.x, arr[i * 3 + 0]);
+        max.y = Math.max(max.y, arr[i * 3 + 1]);
+        max.z = Math.max(max.z, arr[i * 3 + 2]);
+      }
+    }
+
+    const centerY = (min.y + max.y) / 2;
+    this.camera.position.set(0, centerY, 2 * (max.y - min.y));
+    this.camera.quaternion.identity();
+    this.controls.target.set(0, (min.y + max.y) / 2, 0);
+    console.log(min, max);
   }
 
   getAllObjects(): THREE.Object3D[] {
