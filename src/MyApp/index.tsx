@@ -52,7 +52,7 @@ export default function MyApp(props: MyAppProps) {
         setAnim(objs[0].entity?.animController.anim);
       }
     });
-  }, []);
+  }, [world]);
 
   function onObjectSelect(objId: number) {
     const obj = world.scene.getObjectById(objId);
@@ -78,7 +78,7 @@ export default function MyApp(props: MyAppProps) {
     return () => {
       anim?.onTracksChange.remove(onTracksChange);
     };
-  }, [anim, animController]);
+  }, [anim, props.selector, animController, onTracksChange]);
 
   function onAddTrack() {
     if (anim) {

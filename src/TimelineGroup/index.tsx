@@ -16,11 +16,6 @@ interface TimelineGroupProps {
   tracks: Track[] | undefined;
 }
 
-interface MarqueePos {
-  trackIndex: number;
-  frameIndex: number;
-}
-
 const css_timeline_group = css`
   grid-area: timeline;
   position: relative;
@@ -134,7 +129,7 @@ export default function TimelineGroup(props: TimelineGroupProps) {
         isAddOp.current
       );
     });
-  }, [tracks]);
+  }, [tracks, selector]);
 
   useEffect(() => {
     marquee.onRectChange.add(onRectChange);

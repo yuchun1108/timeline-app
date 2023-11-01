@@ -91,7 +91,7 @@ export default function Inspector(props: InspectorProps) {
     return () => {
       selector.onSelectChange.remove(onSelectChange);
     };
-  }, [onSelectChange]);
+  }, [selector, onSelectChange]);
 
   const track =
     selectedNodes.length > 0 && selectedNodes[0] instanceof Track

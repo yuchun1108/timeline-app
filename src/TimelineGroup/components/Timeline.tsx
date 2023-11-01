@@ -41,7 +41,7 @@ export default function Timeline(props: TimelineProps) {
     return () => {
       track.onKeyframesChange.remove(onKeyframesChange);
     };
-  }, [track]);
+  }, [track, onKeyframesChange]);
 
   const keyFrameDots: ReactElement[] = [];
 

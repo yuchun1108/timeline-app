@@ -55,15 +55,12 @@ export default function KeyframeDot(props: KeyframeProps) {
 
   const onChange = useCallback(() => {
     setIndex(keyframe.index);
-    setIsCorrect(props.keyframe.values !== undefined);
+    setIsCorrect(keyframe.values !== undefined);
   }, [keyframe]);
 
-  const onSelectedChange = useCallback(
-    (_selectState: 0 | 1 | 2) => {
-      setSelectState(_selectState);
-    },
-    [keyframe]
-  );
+  const onSelectedChange = useCallback((_selectState: 0 | 1 | 2) => {
+    setSelectState(_selectState);
+  }, []);
 
   useEffect(() => {
     keyframe.onChange.add(onChange);
@@ -72,7 +69,7 @@ export default function KeyframeDot(props: KeyframeProps) {
       keyframe.onChange.remove(onChange);
       keyframe.onSelectedChange.remove(onSelectedChange);
     };
-  }, [onChange, onSelectedChange]);
+  }, [keyframe, onChange, onSelectedChange]);
 
   function onDragStart(e: any) {
     e.preventDefault();

@@ -40,7 +40,7 @@ export default function MarqueeRect(props: MarqueeRectProps) {
     marquee.onIsShowChange.add((_isShow) => {
       setIsShow(_isShow);
     });
-  }, []);
+  }, [marquee]);
 
   return isShow ? (
     <div

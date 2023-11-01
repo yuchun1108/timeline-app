@@ -57,6 +57,7 @@
     ]
   },
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@types/react-scroll-sync": "^0.8.6",
     "@types/uuid": "^9.0.1"
   }

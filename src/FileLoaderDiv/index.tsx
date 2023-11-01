@@ -101,14 +101,14 @@ export default function FileLoaderDiv({ world }: FileLoaderDivProps) {
 
   return (
     <div css={css_div}>
-      <a
+      <span
         data-tooltip-id="tooltip"
         data-tooltip-content="Upload (fbx / glb / gltf)"
       >
         <button css={css_btn} onClick={onUploadClick} className="btn">
           <FontAwesomeIcon icon={icon({ name: "upload" })} />
         </button>
-      </a>
+      </span>
       <input
         ref={fileInputRef}
         css={css_fileLoader}
@@ -116,11 +116,11 @@ export default function FileLoaderDiv({ world }: FileLoaderDivProps) {
         accept=".fbx,.gltf"
         onChange={onChange}
       ></input>
-      <a data-tooltip-id="tooltip" data-tooltip-content="Clear Scene">
+      <span data-tooltip-id="tooltip" data-tooltip-content="Clear Scene">
         <button css={css_btn} onClick={onClearClick} className="btn">
           <FontAwesomeIcon icon={icon({ name: "trash" })} />
         </button>
-      </a>
+      </span>
     </div>
   );
 }

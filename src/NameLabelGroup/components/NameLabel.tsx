@@ -39,12 +39,9 @@ export default function NameLabel(props: NameLabelProps) {
     setAttr(track.attr);
   }, [track]);
 
-  const onSelectedChange = useCallback(
-    (_selectState: 0 | 1 | 2) => {
-      setSelectState(_selectState);
-    },
-    [track]
-  );
+  const onSelectedChange = useCallback((_selectState: 0 | 1 | 2) => {
+    setSelectState(_selectState);
+  }, []);
 
   useEffect(() => {
     track.onChange.add(onChange);
@@ -54,7 +51,7 @@ export default function NameLabel(props: NameLabelProps) {
       track.onChange.remove(onChange);
       track.onSelectedChange.remove(onSelectedChange);
     };
-  }, [onChange, onSelectedChange]);
+  }, [track, onChange, onSelectedChange]);
 
   function onClick(e: any) {
     console.log(e);

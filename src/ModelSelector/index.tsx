@@ -38,7 +38,7 @@ export default function ModelSelector(props: ModelSelectorProps) {
         }))
       );
     });
-  }, []);
+  }, [world]);
 
   function onOptionSelect(e: any) {
     props.onObjectSelect(Number(e.target.value));
@@ -72,9 +72,9 @@ export default function ModelSelector(props: ModelSelectorProps) {
         css={css_btn}
         onClick={props.onAddTrack}
       >
-        <a data-tooltip-id="tooltip" data-tooltip-content="Add Track">
+        <span data-tooltip-id="tooltip" data-tooltip-content="Add Track">
           <FontAwesomeIcon icon={icon({ name: "plus" })} />
-        </a>
+        </span>
       </button>
     </div>
   );

@@ -70,18 +70,18 @@ export default function Controller(props: ControllerProps) {
     <div id="controller" css={css_controller}>
       <div className="control-buttons" css={css_control_button_group}>
         <button className="btn" css={css_control_btn} onClick={onPlayClick}>
-          <a data-tooltip-id="tooltip" data-tooltip-content="Play">
+          <span data-tooltip-id="tooltip" data-tooltip-content="Play">
             <FontAwesomeIcon icon={icon({ name: "play" })} />
-          </a>
+          </span>
         </button>
         <button className="btn" css={css_control_btn} onClick={onPauseClick}>
-          <a data-tooltip-id="tooltip" data-tooltip-content="Pause">
+          <span data-tooltip-id="tooltip" data-tooltip-content="Pause">
             <FontAwesomeIcon icon={icon({ name: "pause" })} />
-          </a>
+          </span>
         </button>
       </div>
       <div className="frame-size" css={css_frame_size}>
-        <a data-tooltip-id="tooltip" data-tooltip-content="Frame Count">
+        <span data-tooltip-id="tooltip" data-tooltip-content="Frame Count">
           <input
             type={"number"}
             value={frameCount}
@@ -98,8 +98,8 @@ export default function Controller(props: ControllerProps) {
           >
             <FontAwesomeIcon icon={icon({ name: "check" })} />
           </button>
-        </a>
-        <a data-tooltip-id="tooltip" data-tooltip-content="Frame Width">
+        </span>
+        <span data-tooltip-id="tooltip" data-tooltip-content="Frame Width">
           <input
             type={"range"}
             min={5}
@@ -107,7 +107,7 @@ export default function Controller(props: ControllerProps) {
             style={{ width: 70 }}
             onChange={onFrameWidthChange}
           />
-        </a>
+        </span>
       </div>
     </div>
   );
