@@ -8,6 +8,7 @@ body {
   color: #b1b8ba;
   font-size: 16px;
   cursor: pointer;
+  border-radius: 4px;
 }
 
 #three-container {

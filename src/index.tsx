@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import FileLoaderDiv from "./FileLoaderDiv";
 import MyApp from "./MyApp";
+import TopController from "./TopController";
 import { stringToArrayBuff } from "./global/Common";
 import { loadWorldAnim } from "./global/Storage";
 import "./index.css";
@@ -19,6 +20,7 @@ const selector = new AnimSelector();
 root.render(
   <React.StrictMode>
     <FileLoaderDiv world={world} />
+    <TopController world={world} />
     <MyApp world={world} selector={selector} />
   </React.StrictMode>
 );

@@ -14,6 +14,7 @@ export default class World {
   boxHelper: THREE.BoxHelper;
   controls: OrbitControls;
   group: THREE.Object3D | undefined = undefined;
+  dirLight;
 
   private lastTime: number = -1;
 
@@ -22,7 +23,7 @@ export default class World {
     const width = window.innerWidth;
     const height = window.innerHeight - this.myAppHeight;
 
-    this.camera = new THREE.PerspectiveCamera(70, width / height, 0.05, 1000);
+    this.camera = new THREE.PerspectiveCamera(70, width / height, 0.05, 500);
     this.camera.position.set(0, 0, 10);
 
     this.scene = new THREE.Scene();
@@ -31,18 +32,20 @@ export default class World {
 
     this.registerResize();
 
-    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 5);
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 3);
     hemiLight.position.set(0, 200, 0);
     this.scene.add(hemiLight);
 
-    const dirLight = new THREE.DirectionalLight(0xffffff, 5);
-    dirLight.position.set(0, 200, 100);
-    dirLight.castShadow = true;
-    dirLight.shadow.camera.top = 180;
-    dirLight.shadow.camera.bottom = -100;
-    dirLight.shadow.camera.left = -120;
-    dirLight.shadow.camera.right = 120;
-    this.scene.add(dirLight);
+    this.dirLight = new THREE.DirectionalLight(0xffffff, 5);
+    this.dirLight.position.set(0, 200, 100);
+    this.dirLight.castShadow = true;
+
+    console.log(this.dirLight.shadow.camera);
+
+    // dirLight.shadow.mapSize.width = 2048;
+    // dirLight.shadow.mapSize.height = 2048;
+    this.dirLight.shadow.bias = -0.0001;
+    this.scene.add(this.dirLight);
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.update();
@@ -63,12 +66,27 @@ export default class World {
     const renderer = new THREE.WebGLRenderer(param);
     renderer.setSize(width, height);
     renderer.setAnimationLoop(this.update.bind(this));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.autoUpdate = true;
+    renderer.shadowMap.type = THREE.PCFShadowMap;
     const threeContainer = document.getElementById("three-container");
     threeContainer?.appendChild(renderer.domElement);
     return renderer;
   }
 
   //#endregion
+
+  setAllAnimPlay() {
+    this.scene.traverse((obj) => {
+      obj.entity?.animController.play();
+    });
+  }
+
+  setAllAnimStop() {
+    this.scene.traverse((obj) => {
+      obj.entity?.animController.stop();
+    });
+  }
 
   update(time: number) {
     time *= 0.001;
@@ -80,12 +98,21 @@ export default class World {
       obj.entity?.update(deltaTime);
     });
 
-    this.renderer.render(this.scene, this.camera);
+    const isDirty = this.checkHasDirty();
 
-    this.checkHasDirtyAndSave();
+    if (isDirty) {
+      saveWorldAnim(this);
+
+      this.scene.traverse((obj) => {
+        obj.entity?.animController.forceUpdate();
+      });
+      // console.log("save");
+    }
+
+    this.renderer.render(this.scene, this.camera);
   }
 
-  checkHasDirtyAndSave() {
+  checkHasDirty(): boolean {
     let isDirty = false;
     this.scene.traverse((obj) => {
       if (obj.entity) {
@@ -96,11 +123,7 @@ export default class World {
         }
       }
     });
-
-    if (isDirty) {
-      saveWorldAnim(this);
-      console.log("save");
-    }
+    return isDirty;
   }
 
   clearGroup() {
@@ -114,6 +137,10 @@ export default class World {
     this.group = group;
 
     this.group.traverse((obj) => {
+      if (obj instanceof THREE.Mesh) {
+        obj.castShadow = true;
+        obj.receiveShadow = true;
+      }
       obj.entity = new Entity(obj);
     });
 
@@ -129,7 +156,6 @@ export default class World {
 
   private updateBoxHelper() {
     this.boxHelper.update();
-    console.log(this.boxHelper);
     const attr = this.boxHelper.geometry.attributes;
     const count = attr.position.count;
     const arr = attr.position.array;
@@ -159,7 +185,18 @@ export default class World {
     this.camera.position.set(0, centerY, 2 * (max.y - min.y));
     this.camera.quaternion.identity();
     this.controls.target.set(0, (min.y + max.y) / 2, 0);
-    console.log(min, max);
+
+    this.dirLight.shadow.camera.top = max.y;
+    this.dirLight.shadow.camera.bottom = min.y;
+    this.dirLight.shadow.camera.left = min.x;
+    this.dirLight.shadow.camera.right = max.x;
+
+    console.log(this.dirLight.shadow);
+
+    // this.dirLight.shadow.camera.top = 6;
+    // dirLight.shadow.camera.bottom = -4;
+    // dirLight.shadow.camera.left = -1;
+    // dirLight.shadow.camera.right = 1;
   }
 
   getAllObjects(): THREE.Object3D[] {

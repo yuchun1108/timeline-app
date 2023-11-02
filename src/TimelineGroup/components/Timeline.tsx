@@ -13,6 +13,7 @@ interface TimelineProps {
   index: number;
   moveOffset: number;
   selector: AnimSelector;
+  fps: number;
 }
 
 const css_timeline = css`
@@ -101,6 +102,7 @@ export default function Timeline(props: TimelineProps) {
         trackUuid={track.uuid}
         frameSize={props.frameSize}
         index={props.index}
+        fps={props.fps}
       />
       {keyFrameDots}
     </div>

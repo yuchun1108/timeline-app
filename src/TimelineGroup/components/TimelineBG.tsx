@@ -7,6 +7,7 @@ interface TimelineBGProps {
   trackUuid: string;
   index: number;
   frameSize: FrameSize;
+  fps: number;
 }
 
 const css_timeline_bg = css`
@@ -36,7 +37,12 @@ export default function TimelineBG(props: TimelineBGProps) {
       const context: CanvasRenderingContext2D | null = canvas.getContext("2d");
 
       if (context)
-        drawTimelineFrame(context, props.frameSize, props.frameSize.height - 1);
+        drawTimelineFrame(
+          context,
+          props.frameSize,
+          props.fps,
+          props.frameSize.height - 1
+        );
     }
   }, [props.frameSize]);
 

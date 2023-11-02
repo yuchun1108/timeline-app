@@ -1,5 +1,4 @@
 import { Object3D } from "three";
-import Entity from "../three/Entity";
 import World from "../three/World";
 
 export function saveWorldAnim(world: World) {
@@ -9,7 +8,7 @@ export function saveWorldAnim(world: World) {
   objs.forEach((obj) => {
     const entity = obj.entity;
     if (!entity) return;
-    const key = getObjKey(entity);
+    const key = getObjKey(obj);
     localStorage.setItem(key, entity.animController.anim.toJson());
   });
 }
@@ -26,14 +25,14 @@ export function loadWorldAnim(world: World) {
   objs.forEach((obj) => {
     const entity = obj.entity;
     if (!entity) return;
-    const key = getObjKey(entity);
+    const key = getObjKey(obj);
     const json = localStorage.getItem(key);
     if (json) entity.animController.anim.fromJson(json);
   });
 }
 
-function getObjKey(entity: Entity) {
-  return "anim_" + entity.path;
+function getObjKey(obj: Object3D) {
+  return "anim_" + obj.id;
 }
 
 function getPathList(objs: Object3D[]): string {

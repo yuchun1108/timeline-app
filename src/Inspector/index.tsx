@@ -78,6 +78,30 @@ const css_attr_input = css`
   width: 50%;
 `;
 
+let tooltip_attr_list = "<div><h3>Available Attrs</h3><ul>";
+const attr_list = [
+  "position",
+  "position-x",
+  "position-y",
+  "position-z",
+  "position-xy",
+  "position-yz",
+  "position-xz",
+  "scale",
+  "scale-x",
+  "scale-y",
+  "scale-z",
+  "scale-xyz",
+  "rotation",
+  "rotation-x",
+  "rotation-y",
+  "rotation-z",
+];
+attr_list.forEach((attr) => {
+  tooltip_attr_list += "<li>" + attr + "</li>";
+});
+tooltip_attr_list += "</ul></div>";
+
 export default function Inspector(props: InspectorProps) {
   const { selector } = props;
   const [selectedNodes, setSelectedNodes] = useState<AnimNode[]>([]);
@@ -103,11 +127,12 @@ export default function Inspector(props: InspectorProps) {
       ? selectedNodes[0]
       : undefined;
 
-  const [ease, setEase] = useState<string>(keyframe ? keyframe.easeName : "");
-
   function onEaseChange(e: any) {
-    setEase(e.target.value);
     keyframe?.setEaseName(e.target.value);
+  }
+
+  function onOptChange(e: any) {
+    track?.setOpt(e.target.value);
   }
 
   function onInOutChange(e: any) {
@@ -135,6 +160,7 @@ export default function Inspector(props: InspectorProps) {
                 css={css_attr_input}
                 type="text"
                 autoCorrect="off"
+                autoComplete="off"
                 defaultValue={track.targetText}
                 onChange={(e: any) => {
                   track.setTargetText(e.target.value);
@@ -143,20 +169,39 @@ export default function Inspector(props: InspectorProps) {
             </label>
           </div>
 
+          <span data-tooltip-id="tooltip" data-tooltip-html={tooltip_attr_list}>
+            <div css={css_attr}>
+              <label css={css_attr_label} htmlFor="input-track-attr">
+                attr
+              </label>
+              <input
+                id="input-track-attr"
+                css={css_attr_input}
+                type="text"
+                autoCorrect="off"
+                autoComplete="off"
+                defaultValue={track.attr}
+                onChange={(e: any) => {
+                  track.setAttr(e.target.value);
+                }}
+              />
+            </div>
+          </span>
+
           <div css={css_attr}>
-            <label css={css_attr_label} htmlFor="input-track-attr">
-              attr
+            <label css={css_attr_label} htmlFor="selector-track-opt">
+              opt
             </label>
-            <input
-              id="input-track-attr"
+            <select
+              id="selector-track-opt"
               css={css_attr_input}
-              type="text"
-              autoCorrect="off"
-              defaultValue={track.attr}
-              onChange={(e: any) => {
-                track.setAttr(e.target.value);
-              }}
-            />
+              style={{ width: "40%" }}
+              defaultValue={track.opt}
+              onChange={onOptChange}
+            >
+              <option value="add">add</option>
+              <option value="override">override</option>
+            </select>
           </div>
         </div>
       </>
@@ -182,6 +227,7 @@ export default function Inspector(props: InspectorProps) {
               css={css_attr_input}
               type="text"
               autoCorrect="off"
+              autoComplete="off"
               defaultValue={keyframe.text}
               onChange={(e: any) => {
                 keyframe.setText(e.target.value);
@@ -199,7 +245,7 @@ export default function Inspector(props: InspectorProps) {
               style={{ width: "30%" }}
               defaultValue={keyframe.easeEnd}
               onChange={onInOutChange}
-              disabled={ease === "" || ease === "linear"}
+              // disabled={ease === "" || ease === "linear"}
             >
               <option value="in">in</option>
               <option value="out">out</option>
@@ -245,14 +291,6 @@ export default function Inspector(props: InspectorProps) {
         <FontAwesomeIcon icon={icon({ name: "file-export" })} />
         <span css={css_exportBtn_text}>Export</span>
       </button>
-
-      {/* <button
-        onClick={() => {
-          localStorage.clear();
-        }}
-      >
-        clear storage
-      </button> */}
     </div>
   );
 }

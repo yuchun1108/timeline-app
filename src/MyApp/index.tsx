@@ -9,56 +9,57 @@ import ModelSelector from "../ModelSelector";
 import NameLabelGroup from "../NameLabelGroup";
 import Timebar from "../Timebar";
 import TimelineGroup from "../TimelineGroup";
-import FrameSize from "../global/FrameSize";
+import FrameSize, { loadFrameSize, saveFrameSize } from "../global/FrameSize";
 import AnimSelector from "../three/AnimSelector";
 import World from "../three/World";
-import { Anim, Track } from "../three/anim/Anim";
-import AnimController from "../three/anim/AnimController";
+import { Track } from "../three/anim/Anim";
 
 interface MyAppProps {
   world: World;
   selector: AnimSelector;
 }
 
+function GetDefaultObject(world: World) {
+  const selectObj = localStorage.getItem("selected-object");
+  if (!selectObj) return undefined;
+
+  const selectObjId = Number(selectObj);
+  return world.scene.getObjectById(selectObjId);
+}
+
+const timeBarHeight = 26;
+
 export default function MyApp(props: MyAppProps) {
-  const { world } = props;
-  const [animController, setAnimController] = useState<
-    AnimController | undefined
-  >(
-    world.getAllObjects().length > 0
-      ? world.getAllObjects()[0].entity?.animController
-      : undefined
-  );
-  const [anim, setAnim] = useState<Anim | undefined>(
-    world.getAllObjects().length > 0
-      ? world.getAllObjects()[0].entity?.animController.anim
-      : undefined
+  const { world, selector } = props;
+  const [object3D, setObject3D] = useState<THREE.Object3D | undefined>(
+    undefined
   );
   const [tracks, setTracks] = useState<Track[] | undefined>(undefined);
 
-  const timeBarHeight = 26;
-  const [frameSize, setFrameSize] = useState<FrameSize>({
-    width: 20,
-    count: 60,
-    height: 20,
-    fps: 24,
-  });
+  const [frameSize, setFrameSize] = useState<FrameSize>(loadFrameSize());
+
+  const animController = object3D?.entity?.animController;
+  const anim = animController?.anim;
 
   useEffect(() => {
     world.onHierarchyChange.add(() => {
-      const objs = world.getAllObjects();
-      if (objs.length > 0) {
-        setAnimController(objs[0].entity?.animController);
-        setAnim(objs[0].entity?.animController.anim);
-      }
+      setObject3D(GetDefaultObject(world));
+      // const objs = world.getAllObjects();
+      // if (objs.length > 0) {
+
+      //   setObject3D(objs[0]);
+      // }
     });
   }, [world]);
 
   function onObjectSelect(objId: number) {
     const obj = world.scene.getObjectById(objId);
+    setObject3D(obj);
 
-    setAnimController(obj?.entity?.animController);
-    setAnim(obj?.entity?.animController.anim);
+    if (obj && obj.entity) {
+      console.log(obj.id);
+      localStorage.setItem("selected-object", obj.id.toString());
+    }
   }
 
   const onTracksChange = useCallback((tracks: Track[]) => {
@@ -67,7 +68,7 @@ export default function MyApp(props: MyAppProps) {
 
   useEffect(() => {
     anim?.onTracksChange.add(onTracksChange);
-    props.selector.setAnim(anim, animController);
+    selector.setAnim(anim, animController);
     if (anim) {
       setTracks([...anim.tracks]);
       setFrameSize((prev) => ({ ...prev, fps: anim.fps }));
@@ -78,7 +79,11 @@ export default function MyApp(props: MyAppProps) {
     return () => {
       anim?.onTracksChange.remove(onTracksChange);
     };
-  }, [anim, props.selector, animController, onTracksChange]);
+  }, [object3D, selector, onTracksChange]);
+
+  useEffect(() => {
+    saveFrameSize(frameSize);
+  }, [frameSize]);
 
   function onAddTrack() {
     if (anim) {
@@ -106,7 +111,7 @@ export default function MyApp(props: MyAppProps) {
     height: 200px;
     display: grid;
     grid-template-columns: 200px auto 200px;
-    grid-template-rows: 30px ${timeBarHeight - 1}px auto;
+    grid-template-rows: 34px ${timeBarHeight - 1}px auto;
     grid-template-areas:
       "controller controller controller"
       "model-selector timebar inspector"
@@ -132,7 +137,7 @@ export default function MyApp(props: MyAppProps) {
         />
         <NameLabelGroup
           height={frameSize.height}
-          selector={props.selector}
+          selector={selector}
           tracks={tracks}
         />
 
@@ -140,15 +145,16 @@ export default function MyApp(props: MyAppProps) {
           frameSize={frameSize}
           height={timeBarHeight}
           animController={animController}
+          fps={anim?.fps ?? 30}
         />
         <TimelineGroup
           frameSize={frameSize}
-          selector={props.selector}
+          selector={selector}
           anim={anim}
           tracks={tracks}
         />
 
-        <Inspector world={world} anim={anim} selector={props.selector} />
+        <Inspector world={world} anim={anim} selector={selector} />
         <Tooltip id="tooltip" />
       </div>
     </ScrollSync>

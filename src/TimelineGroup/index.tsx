@@ -186,6 +186,7 @@ export default function TimelineGroup(props: TimelineGroupProps) {
         <Timeline
           frameSize={props.frameSize}
           track={track}
+          fps={props.anim?.fps ?? 30}
           index={i}
           key={track.uuid}
           moveOffset={moveOffset}

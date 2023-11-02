@@ -69,16 +69,16 @@ export default function Controller(props: ControllerProps) {
   return (
     <div id="controller" css={css_controller}>
       <div className="control-buttons" css={css_control_button_group}>
-        <button className="btn" css={css_control_btn} onClick={onPlayClick}>
-          <span data-tooltip-id="tooltip" data-tooltip-content="Play">
+        <span data-tooltip-id="tooltip" data-tooltip-content="Play">
+          <button className="btn" css={css_control_btn} onClick={onPlayClick}>
             <FontAwesomeIcon icon={icon({ name: "play" })} />
-          </span>
-        </button>
-        <button className="btn" css={css_control_btn} onClick={onPauseClick}>
-          <span data-tooltip-id="tooltip" data-tooltip-content="Pause">
+          </button>
+        </span>
+        <span data-tooltip-id="tooltip" data-tooltip-content="Pause">
+          <button className="btn" css={css_control_btn} onClick={onPauseClick}>
             <FontAwesomeIcon icon={icon({ name: "pause" })} />
-          </span>
-        </button>
+          </button>
+        </span>
       </div>
       <div className="frame-size" css={css_frame_size}>
         <span data-tooltip-id="tooltip" data-tooltip-content="Frame Count">

@@ -7,6 +7,7 @@ import AnimController from "../three/anim/AnimController";
 
 interface TimebarProps {
   frameSize: FrameSize;
+  fps: number;
   height: number;
   animController: AnimController | undefined;
 }
@@ -63,7 +64,12 @@ export default function Timebar(props: TimebarProps) {
       canvas.height = props.height - 1;
       const context: CanvasRenderingContext2D | null = canvas.getContext("2d");
       if (context)
-        drawTimelineFrame(context, props.frameSize, props.height - 1);
+        drawTimelineFrame(
+          context,
+          props.frameSize,
+          props.fps,
+          props.height - 1
+        );
     }
   }, [props.frameSize, props.height]);
 
@@ -79,16 +85,13 @@ export default function Timebar(props: TimebarProps) {
 
   function posXtoTime(posX: number) {
     return (
-      (posX - props.frameSize.width * 0.5) /
-      props.frameSize.width /
-      props.frameSize.fps
+      (posX - props.frameSize.width * 0.5) / props.frameSize.width / props.fps
     );
   }
 
   function timeToPosX(timePos: number) {
     return (
-      timePos * props.frameSize.width * props.frameSize.fps +
-      props.frameSize.width * 0.5
+      timePos * props.frameSize.width * props.fps + props.frameSize.width * 0.5
     );
   }
 

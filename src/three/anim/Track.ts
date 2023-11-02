@@ -1,3 +1,4 @@
+import * as THREE from "three";
 import { inverseLerp, lerp } from "three/src/math/MathUtils";
 import Action from "../../global/Actions";
 import { AnimNode } from "./AnimNode";
@@ -9,6 +10,7 @@ export class Track extends AnimNode {
   targetText: string = "";
   targetPath: string[] = [""];
   attr: string = "";
+  opt: string = "add";
   keyframes: Keyframe[] = [];
   cloneKeyframes: Keyframe[] = [];
   _isDirty: boolean = false;
@@ -36,7 +38,6 @@ export class Track extends AnimNode {
     this.targetText = target;
 
     this.parseTargetPath();
-    console.log(this.targetText, this.targetPath);
     this.onChange.forEach((func) => func());
     this.markDirty();
   }
@@ -59,11 +60,17 @@ export class Track extends AnimNode {
     this.markDirty();
   }
 
+  setOpt(opt: string) {
+    this.opt = opt;
+    this.onChange.forEach((func) => func());
+    this.markDirty();
+  }
+
   sortKeyframes() {
     this.keyframes.sort((a, b) => a.index - b.index);
   }
 
-  apply(obj: THREE.Object3D, time: number, fps: number) {
+  getTarget(obj: THREE.Object3D): THREE.Object3D | undefined {
     let target: THREE.Object3D | undefined = obj;
 
     if (this.targetPath.length === 0 || this.targetPath[0] === "") {
@@ -76,9 +83,15 @@ export class Track extends AnimNode {
         );
         if (!target) break;
       }
-
-      if (!target) return;
     }
+
+    return target;
+  }
+
+  apply(obj: THREE.Object3D, time: number, fps: number) {
+    let target: THREE.Object3D | undefined = this.getTarget(obj);
+
+    if (!target) return;
 
     const values = this.getValues(time, fps);
     if (values === undefined) return;
@@ -86,71 +99,120 @@ export class Track extends AnimNode {
     const needValueCount = getAttrNeedValueCount(this.attr);
     if (needValueCount === 0 || values.length !== needValueCount) return;
 
+    if (this.attr.startsWith("position")) {
+      this.applyPosition(target, values);
+    } else if (this.attr.startsWith("scale")) {
+      this.applyScale(target, values);
+    } else if (this.attr.startsWith("rotation")) {
+      this.applyRotation(target, values);
+    }
+  }
+
+  private applyPosition(target: THREE.Object3D, values: number[]) {
+    const pos = new THREE.Vector3();
+
+    if (this.opt === "override") {
+      pos.copy(target.position);
+    }
+
     switch (this.attr) {
       case "position":
-        target.position.set(values[0], values[1], values[2]);
+        pos.fromArray(values);
         break;
       case "position-x":
-        target.position.setX(values[0]);
+        pos.x = values[0];
         break;
       case "position-y":
-        target.position.setY(values[0]);
+        pos.y = values[0];
         break;
       case "position-z":
-        target.position.setZ(values[0]);
+        pos.z = values[0];
         break;
       case "position-xy":
-        target.position.setX(values[0]).setY(values[1]);
+        pos.x = values[0];
+        pos.y = values[1];
         break;
       case "position-yz":
-        target.position.setY(values[0]).setZ(values[1]);
+        pos.y = values[0];
+        pos.z = values[1];
         break;
       case "position-xz":
-        target.position.setX(values[0]).setZ(values[1]);
+        pos.x = values[0];
+        pos.z = values[1];
         break;
+    }
+
+    if (this.opt === "add") {
+      target.position.add(pos);
+    } else if (this.opt === "override") {
+      target.position.copy(pos);
+    }
+  }
+
+  private applyScale(target: THREE.Object3D, values: number[]) {
+    const scale = new THREE.Vector3();
+
+    if (this.opt === "override") {
+      scale.copy(target.scale);
+    }
+
+    switch (this.attr) {
       case "scale-xyz":
-        target.scale.set(values[0], values[1], values[2]);
+        scale.fromArray(values);
         break;
       case "scale":
-        target.scale.set(values[0], values[0], values[0]);
+        scale.x = scale.y = scale.z = values[0];
         break;
       case "scale-x":
-        target.scale.setX(values[0]);
+        scale.x = values[0];
         break;
       case "scale-y":
-        target.scale.setY(values[0]);
+        scale.y = values[0];
         break;
       case "scale-z":
-        target.scale.setZ(values[0]);
+        scale.z = values[0];
         break;
+    }
+
+    if (this.opt === "add") {
+      target.scale.add(scale);
+    } else if (this.opt === "override") {
+      target.scale.copy(scale);
+    }
+  }
+
+  private applyRotation(target: THREE.Object3D, values: number[]) {
+    const rotation = new THREE.Euler();
+
+    if (this.opt === "override") {
+      rotation.copy(target.rotation);
+    }
+
+    for (let i = 0; i < values.length; i++) {
+      values[i] = (values[i] / 180) * Math.PI;
+    }
+
+    switch (this.attr) {
       case "rotation":
-        target.rotation.set(
-          (values[0] / 180) * Math.PI,
-          (values[1] / 180) * Math.PI,
-          (values[2] / 180) * Math.PI
-        );
+        rotation.set(values[0], values[1], values[2]);
         break;
       case "rotation-x":
-        target.rotation.set(
-          (values[0] / 180) * Math.PI,
-          target.rotation.y,
-          target.rotation.z
-        );
+        rotation.x = values[0];
         break;
       case "rotation-y":
-        target.rotation.set(
-          target.rotation.x,
-          (values[0] / 180) * Math.PI,
-          target.rotation.z
-        );
+        rotation.y = values[0];
         break;
       case "rotation-z":
-        target.rotation.set(
-          target.rotation.x,
-          target.rotation.y,
-          (values[0] / 180) * Math.PI
-        );
+        rotation.z = values[0];
         break;
+    }
+
+    if (this.opt === "add") {
+      target.rotation.x += rotation.x;
+      target.rotation.y += rotation.y;
+      target.rotation.z += rotation.z;
+    } else if (this.opt === "override") {
+      target.rotation.copy(rotation);
     }
   }
 
@@ -214,6 +276,7 @@ export class Track extends AnimNode {
     return {
       targetText: this.targetText,
       attr: this.attr,
+      opt: this.opt,
       keyframes: this.keyframes.map((keyframe) => keyframe.toAttrs()),
     };
   }

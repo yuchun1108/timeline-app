@@ -54,7 +54,6 @@ export default function NameLabel(props: NameLabelProps) {
   }, [track, onChange, onSelectedChange]);
 
   function onClick(e: any) {
-    console.log(e);
     props.onTrackSelect(track);
   }
 

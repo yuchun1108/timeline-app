@@ -8,7 +8,6 @@ export function loadModel(
 ): Promise<THREE.Object3D> {
   return new Promise<THREE.Object3D>((resolve, reject) => {
     fileName = fileName.toLowerCase();
-    console.log(fileName);
     if (fileName.endsWith("fbx")) {
       const loader = new FBXLoader();
 

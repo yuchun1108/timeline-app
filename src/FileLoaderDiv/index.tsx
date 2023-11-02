@@ -12,20 +12,17 @@ const css_div = css`
   position: absolute;
   top: 0;
   left: 0;
-  /* width: 200px; */
-  /* height: 50px; */
   background-color: #2c393c;
-  border-radius: 0 0 5px 0;
+  border-radius: 0 0 12px 0;
   color: white;
-  padding: 8px;
-  overflow: hidden;
+  padding: 6px;
 `;
 
 const css_btn = css`
-  width: 34px;
+  width: 120px;
   height: 34px;
-  font-size: 20px;
-  margin: 2px 4px 2px 4px;
+  font-size: 16px;
+  margin: 4px 4px 4px 4px;
 `;
 
 const css_fileLoader = css`
@@ -88,7 +85,7 @@ export default function FileLoaderDiv({ world }: FileLoaderDivProps) {
     if (e.target.files.length > 0) reader.readAsArrayBuffer(e.target.files[0]);
   }
 
-  function onUploadClick(e: any) {
+  function onImportClick(e: any) {
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
@@ -103,22 +100,25 @@ export default function FileLoaderDiv({ world }: FileLoaderDivProps) {
     <div css={css_div}>
       <span
         data-tooltip-id="tooltip"
-        data-tooltip-content="Upload (fbx / glb / gltf)"
+        data-tooltip-content="Import (fbx / glb / gltf)"
       >
-        <button css={css_btn} onClick={onUploadClick} className="btn">
-          <FontAwesomeIcon icon={icon({ name: "upload" })} />
+        <button css={css_btn} onClick={onImportClick} className="btn">
+          <FontAwesomeIcon icon={icon({ name: "file-import" })} />
+          <span> Import</span>
         </button>
       </span>
       <input
         ref={fileInputRef}
         css={css_fileLoader}
         type="file"
-        accept=".fbx,.gltf"
+        accept=".fbx,.glb,.gltf"
         onChange={onChange}
       ></input>
+      <br />
       <span data-tooltip-id="tooltip" data-tooltip-content="Clear Scene">
         <button css={css_btn} onClick={onClearClick} className="btn">
           <FontAwesomeIcon icon={icon({ name: "trash" })} />
+          <span> Clear</span>
         </button>
       </span>
     </div>

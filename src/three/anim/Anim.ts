@@ -10,7 +10,7 @@ export { Keyframe } from "./Keyframe";
 export { Track } from "./Track";
 
 export class Anim {
-  fps: number = 30;
+  fps: number = 24;
   tracks: Track[];
   timeLength: number = 0;
   private _isDirty: boolean = false;
@@ -248,6 +248,11 @@ export class Anim {
   }
 
   apply(obj: THREE.Object3D, time: number) {
+    this.tracks.forEach((track) => {
+      const target = track.getTarget(obj);
+      target?.entity?.resetTransfrom();
+    });
+
     this.tracks.forEach((track) => {
       track.apply(obj, time, this.fps);
     });

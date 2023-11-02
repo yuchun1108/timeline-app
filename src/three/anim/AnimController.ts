@@ -29,6 +29,10 @@ export default class AnimController {
     }
   }
 
+  forceUpdate() {
+    this.anim.apply(this.target, this.animTime);
+  }
+
   play() {
     this.isPlaying = true;
   }
@@ -38,7 +42,7 @@ export default class AnimController {
   }
 
   setAnimTime(animTime: number) {
-    this.lastAnimTime = this.animTime = animTime % this.anim.timeLength;
+    this.lastAnimTime = this.animTime = animTime;
     this.anim.apply(this.target, this.animTime);
   }
 }

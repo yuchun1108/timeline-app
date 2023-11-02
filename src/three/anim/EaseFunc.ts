@@ -135,30 +135,32 @@ const easeFunc: { [funcName: string]: (x: number) => number } = {
       : (Math.pow(2, -20 * x + 10) * Math.sin((20 * x - 11.125) * c5)) / 2 + 1;
   },
 
+  bounce_out: bounce_out,
   //bounce
   bounce_in: function (x: number): number {
-    return 1 - this.bounce_out(1 - x);
-  },
-  bounce_out: function (x: number): number {
-    const n1 = 7.5625;
-    const d1 = 2.75;
-
-    if (x < 1 / d1) {
-      return n1 * x * x;
-    } else if (x < 2 / d1) {
-      return n1 * (x -= 1.5 / d1) * x + 0.75;
-    } else if (x < 2.5 / d1) {
-      return n1 * (x -= 2.25 / d1) * x + 0.9375;
-    } else {
-      return n1 * (x -= 2.625 / d1) * x + 0.984375;
-    }
+    return 1 - bounce_out(1 - x);
   },
   bounce_inout: function (x: number): number {
     return x < 0.5
-      ? (1 - this.bounce_out(1 - 2 * x)) / 2
-      : (1 + this.bounce_out(2 * x - 1)) / 2;
+      ? (1 - bounce_out(1 - 2 * x)) / 2
+      : (1 + bounce_out(2 * x - 1)) / 2;
   },
 };
+
+function bounce_out(x: number): number {
+  const n1 = 7.5625;
+  const d1 = 2.75;
+
+  if (x < 1 / d1) {
+    return n1 * x * x;
+  } else if (x < 2 / d1) {
+    return n1 * (x -= 1.5 / d1) * x + 0.75;
+  } else if (x < 2.5 / d1) {
+    return n1 * (x -= 2.25 / d1) * x + 0.9375;
+  } else {
+    return n1 * (x -= 2.625 / d1) * x + 0.984375;
+  }
+}
 
 export default function getEaseFunc(
   funcName: string
