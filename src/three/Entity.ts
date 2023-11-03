@@ -45,5 +45,12 @@ export default class Entity {
 
   update(deltaTime: number) {
     this.animController.update(deltaTime);
+
+    // if (this.target.name === "Star") {
+    //   this.target.rotation.x += 0.1;
+    //   this.target.rotation.y = 0;
+    //   this.target.rotation.z = 0;
+    //   // this.resetTransfrom();
+    // }
   }
 }

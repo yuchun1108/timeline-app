@@ -57,7 +57,6 @@ export default function MyApp(props: MyAppProps) {
     setObject3D(obj);
 
     if (obj && obj.entity) {
-      console.log(obj.id);
       localStorage.setItem("selected-object", obj.id.toString());
     }
   }
@@ -124,6 +123,7 @@ export default function MyApp(props: MyAppProps) {
     <ScrollSync>
       <div id="my-app" css={css_myApp}>
         <Controller
+          world={world}
           frameSize={frameSize}
           animController={animController}
           onFrameCountChange={onFrameCountChange}

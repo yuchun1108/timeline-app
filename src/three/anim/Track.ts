@@ -89,8 +89,7 @@ export class Track extends AnimNode {
   }
 
   apply(obj: THREE.Object3D, time: number, fps: number) {
-    let target: THREE.Object3D | undefined = this.getTarget(obj);
-
+    let target = this.getTarget(obj);
     if (!target) return;
 
     const values = this.getValues(time, fps);
@@ -182,28 +181,26 @@ export class Track extends AnimNode {
   }
 
   private applyRotation(target: THREE.Object3D, values: number[]) {
-    const rotation = new THREE.Euler();
+    const rotation = new THREE.Euler(0, 0, 0);
+
+    const degrees = values.map((value) => (value / 180) * Math.PI);
 
     if (this.opt === "override") {
       rotation.copy(target.rotation);
     }
 
-    for (let i = 0; i < values.length; i++) {
-      values[i] = (values[i] / 180) * Math.PI;
-    }
-
     switch (this.attr) {
       case "rotation":
-        rotation.set(values[0], values[1], values[2]);
+        rotation.set(degrees[0], degrees[1], degrees[2]);
         break;
       case "rotation-x":
-        rotation.x = values[0];
+        rotation.x = degrees[0];
         break;
       case "rotation-y":
-        rotation.y = values[0];
+        rotation.y = degrees[0];
         break;
       case "rotation-z":
-        rotation.z = values[0];
+        rotation.z = degrees[0];
         break;
     }
 

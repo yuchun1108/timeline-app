@@ -30,6 +30,7 @@ export default class AnimController {
   }
 
   forceUpdate() {
+    this.resetTransform();
     this.anim.apply(this.target, this.animTime);
   }
 
@@ -43,6 +44,15 @@ export default class AnimController {
 
   setAnimTime(animTime: number) {
     this.lastAnimTime = this.animTime = animTime;
-    this.anim.apply(this.target, this.animTime);
+    this.forceUpdate();
+  }
+
+  resetTransform() {
+    this.anim.tracks.forEach((track) => {
+      const target = track.getTarget(this.target);
+      if (target) {
+        target.entity?.resetTransfrom();
+      }
+    });
   }
 }

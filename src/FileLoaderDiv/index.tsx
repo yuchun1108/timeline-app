@@ -48,8 +48,6 @@ export default function FileLoaderDiv({ world }: FileLoaderDivProps) {
     reader.addEventListener("load", function (_e: any) {
       const arrBuff: ArrayBuffer = _e.target.result;
 
-      console.log(arrBuff);
-
       loadModel(fileName, arrBuff)
         .then((object) => {
           world.setGroup(object);
@@ -81,7 +79,6 @@ export default function FileLoaderDiv({ world }: FileLoaderDivProps) {
     if (e.target.files.length > 0) {
     }
 
-    console.log(e.target.files);
     if (e.target.files.length > 0) reader.readAsArrayBuffer(e.target.files[0]);
   }
 

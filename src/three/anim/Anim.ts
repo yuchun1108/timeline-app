@@ -106,41 +106,6 @@ export class Anim {
     this._isDirty = true;
   }
 
-  // addKeyframe(
-  //   track: string | Track | undefined,
-  //   indexOrKeyframes: number | Keyframe[]
-  // ): void {
-  //   // if (typeof track === "string") {
-  //   //   track = this.tracks.find((t) => t.uuid === track);
-  //   // }
-  //   // if (!track) return;
-
-  //   // let addKeyframes: Keyframe[] = [];
-
-  //   // if (typeof indexOrKeyframes === "number") {
-  //   //   const index = indexOrKeyframes;
-  //   // } else {
-  //   //   addKeyframes = indexOrKeyframes;
-  //   //   addKeyframes.forEach((keyframe) => {
-  //   //     if (track instanceof Track) keyframe.track = track;
-  //   //   });
-  //   // }
-
-  //   track.keyframes.push(...addKeyframes);
-
-  //   track.sortKeyframes();
-  //   this.calcTimeLength();
-
-  //   track.onKeyframesChange.forEach((func) => {
-  //     if (track instanceof Track) {
-  //       func(track.keyframes);
-  //     }
-  //   });
-  //   this.onAddKeyframe?.(addKeyframes);
-
-  //   this._isDirty = true;
-  // }
-
   moveKeyFrame(nodes: AnimNode[], offset: number): boolean {
     if (offset === 0) return false;
     if (nodes.length === 0) return false;
@@ -248,11 +213,6 @@ export class Anim {
   }
 
   apply(obj: THREE.Object3D, time: number) {
-    this.tracks.forEach((track) => {
-      const target = track.getTarget(obj);
-      target?.entity?.resetTransfrom();
-    });
-
     this.tracks.forEach((track) => {
       track.apply(obj, time, this.fps);
     });

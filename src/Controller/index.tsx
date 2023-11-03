@@ -4,9 +4,11 @@ import { icon } from "@fortawesome/fontawesome-svg-core/import.macro";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import FrameSize from "../global/FrameSize";
+import World from "../three/World";
 import AnimController from "../three/anim/AnimController";
 
 interface ControllerProps {
+  world: World;
   frameSize: FrameSize;
   animController: AnimController | undefined;
   onFrameCountChange: (count: number) => void;
@@ -17,11 +19,13 @@ export default function Controller(props: ControllerProps) {
   const [frameCount, setFrameCount] = useState(props.frameSize.count);
 
   function onPlayClick(e: any) {
+    props.world.setAllAnimStop();
     props.animController?.play();
   }
 
   function onPauseClick(e: any) {
-    props.animController?.stop();
+    // props.animController?.stop();
+    props.world.setAllAnimStop();
   }
 
   function onFrameCountKeyDown(e: any) {

@@ -95,6 +95,10 @@ export default class World {
     this.lastTime = time;
 
     this.scene.traverse((obj) => {
+      obj.entity?.animController?.resetTransform();
+    });
+
+    this.scene.traverse((obj) => {
       obj.entity?.update(deltaTime);
     });
 
@@ -106,7 +110,6 @@ export default class World {
       this.scene.traverse((obj) => {
         obj.entity?.animController.forceUpdate();
       });
-      // console.log("save");
     }
 
     this.renderer.render(this.scene, this.camera);
@@ -190,8 +193,6 @@ export default class World {
     this.dirLight.shadow.camera.bottom = min.y;
     this.dirLight.shadow.camera.left = min.x;
     this.dirLight.shadow.camera.right = max.x;
-
-    console.log(this.dirLight.shadow);
 
     // this.dirLight.shadow.camera.top = 6;
     // dirLight.shadow.camera.bottom = -4;
