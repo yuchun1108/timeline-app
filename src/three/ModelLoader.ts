@@ -16,7 +16,6 @@ export function loadDemo(world: World, loadDefaultAnim: boolean) {
       world.setGroup(gltf.scene);
 
       if (loadDefaultAnim) {
-        console.log("loadDefaultAnim");
         fetch("demo/anim.json")
           .then((res) => res.text())
           .then((text) => {

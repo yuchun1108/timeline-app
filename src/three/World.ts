@@ -52,6 +52,11 @@ export default class World {
 
     this.boxHelper = new THREE.BoxHelper(this.scene);
     //this.scene.add(this.boxHelper);
+
+    const grid = new THREE.GridHelper(100, 100, 0xbbbbbb, 0x444444);
+    grid.material.opacity = 0.2;
+    grid.material.transparent = true;
+    this.scene.add(grid);
   }
 
   //#region setup
@@ -117,9 +122,13 @@ export default class World {
 
     this.scene.traverse((obj) => {
       if (obj.entity?.animController.isPlaying) {
-        animPlayingEnts.push(obj.entity);
+        obj.entity?.animController.anim.tracks.forEach((track) => {
+          const _ent = track.getTarget(obj)?.entity;
+          if (_ent && !animPlayingEnts.includes(_ent)) {
+            animPlayingEnts.push(_ent);
+          }
+        });
       }
-      // obj.entity?.animController?.resetTransform();
     });
 
     animPlayingEnts.forEach((entity) => entity.resetTransfrom());

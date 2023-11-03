@@ -56,9 +56,7 @@ export function loadWorldAnim(world: World) {
   const objs = world.getAllObjects();
   const pathList = localStorage.getItem("pathList");
   if (pathList !== getPathList(objs)) {
-    console.log("world paths are different.");
-    console.log(pathList);
-    console.log(getPathList(objs));
+    console.log("Scene is the same.");
     return;
   }
 
