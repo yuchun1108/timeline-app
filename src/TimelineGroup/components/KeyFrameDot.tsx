@@ -15,32 +15,32 @@ const css_keyframe = css`
   top: 4px;
   width: 11px;
   height: 11px;
-  background: url("/image/keyframe.png") 0 0;
+  background: url(/timeline-app/image/keyframe.png) 0 0;
 `;
 
 const css_keyframe_selected = css`
   ${css_keyframe}
-  background: url("/image/keyframe.png") -11px 0;
+  background: url(/timeline-app/image/keyframe.png) -11px 0;
 `;
 
 const css_keyframe_firstSelect = css`
   ${css_keyframe}
-  background: url("/image/keyframe.png") -22px 0;
+  background: url(/timeline-app/image/keyframe.png) -22px 0;
 `;
 
 const css_keyframe_error = css`
   ${css_keyframe}
-  background: url("/image/keyframe.png") -33px 0;
+  background: url(/timeline-app/image/keyframe.png) -33px 0;
 `;
 
 const css_keyframe_error_selected = css`
   ${css_keyframe}
-  background: url("/image/keyframe.png") -44px 0;
+  background: url(/timeline-app/image/keyframe.png) -44px 0;
 `;
 
 const css_keyframe_error_firstSelect = css`
   ${css_keyframe}
-  background: url("/image/keyframe.png") -55px 0;
+  background: url(/timeline-app/image/keyframe.png) -55px 0;
 `;
 
 export default function KeyframeDot(props: KeyframeProps) {

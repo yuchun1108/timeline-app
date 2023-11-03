@@ -2,7 +2,7 @@
   "name": "timeline-app",
   "version": "0.1.0",
   "private": true,
-  "_homepage": "https://yuchun1108.github.io/timeline-app/",
+  "homepage": "https://yuchun1108.github.io/timeline-app/",
   "dependencies": {
     "@emotion/react": "^11.11.1",
     "@fortawesome/fontawesome-svg-core": "^6.4.2",
