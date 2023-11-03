@@ -42,8 +42,11 @@ export default function ModelSelector(props: ModelSelectorProps) {
 
   useEffect(() => {
     const selectObj = localStorage.getItem("selected-object");
-    if (selectorRef.current && selectObj) {
-      selectorRef.current.value = selectObj;
+
+    if (selectorRef.current) {
+      if (selectObj) {
+        selectorRef.current.value = selectObj;
+      }
     }
   }, [options]);
 

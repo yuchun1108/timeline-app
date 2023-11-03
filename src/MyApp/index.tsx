@@ -21,7 +21,11 @@ interface MyAppProps {
 
 function GetDefaultObject(world: World) {
   const selectObj = localStorage.getItem("selected-object");
-  if (!selectObj) return undefined;
+  if (!selectObj) {
+    const objs = world.getAllObjects();
+    if (objs.length > 0) return objs[0];
+    return undefined;
+  }
 
   const selectObjId = Number(selectObj);
   return world.scene.getObjectById(selectObjId);
@@ -32,7 +36,7 @@ const timeBarHeight = 26;
 export default function MyApp(props: MyAppProps) {
   const { world, selector } = props;
   const [object3D, setObject3D] = useState<THREE.Object3D | undefined>(
-    undefined
+    GetDefaultObject(world)
   );
   const [tracks, setTracks] = useState<Track[] | undefined>(undefined);
 
@@ -44,11 +48,6 @@ export default function MyApp(props: MyAppProps) {
   useEffect(() => {
     world.onHierarchyChange.add(() => {
       setObject3D(GetDefaultObject(world));
-      // const objs = world.getAllObjects();
-      // if (objs.length > 0) {
-
-      //   setObject3D(objs[0]);
-      // }
     });
   }, [world]);
 

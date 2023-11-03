@@ -1,8 +1,12 @@
+import { toast } from "react-toastify";
+
 export default interface FrameSize {
   width: number;
   count: number;
   height: number;
 }
+
+let frameSize: FrameSize | undefined = undefined;
 
 export function saveFrameSize(frameSize: FrameSize) {
   const str = JSON.stringify(frameSize);
@@ -10,19 +14,27 @@ export function saveFrameSize(frameSize: FrameSize) {
 }
 
 export function loadFrameSize(): FrameSize {
-  const str = localStorage.getItem("frameSize");
-  if (str) {
-    try {
-      return JSON.parse(str);
-    } catch (e) {
-      console.log(e);
+  if (frameSize === undefined) {
+    const str = localStorage.getItem("frameSize");
+    if (str) {
+      try {
+        frameSize = JSON.parse(str);
+      } catch (e) {
+        toast.error("An error occurred while reading frameSize");
+        console.error(e);
+      }
     }
   }
-  return {
-    width: 20,
-    count: 60,
-    height: 20,
-  };
+
+  if (frameSize === undefined) {
+    frameSize = {
+      width: 20,
+      count: 60,
+      height: 20,
+    };
+  }
+
+  return frameSize;
 }
 
 export function drawTimelineFrame(

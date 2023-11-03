@@ -13,10 +13,6 @@ interface InspectorProps {
   selector: AnimSelector;
 }
 
-function exportAnim(anim: Anim) {
-  printToNewTab(anim.toJson());
-}
-
 const css_inspector = css`
   grid-area: inspector;
   background-color: #364346;
@@ -137,6 +133,10 @@ export default function Inspector(props: InspectorProps) {
 
   function onInOutChange(e: any) {
     keyframe?.setEaseEnd(e.target.value);
+  }
+
+  function exportAnim(anim: Anim) {
+    printToNewTab(anim.toJson("\t"));
   }
 
   let element: ReactNode;

@@ -188,12 +188,12 @@ export class Anim {
     });
   }
 
-  toJson(): string {
+  toJson(space: string | undefined = undefined): string {
     const attrs = {
       fps: this.fps,
       tracks: this.tracks.map((track) => track.toAttrs()),
     };
-    return JSON.stringify(attrs, null, "\t");
+    return JSON.stringify(attrs, null, space);
   }
 
   fromJson(text: string) {
@@ -210,6 +210,8 @@ export class Anim {
     }
 
     this.calcTimeLength();
+
+    this.onTracksChange.forEach((func) => func(this.tracks));
   }
 
   apply(obj: THREE.Object3D, time: number) {

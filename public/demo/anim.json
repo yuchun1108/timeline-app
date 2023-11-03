@@ -1,0 +1,50 @@
+[
+	{
+		"key": ".Scene",
+		"animJson": "{\"fps\":24,\"tracks\":[{\"targetText\":\"\",\"attr\":\"position-y\",\"opt\":\"add\",\"keyframes\":[{\"index\":0,\"easeName\":\"linear\",\"easeEnd\":\"in\",\"text\":\"0\"},{\"index\":24,\"easeName\":\"linear\",\"easeEnd\":\"in\",\"text\":\"1\"}]}]}"
+	},
+	{
+		"key": ".Scene.Ground",
+		"animJson": "{\"fps\":24,\"tracks\":[]}"
+	},
+	{
+		"key": ".Scene.Tree",
+		"animJson": "{\"fps\":24,\"tracks\":[]}"
+	},
+	{
+		"key": ".Scene.Tree.Leaf0",
+		"animJson": "{\"fps\":24,\"tracks\":[]}"
+	},
+	{
+		"key": ".Scene.Tree.Leaf0.Leaf1",
+		"animJson": "{\"fps\":24,\"tracks\":[]}"
+	},
+	{
+		"key": ".Scene.Tree.Leaf0.Leaf1.Leaf2",
+		"animJson": "{\"fps\":24,\"tracks\":[]}"
+	},
+	{
+		"key": ".Scene.Brick",
+		"animJson": "{\"fps\":24,\"tracks\":[]}"
+	},
+	{
+		"key": ".Scene.Star",
+		"animJson": "{\"fps\":24,\"tracks\":[]}"
+	},
+	{
+		"key": ".Scene.Tree001",
+		"animJson": "{\"fps\":24,\"tracks\":[]}"
+	},
+	{
+		"key": ".Scene.Tree001.Leaf0001",
+		"animJson": "{\"fps\":24,\"tracks\":[]}"
+	},
+	{
+		"key": ".Scene.Tree001.Leaf0001.Leaf1001",
+		"animJson": "{\"fps\":24,\"tracks\":[]}"
+	},
+	{
+		"key": ".Scene.Tree001.Leaf0001.Leaf1001.Leaf2001",
+		"animJson": "{\"fps\":24,\"tracks\":[]}"
+	}
+]

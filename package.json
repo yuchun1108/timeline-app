@@ -24,6 +24,7 @@
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
     "react-scroll-sync": "^0.11.0",
+    "react-toastify": "^9.1.3",
     "react-tooltip": "^5.21.6",
     "three": "^0.157.0",
     "typescript": "^4.9.5",

@@ -40,8 +40,6 @@ export default class World {
     this.dirLight.position.set(0, 200, 100);
     this.dirLight.castShadow = true;
 
-    console.log(this.dirLight.shadow.camera);
-
     // dirLight.shadow.mapSize.width = 2048;
     // dirLight.shadow.mapSize.height = 2048;
     this.dirLight.shadow.bias = -0.0001;
@@ -69,6 +67,7 @@ export default class World {
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.autoUpdate = true;
     renderer.shadowMap.type = THREE.PCFShadowMap;
+    renderer.setClearColor(new THREE.Color(0.01, 0.01, 0.01), 1);
     const threeContainer = document.getElementById("three-container");
     threeContainer?.appendChild(renderer.domElement);
     return renderer;
@@ -94,9 +93,7 @@ export default class World {
     const deltaTime = time - this.lastTime;
     this.lastTime = time;
 
-    this.scene.traverse((obj) => {
-      obj.entity?.animController?.resetTransform();
-    });
+    this.resetAnimTransform();
 
     this.scene.traverse((obj) => {
       obj.entity?.update(deltaTime);
@@ -113,6 +110,19 @@ export default class World {
     }
 
     this.renderer.render(this.scene, this.camera);
+  }
+
+  private resetAnimTransform() {
+    const animPlayingEnts: Entity[] = [];
+
+    this.scene.traverse((obj) => {
+      if (obj.entity?.animController.isPlaying) {
+        animPlayingEnts.push(obj.entity);
+      }
+      // obj.entity?.animController?.resetTransform();
+    });
+
+    animPlayingEnts.forEach((entity) => entity.resetTransfrom());
   }
 
   checkHasDirty(): boolean {
@@ -193,11 +203,6 @@ export default class World {
     this.dirLight.shadow.camera.bottom = min.y;
     this.dirLight.shadow.camera.left = min.x;
     this.dirLight.shadow.camera.right = max.x;
-
-    // this.dirLight.shadow.camera.top = 6;
-    // dirLight.shadow.camera.bottom = -4;
-    // dirLight.shadow.camera.left = -1;
-    // dirLight.shadow.camera.right = 1;
   }
 
   getAllObjects(): THREE.Object3D[] {
